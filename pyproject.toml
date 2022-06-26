@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "pyboy"
+version = "1.5.1"
+description = ""
+authors = ["Mads Ynddal <mads-pyboy@ynddal.dk>"]
+license = "LGPL3"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+Cython = "^0.29.30"
+numpy = "^1.23.0"
+PySDL2 = "^0.9.11"
+pysdl2-dll = "^2.0.20"
+
+[tool.poetry.dev-dependencies]
+Cython = "^0.29.30"
+numpy = "^1.23.0"
+PySDL2 = "^0.9.11"
+pysdl2-dll = "^2.0.20"
+Pillow = "^9.1.1"
+pytest = "^7.1.2"
+pytest-xdist = "^2.5.0"
+pytest-lazy-fixture = "^0.6.3"
+PyOpenGL = "^3.1.6"
+gym = "^0.24.1"
+filelock = "^3.7.1"
+cryptography = "^37.0.3"
+GitPython = "^3.1.27"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
