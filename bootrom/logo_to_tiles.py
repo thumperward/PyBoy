@@ -1,6 +1,5 @@
 """Outputs a .asm file that holds the tile data for the boot rom logo"""
 
-
 TILES = {
     "P1": """
 ........

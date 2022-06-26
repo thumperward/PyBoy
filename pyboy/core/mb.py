@@ -144,9 +144,7 @@ class Motherboard:
             self.double_speed = f.read()
             _cgb = f.read()
             if self.cgb != _cgb:
-                logger.critical(
-                    "Loading state which is not CGB, but PyBoy is loaded in CGB mode!"
-                )
+                logger.critical("Loading state which is not CGB, but PyBoy is loaded in CGB mode!")
 
                 return
             self.cgb = _cgb
@@ -179,20 +177,11 @@ class Motherboard:
             return True
 
         return any(
-            self.cpu.PC == pc
-            and (
-                (pc < 0x4000 and bank == 0 and not self.bootrom_enabled)
-                or (
-                    0x4000 <= pc < 0x8000
-                    and self.cartridge.rombank_selected == bank
-                )
-                or (
-                    0xA000 <= pc < 0xC000
-                    and self.cartridge.rambank_selected == bank
-                )
-                or (0xC000 <= pc <= 0xFFFF and bank == -1)
-                or (pc < 0x100 and bank == -1 and self.bootrom_enabled)
-            )
+            self.cpu.PC == pc and
+            ((pc < 0x4000 and bank == 0 and not self.bootrom_enabled) or
+             (0x4000 <= pc < 0x8000 and self.cartridge.rombank_selected == bank) or
+             (0xA000 <= pc < 0xC000 and self.cartridge.rambank_selected == bank) or
+             (0xC000 <= pc <= 0xFFFF and bank == -1) or (pc < 0x100 and bank == -1 and self.bootrom_enabled))
             for bank, pc in self.breakpoints_list
         )
 

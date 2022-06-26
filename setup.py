@@ -136,9 +136,7 @@ def prep_pxd_py_files():
                 yield os.path.join(root, f)
             if os.path.splitext(f)[1] == ".pxd":
                 py_file = f"{os.path.join(root, os.path.splitext(f)[0])}.py"
-                if os.path.isfile(py_file) and os.path.getmtime(
-                    os.path.join(root, f)
-                ) > os.path.getmtime(py_file):
+                if os.path.isfile(py_file) and os.path.getmtime(os.path.join(root, f)) > os.path.getmtime(py_file):
                     os.utime(py_file)
 
 

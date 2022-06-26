@@ -126,7 +126,6 @@ def test_tiles(default_rom):
         ],
     ]
 
-
     for identifier in range(384):
         t = pyboy.botsupport_manager().tile(identifier)
         assert t.tile_identifier == identifier
@@ -238,9 +237,7 @@ def test_tetris(tetris_rom):
             # We could also read out the score from the screen instead of
             # finding the corresponding value in RAM.
 
-            if not first_brick and any(
-                filter(lambda x: x != 303, tile_map[2:12, 17])
-            ):
+            if not first_brick and any(filter(lambda x: x != 303, tile_map[2:12, 17])):
                 first_brick = True
                 print(frame)
                 print("First brick touched the bottom!")

@@ -250,8 +250,5 @@ class PyBoyGameWrapper(PyBoyPlugin):
             raise ValueError(f"Invalid observation_type : {observation_type}")
 
     def _sum_number_on_screen(self, x, y, length, blank_tile_identifier, tile_identifier_offset):
-        return sum(
-            (x + tile_identifier_offset) * (10 ** (length - 1 - i))
-            for i, x in enumerate(self.tilemap_background[x : x + length, y])
-            if x != blank_tile_identifier
-        )
+        return sum((x+tile_identifier_offset) * (10**(length - 1 - i))
+                   for i, x in enumerate(self.tilemap_background[x:x + length, y]) if x != blank_tile_identifier)

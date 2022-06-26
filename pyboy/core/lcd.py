@@ -120,7 +120,7 @@ class LCD:
 
         if mode == 1:
             remaining_ly = 153 - self.LY
-            return remainder + 456 * multiplier * remaining_ly + 80 * multiplier + mode3
+            return remainder + 456*multiplier*remaining_ly + 80*multiplier + mode3
         elif mode == 2:
             return remainder + mode3
         elif mode == 3:
@@ -258,9 +258,7 @@ class LCD:
         if state_version >= 8:
             _cgb = f.read()
             if self.cgb != _cgb:
-                logger.critical(
-                    "Loading state which is not CGB, but PyBoy is loaded in CGB mode!"
-                )
+                logger.critical("Loading state which is not CGB, but PyBoy is loaded in CGB mode!")
 
                 return
             self.cgb = _cgb
@@ -620,13 +618,9 @@ class Renderer:
 
                         if lcd._LCDC.cgb_master_priority: # If 0, sprites are always on top, if 1 follow priorities
                             if (
-                                bgmappriority
-                                and buffer[ly][x] & COL0_FLAG
-                                or not bgmappriority
-                                and spritepriority
-                                and buffer[ly][x] & COL0_FLAG
-                                or not bgmappriority
-                                and not spritepriority
+                                bgmappriority and buffer[ly][x] & COL0_FLAG or
+                                not bgmappriority and spritepriority and buffer[ly][x] & COL0_FLAG or
+                                not bgmappriority and not spritepriority
                             ):
                                 buffer[ly][x] = pixel
                         else:
@@ -634,15 +628,11 @@ class Renderer:
                     else:
                         # TODO: Unify with CGB
                         pixel = (
-                            lcd.OBP1.getcolor(color_code)
-                            if attributes & 0b10000
-                            else lcd.OBP0.getcolor(color_code)
+                            lcd.OBP1.getcolor(color_code) if attributes & 0b10000 else lcd.OBP0.getcolor(color_code)
                         )
 
                         if (
-                            spritepriority
-                            and buffer[ly][x] & COL0_FLAG
-                            or not spritepriority
+                            spritepriority and buffer[ly][x] & COL0_FLAG or not spritepriority
                         ): # if BG pixel is transparent
                             buffer[ly][x] = pixel
                 x += 1

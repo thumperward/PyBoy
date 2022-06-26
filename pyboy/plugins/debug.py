@@ -579,7 +579,7 @@ class TileViewWindow(BaseDebugWindow):
 
         # Mark current scanline directly from LY,SCX,SCY,WX,WY
         for x in range(constants.COLS):
-                # Mark current scanline directly from LY,SCX,SCY,WX,WY
+            # Mark current scanline directly from LY,SCX,SCY,WX,WY
             if background_view:
                 self.buf0[(self.mb.lcd.SCY + self.mb.lcd.LY) % 0xFF][(self.mb.lcd.SCX + x) % 0xFF] = 0xFF00CE12
             else:
@@ -846,7 +846,8 @@ class MemoryWindow(BaseDebugWindow):
         self.text_buffer[self.NROWS - 1][self.NCOLS - 1] = 0xBC
 
     def write_addresses(self):
-        header = (f"Memory from 0x{self.start_address:04X} " f"to 0x{self.start_address+0x3FF:04X}").encode("cp437")
+        header = (f"Memory from 0x{self.start_address:04X} "
+                  f"to 0x{self.start_address+0x3FF:04X}").encode("cp437")
         if cythonmode:
             for x in range(28):
                 self.text_buffer[1][x + 2] = header[x]

@@ -139,21 +139,19 @@ class BaseMBC:
             logger.error(f"Reading address invalid: {address}")
 
     def __repr__(self):
-        return "\n".join(
-            [
-                "Cartridge:",
-                f"Filename: {self.filename}",
-                f"Game name: {self.gamename}",
-                f"GB Color: {self.ROMBanks[0][0x143] == 0x80}",
-                f"Cartridge type: {hex(self.cartType)}",
-                f"Number of ROM banks: {self.external_rom_count}",
-                f"Active ROM bank: {self.rombank_selected}",
-                f"Number of RAM banks: {len(self.rambanks)}",
-                f"Active RAM bank: {self.rambank_selected}",
-                f"Battery: {self.battery}",
-                f"RTC: {self.rtc}",
-            ]
-        )
+        return "\n".join([
+            "Cartridge:",
+            f"Filename: {self.filename}",
+            f"Game name: {self.gamename}",
+            f"GB Color: {self.ROMBanks[0][0x143] == 0x80}",
+            f"Cartridge type: {hex(self.cartType)}",
+            f"Number of ROM banks: {self.external_rom_count}",
+            f"Active ROM bank: {self.rombank_selected}",
+            f"Number of RAM banks: {len(self.rambanks)}",
+            f"Active RAM bank: {self.rambank_selected}",
+            f"Battery: {self.battery}",
+            f"RTC: {self.rtc}",
+        ])
 
 
 class ROMOnly(BaseMBC):
