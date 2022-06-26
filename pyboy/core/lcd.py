@@ -113,23 +113,18 @@ class LCD:
 
     def cycles_to_mode0(self):
         multiplier = 2 if self.double_speed else 1
-        mode2 = 80 * multiplier
         mode3 = 170 * multiplier
-        mode1 = 456 * multiplier
-
         mode = self._STAT._mode
         # Remaining cycles for this already active mode
         remainder = self.clock_target - self.clock
 
-        if mode == 2:
+        if mode == 1:
+            remaining_ly = 153 - self.LY
+            return remainder + 456 * multiplier * remaining_ly + 80 * multiplier + mode3
+        elif mode == 2:
             return remainder + mode3
         elif mode == 3:
             return remainder
-        elif mode == 0:
-            return 0
-        elif mode == 1:
-            remaining_ly = 153 - self.LY
-            return remainder + mode1*remaining_ly + mode2 + mode3
         else:
             # logger.error(f"Unsupported STAT mode: {mode}")
             return 0
@@ -177,15 +172,11 @@ class LCD:
 
                     self.renderer.scanline(self, self.LY)
                     self.renderer.scanline_sprites(self, self.LY, self.renderer._screenbuffer, False)
-                    if self.LY < 143:
-                        self.next_stat_mode = 2
-                    else:
-                        self.next_stat_mode = 1
+                    self.next_stat_mode = 2 if self.LY < 143 else 1
                 elif self._STAT._mode == 1: # VBLANK
                     self.clock_target += 456 * multiplier
-                    self.next_stat_mode = 1
-
                     self.LY += 1
+                    self.next_stat_mode = 1
                     interrupt_flag |= self._STAT.update_LYC(self.LYC, self.LY)
 
                     if self.LY == 144:
@@ -195,14 +186,12 @@ class LCD:
                     if self.LY == 153:
                         # Reset to new frame and start from mode 2
                         self.next_stat_mode = 2
-        else:
-            # See also `self.set_lcdc`
-            if self.clock >= FRAME_CYCLES:
-                self.frame_done = True
-                self.clock %= FRAME_CYCLES
+        elif self.clock >= FRAME_CYCLES:
+            self.frame_done = True
+            self.clock %= FRAME_CYCLES
 
-                # Renderer
-                self.renderer.blank_screen(self)
+            # Renderer
+            self.renderer.blank_screen(self)
 
         return interrupt_flag
 
@@ -269,7 +258,10 @@ class LCD:
         if state_version >= 8:
             _cgb = f.read()
             if self.cgb != _cgb:
-                logger.critical(f"Loading state which is not CGB, but PyBoy is loaded in CGB mode!")
+                logger.critical(
+                    "Loading state which is not CGB, but PyBoy is loaded in CGB mode!"
+                )
+
                 return
             self.cgb = _cgb
             self.double_speed = f.read()
@@ -621,33 +613,37 @@ class Renderer:
             for dx in range(8):
                 xx = 7 - dx if xflip else dx
                 color_code = spritecache[8*tileindex + yy][xx]
-                if 0 <= x < COLS and not color_code == 0: # If pixel is not transparent
+                if 0 <= x < COLS and color_code != 0:
                     if self.cgb:
                         pixel = lcd.ocpd.getcolor(palette, color_code)
                         bgmappriority = buffer[ly][x] & BG_PRIORITY_FLAG
 
                         if lcd._LCDC.cgb_master_priority: # If 0, sprites are always on top, if 1 follow priorities
-                            if bgmappriority: # If 0, use spritepriority, if 1 take priority
-                                if buffer[ly][x] & COL0_FLAG:
-                                    buffer[ly][x] = pixel
-                            elif spritepriority: # If 1, sprite is behind bg/window. Color 0 of window/bg is transparent
-                                if buffer[ly][x] & COL0_FLAG:
-                                    buffer[ly][x] = pixel
-                            else:
+                            if (
+                                bgmappriority
+                                and buffer[ly][x] & COL0_FLAG
+                                or not bgmappriority
+                                and spritepriority
+                                and buffer[ly][x] & COL0_FLAG
+                                or not bgmappriority
+                                and not spritepriority
+                            ):
                                 buffer[ly][x] = pixel
                         else:
                             buffer[ly][x] = pixel
                     else:
                         # TODO: Unify with CGB
-                        if attributes & 0b10000:
-                            pixel = lcd.OBP1.getcolor(color_code)
-                        else:
-                            pixel = lcd.OBP0.getcolor(color_code)
+                        pixel = (
+                            lcd.OBP1.getcolor(color_code)
+                            if attributes & 0b10000
+                            else lcd.OBP0.getcolor(color_code)
+                        )
 
-                        if spritepriority: # If 1, sprite is behind bg/window. Color 0 of window/bg is transparent
-                            if buffer[ly][x] & COL0_FLAG: # if BG pixel is transparent
-                                buffer[ly][x] = pixel
-                        else:
+                        if (
+                            spritepriority
+                            and buffer[ly][x] & COL0_FLAG
+                            or not spritepriority
+                        ): # if BG pixel is transparent
                             buffer[ly][x] = pixel
                 x += 1
             x -= 8
@@ -661,14 +657,13 @@ class Renderer:
         if vbank and self.cgb:
             self._tilecache0_state[tile] = 0
             self._tilecache1_state[tile] = 0
-            self._spritecache0_state[tile] = 0
-            self._spritecache1_state[tile] = 0
         else:
             self._tilecache0_state[tile] = 0
             if self.cgb:
                 self._tilecache1_state[tile] = 0
-            self._spritecache0_state[tile] = 0
-            self._spritecache1_state[tile] = 0
+
+        self._spritecache0_state[tile] = 0
+        self._spritecache1_state[tile] = 0
 
     def clear_tilecache0(self):
         self._tilecache0_state = array("B", [0] * TILES)
@@ -822,11 +817,7 @@ class CGBRenderer(Renderer):
         if self._tilecache0_state[t]:
             return
 
-        if bank:
-            vram_bank = lcd.VRAM1
-        else:
-            vram_bank = lcd.VRAM0
-
+        vram_bank = lcd.VRAM1 if bank else lcd.VRAM0
         # for t in self.tiles_changed0:
         for k in range(0, 16, 2): # 2 bytes for each line
             byte1 = vram_bank[t*16 + k]
@@ -841,10 +832,7 @@ class CGBRenderer(Renderer):
     def update_tilecache1(self, lcd, t, bank):
         if self._tilecache1_state[t]:
             return
-        if bank:
-            vram_bank = lcd.VRAM1
-        else:
-            vram_bank = lcd.VRAM0
+        vram_bank = lcd.VRAM1 if bank else lcd.VRAM0
         # for t in self.tiles_changed0:
         for k in range(0, 16, 2): # 2 bytes for each line
             byte1 = vram_bank[t*16 + k]
@@ -859,10 +847,7 @@ class CGBRenderer(Renderer):
     def update_spritecache0(self, lcd, t, bank):
         if self._spritecache0_state[t]:
             return
-        if bank:
-            vram_bank = lcd.VRAM1
-        else:
-            vram_bank = lcd.VRAM0
+        vram_bank = lcd.VRAM1 if bank else lcd.VRAM0
         # for t in self.tiles_changed0:
         for k in range(0, 16, 2): # 2 bytes for each line
             byte1 = vram_bank[t*16 + k]
@@ -877,10 +862,7 @@ class CGBRenderer(Renderer):
     def update_spritecache1(self, lcd, t, bank):
         if self._spritecache1_state[t]:
             return
-        if bank:
-            vram_bank = lcd.VRAM1
-        else:
-            vram_bank = lcd.VRAM0
+        vram_bank = lcd.VRAM1 if bank else lcd.VRAM0
         # for t in self.tiles_changed0:
         for k in range(0, 16, 2): # 2 bytes for each line
             byte1 = vram_bank[t*16 + k]

@@ -57,7 +57,7 @@ def move_gif(game, dest):
     for _ in range(10):
         try:
             gif = sorted(filter(lambda x: game in x, os.listdir(record_dir)))[-1]
-            os.replace(record_dir + "/" + gif, dest)
+            os.replace(f"{record_dir}/{gif}", dest)
             break
         except:
             time.sleep(1)

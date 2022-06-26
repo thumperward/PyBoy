@@ -121,7 +121,7 @@ def sdl2_event_pump(events):
                     mouse_scroll_y=event.wheel.y
                 )
             )
-        elif event.type == sdl2.SDL_MOUSEMOTION or event.type == sdl2.SDL_MOUSEBUTTONUP:
+        elif event.type in [sdl2.SDL_MOUSEMOTION, sdl2.SDL_MOUSEBUTTONUP]:
             mouse_button = -1
             if event.type == sdl2.SDL_MOUSEBUTTONUP:
                 if event.button.button == sdl2.SDL_BUTTON_LEFT:
@@ -194,14 +194,12 @@ class WindowSDL2(PyBoyWindowPlugin):
         sdl2.SDL_RenderClear(self._sdlrenderer)
 
     def enabled(self):
-        if self.pyboy_argv.get("window_type") in ("SDL2", None):
-            if not sdl2:
-                logger.error("Failed to import sdl2, needed for sdl2 window")
-                return False # Disable, or raise exception?
-            else:
-                return True
-        else:
+        if self.pyboy_argv.get("window_type") not in ("SDL2", None):
             return False
+        if sdl2:
+            return True
+        logger.error("Failed to import sdl2, needed for sdl2 window")
+        return False # Disable, or raise exception?
 
     def frame_limiter(self, speed):
         self._ftime += 1.0 / (60.0*speed)

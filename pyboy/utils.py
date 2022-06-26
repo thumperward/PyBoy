@@ -135,8 +135,7 @@ def color_code(byte1, byte2, offset):
 def flatten_list(l):
     flat_list = []
     for sublist in l:
-        for item in sublist:
-            flat_list.append(item)
+        flat_list.extend(iter(sublist))
     return flat_list
 
 
@@ -207,10 +206,7 @@ class WindowEvent:
         self.event = event
 
     def __eq__(self, x):
-        if isinstance(x, int):
-            return self.event == x
-        else:
-            return self.event == x.event
+        return self.event == x if isinstance(x, int) else self.event == x.event
 
     def __int__(self):
         return self.event

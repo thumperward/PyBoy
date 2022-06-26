@@ -25,7 +25,7 @@ def test_rtc3test(subtest, rtc3test_file):
     for _ in range(25):
         pyboy.tick()
 
-    for n in range(subtest):
+    for _ in range(subtest):
         pyboy.send_input(WindowEvent.PRESS_ARROW_DOWN)
         pyboy.tick()
         pyboy.send_input(WindowEvent.RELEASE_ARROW_DOWN)
@@ -36,10 +36,16 @@ def test_rtc3test(subtest, rtc3test_file):
     pyboy.send_input(WindowEvent.RELEASE_BUTTON_A)
     pyboy.tick()
 
-    while True:
-        # Continue until it says "(A) Return"
-        if pyboy.botsupport_manager().tilemap_background()[6:14, 17] == [193, 63, 27, 40, 55, 56, 53, 49]:
-            break
+    while pyboy.botsupport_manager().tilemap_background()[6:14, 17] != [
+        193,
+        63,
+        27,
+        40,
+        55,
+        56,
+        53,
+        49,
+    ]:
         pyboy.tick()
 
     png_path = Path(f"test_results/{rtc3test_file}_{subtest}.png")
