@@ -5,11 +5,15 @@
 	},
 	"customizations": {
 		"vscode": {
-			"settings": {},
+			"settings": {
+				"python.venvPath": "~/.cache/pypoetry/virtualenvs/"
+			},
 			"extensions": [
 				"ms-python.python",
 				"ms-python.vscode-pylance",
-				"bungcip.better-toml"
+				"bungcip.better-toml",
+				"sourcery.sourcery",
+				"DavidAnson.vscode-markdownlint"
 			]
 		}
 	},
