@@ -13,7 +13,8 @@
 				"ms-python.vscode-pylance",
 				"bungcip.better-toml",
 				"sourcery.sourcery",
-				"DavidAnson.vscode-markdownlint"
+				"DavidAnson.vscode-markdownlint",
+				"redhat.vscode-yaml"
 			]
 		}
 	},
