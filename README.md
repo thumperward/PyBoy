@@ -33,8 +33,7 @@ issue here on GitHub, or write on our [Discord channel](https://discord.gg/Zrf2n
 The instructions are simple, if you already have a functioning Python
 environment on your machine.
 
-1.  Install PyBoy using __`pip install pyboy`__ (add __`--user`__ if your
-    system asks)
+1.  Install PyBoy using `pip install pyboy` (add `--user` if your system asks)
 2.  If your system isn't supported by
     [pysdl2-dll](https://pypi.org/project/pysdl2-dll/), you'll need to install
     SDL2 from your package manager.
@@ -135,3 +134,7 @@ and we will have a look at it.
 5.  Add tests. We need good pytests for your code. This will help us keep the
     project stable.
 6.  Please don't change the code style, unless it's specifically asked for.
+
+## TODO
+
+-   Document the use of `PYTEST_SECRETS_KEY`

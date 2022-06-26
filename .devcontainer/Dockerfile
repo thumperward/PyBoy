@@ -3,9 +3,11 @@ FROM mcr.microsoft.com/vscode/devcontainers/base:debian
 # Install additional OS packages.
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt update && apt install -y --no-install-recommends \
+  build-essential \
   python3-pip \
   npm \
-  2>&1
+  2>&1 && \
+  rm -rf /var/lib/apt/lists/* 
 
 # Install Python packages needed by the container (not package dependencies).
 RUN pip3 install \
@@ -19,32 +21,27 @@ RUN npm install -g \
   markdownlint-cli \
   2>&1
 
-# [Optional] If your pip requirements rarely change, uncomment this section to add them to the image.
-# COPY requirements.txt /tmp/pip-tmp/
-# RUN pip3 --disable-pip-version-check --no-cache-dir install -r /tmp/pip-tmp/requirements.txt \
-#    && rm -rf /tmp/pip-tmp
-
-# FROM ubuntu:20.04
-
-# RUN apt-get update && apt-get install -y \
-#   build-essential \
+# Install packages needed to build rgbasm (for boot rom).
+# RUN apt install -y \
 #   libsdl2-dev \
-#   python3 \
 #   python3-pip \
 #   python3-dev \
 #   libtiff5-dev \
-#   libjpeg8-dev \
+#   libjpeg62-turbo-dev \
+#   libpng-dev \
 #   zlib1g-dev \
-#   curl \
-#   && rm -rf /var/lib/apt/lists/*
+#   pkg-config \
+#   bison 
+
+# Install rgbasm.
+# RUN git clone git@github.com:gbdev/rgbds.git && \
+#   cd rgbds && \
+#   make && \
+#   make install
 
 # ARG pypy_version=pypy3.6-v7.3.0-linux64
 # RUN curl -OL "https://bitbucket.org/pypy/pypy/downloads/$pypy_version.tar.bz2" && tar -xvf "$pypy_version.tar.bz2"
 # ENV PATH="/$pypy_version/bin:${PATH}"
-
-# COPY requirements.txt /
-# RUN pip3 install --upgrade pip && pip3 install -r requirements.txt
-# RUN pypy3 -m ensurepip && pypy3 -m pip install --upgrade pip && pypy3 -m pip install --no-cache-dir -r requirements.txt
 
 # WORKDIR /pyboy
 
