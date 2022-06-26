@@ -37,8 +37,6 @@ def parser_arguments():
     yield GameWrapperSuperMarioLand.argv
     yield GameWrapperTetris.argv
     yield GameWrapperKirbyDreamLand.argv
-    # yield_plugins end
-    pass
 
 
 class PluginManager:
@@ -159,8 +157,6 @@ class PluginManager:
             self.window_dummy.set_title(self.pyboy.window_title)
         if self.debug_enabled:
             self.debug.set_title(self.pyboy.window_title)
-        # foreach end
-        pass
 
     def _post_tick_windows(self):
         # foreach windows [].post_tick()
@@ -174,32 +170,25 @@ class PluginManager:
             self.window_dummy.post_tick()
         if self.debug_enabled:
             self.debug.post_tick()
-        # foreach end
-        pass
 
     def frame_limiter(self, speed):
         if speed <= 0:
             return
         # foreach windows done = [].frame_limiter(speed), if done: return
         if self.window_sdl2_enabled:
-            done = self.window_sdl2.frame_limiter(speed)
-            if done:
+            if done := self.window_sdl2.frame_limiter(speed):
                 return
         if self.window_open_gl_enabled:
-            done = self.window_open_gl.frame_limiter(speed)
-            if done:
+            if done := self.window_open_gl.frame_limiter(speed):
                 return
         if self.window_headless_enabled:
-            done = self.window_headless.frame_limiter(speed)
-            if done:
+            if done := self.window_headless.frame_limiter(speed):
                 return
         if self.window_dummy_enabled:
-            done = self.window_dummy.frame_limiter(speed)
-            if done:
+            if done := self.window_dummy.frame_limiter(speed):
                 return
         if self.debug_enabled:
-            done = self.debug.frame_limiter(speed)
-            if done:
+            if done := self.debug.frame_limiter(speed):
                 return
         # foreach end
 
@@ -271,8 +260,6 @@ class PluginManager:
             self.game_wrapper_tetris.stop()
         if self.game_wrapper_kirby_dream_land_enabled:
             self.game_wrapper_kirby_dream_land.stop()
-        # foreach end
-        pass
 
     def handle_breakpoint(self):
         if self.debug_enabled:

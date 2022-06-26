@@ -135,10 +135,9 @@ def prep_pxd_py_files():
             if os.path.splitext(f)[1] == ".py" and f not in ignore_py_files:
                 yield os.path.join(root, f)
             if os.path.splitext(f)[1] == ".pxd":
-                py_file = os.path.join(root, os.path.splitext(f)[0]) + ".py"
-                if os.path.isfile(py_file):
-                    if os.path.getmtime(os.path.join(root, f)) > os.path.getmtime(py_file):
-                        os.utime(py_file)
+                py_file = f"{os.path.join(root, os.path.splitext(f)[0])}.py"
+                if os.path.isfile(py_file) and os.path.getmtime(os.path.join(root, f)) > os.path.getmtime(py_file):
+                    os.utime(py_file)
 
 
 # Cython seems to cythonize these before cleaning, so we only add them, if we aren't cleaning.
@@ -148,7 +147,7 @@ if CYTHON and "clean" not in sys.argv:
         # Cython currently has a bug in its code that results in symbol collision on Windows
         def get_export_symbols(self, ext):
             parts = ext.name.split(".")
-            initfunc_name = "PyInit_" + parts[-2] if parts[-1] == "__init__" else parts[-1] # noqa: F841
+            initfunc_name = f"PyInit_{parts[-2]}" if parts[-1] == "__init__" else parts[-1]
 
         # Override function in Cython to fix symbol collision
         build_ext.get_export_symbols = get_export_symbols

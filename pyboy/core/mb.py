@@ -136,7 +136,7 @@ class Motherboard:
             # From version 2 and above, this is the version number
             self.bootrom_enabled = f.read()
         else:
-            logger.debug(f"State version: 0-1")
+            logger.debug("State version: 0-1")
             # HACK: The byte wasn't a state version, but the bootrom flag
             self.bootrom_enabled = state_version
         if state_version >= 8:
@@ -144,7 +144,8 @@ class Motherboard:
             self.double_speed = f.read()
             _cgb = f.read()
             if self.cgb != _cgb:
-                logger.critical(f"Loading state which is not CGB, but PyBoy is loaded in CGB mode!")
+                logger.critical("Loading state which is not CGB, but PyBoy is loaded in CGB mode!")
+
                 return
             self.cgb = _cgb
             if self.cgb:
@@ -175,17 +176,14 @@ class Motherboard:
             self.breakpoint_latch -= 1
             return True
 
-        for bank, pc in self.breakpoints_list:
-            if self.cpu.PC == pc and (
-                (pc < 0x4000 and bank == 0 and not self.bootrom_enabled) or \
-                (0x4000 <= pc < 0x8000 and self.cartridge.rombank_selected == bank) or \
-                (0xA000 <= pc < 0xC000 and self.cartridge.rambank_selected == bank) or \
-                (0xC000 <= pc <= 0xFFFF and bank == -1) or \
-                (pc < 0x100 and bank == -1 and self.bootrom_enabled)
-            ):
-                # Breakpoint hit
-                return True
-        return False
+        return any(
+            self.cpu.PC == pc and
+            ((pc < 0x4000 and bank == 0 and not self.bootrom_enabled) or
+             (0x4000 <= pc < 0x8000 and self.cartridge.rombank_selected == bank) or
+             (0xA000 <= pc < 0xC000 and self.cartridge.rambank_selected == bank) or
+             (0xC000 <= pc <= 0xFFFF and bank == -1) or (pc < 0x100 and bank == -1 and self.bootrom_enabled))
+            for bank, pc in self.breakpoints_list
+        )
 
     def tick(self):
         while self.lcd.processing_frame():
@@ -221,16 +219,11 @@ class Motherboard:
             # https://gbdev.io/pandocs/CGB_Registers.html#bit-7--0---general-purpose-dma
 
             # TODO: Unify interface
-            if self.cgb and self.double_speed:
-                self.sound.clock += cycles // 2
-            else:
-                self.sound.clock += cycles
-
+            self.sound.clock += cycles // 2 if self.cgb and self.double_speed else cycles
             if self.timer.tick(cycles):
                 self.cpu.set_interruptflag(INTR_TIMER)
 
-            lcd_interrupt = self.lcd.tick(cycles)
-            if lcd_interrupt:
+            if lcd_interrupt := self.lcd.tick(cycles):
                 self.cpu.set_interruptflag(lcd_interrupt)
 
             # Escape halt. This happens when pressing 'return' in the debugger. It will make us skip breaking on halt
@@ -264,7 +257,7 @@ class Motherboard:
             return self.cartridge.getitem(i)
         elif 0xC000 <= i < 0xE000: # 8kB Internal RAM
             bank_offset = 0
-            if self.cgb and 0xD000 <= i:
+            if self.cgb and i >= 0xD000:
                 # Find which bank to read from at FF70
                 bank = self.getitem(0xFF70)
                 bank &= 0b111
@@ -320,39 +313,40 @@ class Motherboard:
                 return self.ram.io_ports[i - 0xFF00]
         elif 0xFF4C <= i < 0xFF80: # Empty but unusable for I/O
             # CGB registers
-            if self.cgb and i == 0xFF4D:
-                return self.key1
-            elif self.cgb and i == 0xFF4F:
-                return self.lcd.vbk.get()
-            elif self.cgb and i == 0xFF68:
-                return self.lcd.bcps.get() | 0x40
-            elif self.cgb and i == 0xFF69:
-                return self.lcd.bcpd.get()
-            elif self.cgb and i == 0xFF6A:
-                return self.lcd.ocps.get() | 0x40
-            elif self.cgb and i == 0xFF6B:
-                return self.lcd.ocpd.get()
-            elif self.cgb and i == 0xFF51:
-                logger.error("HDMA1 is not readable")
-                return 0x00 # Not readable
-            elif self.cgb and i == 0xFF52:
-                logger.error("HDMA2 is not readable")
-                return 0x00 # Not readable
-            elif self.cgb and i == 0xFF53:
-                logger.error("HDMA3 is not readable")
-                return 0x00 # Not readable
-            elif self.cgb and i == 0xFF54:
-                logger.error("HDMA4 is not readable")
-                return 0x00 # Not readable
-            elif self.cgb and i == 0xFF55:
-                return self.hdma.hdma5 & 0xFF
+            if self.cgb:
+                if i == 0xFF4D:
+                    return self.key1
+                elif i == 0xFF4F:
+                    return self.lcd.vbk.get()
+                elif i == 0xFF68:
+                    return self.lcd.bcps.get() | 0x40
+                elif i == 0xFF69:
+                    return self.lcd.bcpd.get()
+                elif i == 0xFF6A:
+                    return self.lcd.ocps.get() | 0x40
+                elif i == 0xFF6B:
+                    return self.lcd.ocpd.get()
+                elif i == 0xFF51:
+                    logger.error("HDMA1 is not readable")
+                    return 0x00 # Not readable
+                elif i == 0xFF52:
+                    logger.error("HDMA2 is not readable")
+                    return 0x00 # Not readable
+                elif i == 0xFF53:
+                    logger.error("HDMA3 is not readable")
+                    return 0x00 # Not readable
+                elif i == 0xFF54:
+                    logger.error("HDMA4 is not readable")
+                    return 0x00 # Not readable
+                elif i == 0xFF55:
+                    return self.hdma.hdma5 & 0xFF
             return self.ram.non_io_internal_ram1[i - 0xFF4C]
         elif 0xFF80 <= i < 0xFFFF: # Internal RAM
             return self.ram.internal_ram1[i - 0xFF80]
         elif i == 0xFFFF: # Interrupt Enable Register
             return self.cpu.interrupts_enabled_register
         else:
-            raise IndexError("Memory access violation. Tried to read: %s" % hex(i))
+            raise IndexError(f"Memory access violation. Tried to read: {hex(i)}")
 
     def setitem(self, i, value):
         assert 0 <= value < 0x100, "Memory write error! Can't write %s to %s" % (hex(value), hex(i))
@@ -380,7 +374,7 @@ class Motherboard:
             self.cartridge.setitem(i, value)
         elif 0xC000 <= i < 0xE000: # 8kB Internal RAM
             bank_offset = 0
-            if self.cgb and 0xD000 <= i:
+            if self.cgb and i >= 0xD000:
                 # Find which bank to read from at FF70
                 bank = self.getitem(0xFF70)
                 bank &= 0b111
@@ -445,10 +439,9 @@ class Motherboard:
             else:
                 self.ram.io_ports[i - 0xFF00] = value
         elif 0xFF4C <= i < 0xFF80: # Empty but unusable for I/O
-            if self.bootrom_enabled and i == 0xFF50 and (value == 0x1 or value == 0x11):
+            if self.bootrom_enabled and i == 0xFF50 and value in [0x1, 0x11]:
                 logger.info("Bootrom disabled!")
                 self.bootrom_enabled = False
-            # CGB registers
             elif self.cgb and i == 0xFF4D:
                 self.key1 = value
             elif self.cgb and i == 0xFF4F:
@@ -484,7 +477,7 @@ class Motherboard:
         elif i == 0xFFFF: # Interrupt Enable Register
             self.cpu.interrupts_enabled_register = value
         else:
-            raise Exception("Memory access violation. Tried to write: %s" % hex(i))
+            raise Exception(f"Memory access violation. Tried to write: {hex(i)}")
 
     def transfer_DMA(self, src):
         # http://problemkaputt.de/pandocs.htm#lcdoamdmatransfers

@@ -41,12 +41,9 @@ class MBC2(BaseMBC):
             return self.rombanks[self.rombank_selected % len(self.rombanks)][address - 0x4000]
         elif 0xA000 <= address < 0xC000:
             if not self.rambank_initialized:
-                logger.error("RAM banks not initialized: %s" % hex(address))
+                logger.error(f"RAM banks not initialized: {hex(address)}")
 
-            if not self.rambank_enabled:
-                return 0xFF
+            return (self.rambanks[0][address % 512] | 0b11110000 if self.rambank_enabled else 0xFF)
 
-            else:
-                return self.rambanks[0][address % 512] | 0b11110000
         else:
-            logger.error("Reading address invalid: %s" % address)
+            logger.error(f"Reading address invalid: {address}")

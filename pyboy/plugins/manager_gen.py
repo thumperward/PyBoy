@@ -174,7 +174,7 @@ if __name__ == "__main__":
 
                 skip_lines(line_iter, "# docs exclude end")
 
-                for p in (set(all_plugins) - set(game_wrappers)) | set(["manager", "manager_gen"]):
+                for p in set(all_plugins) - set(game_wrappers) | {"manager", "manager_gen"}:
                     p_name = to_snake_case(p)
                     lines.append(f"\"{p_name}\": False,\n")
 

@@ -75,7 +75,7 @@ class PyBoyGymEnv(Env):
             WindowEvent.RELEASE_ARROW_LEFT, WindowEvent.RELEASE_BUTTON_A, WindowEvent.RELEASE_BUTTON_B,
             WindowEvent.RELEASE_BUTTON_SELECT, WindowEvent.RELEASE_BUTTON_START
         ]
-        self._release_button = {button: r_button for button, r_button in zip(self._buttons, self._buttons_release)}
+        self._release_button = dict(zip(self._buttons, self._buttons_release))
 
         self.actions = [self._DO_NOTHING] + self._buttons
         if action_type == "all":

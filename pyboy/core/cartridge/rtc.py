@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class RTC:
     def __init__(self, filename):
-        self.filename = filename + ".rtc"
+        self.filename = f"{filename}.rtc"
 
         if not os.path.exists(self.filename):
             logger.info("No RTC file found. Skipping.")
@@ -45,7 +45,7 @@ class RTC:
         f.write(self.day_carry)
 
     def load_state(self, f, state_version):
-        self.timezero = struct.unpack("f", bytes([f.read() for _ in range(4)]))[0]
+        self.timezero = struct.unpack("f", bytes(f.read() for _ in range(4)))[0]
         self.halt = f.read()
         self.day_carry = f.read()
 
@@ -114,9 +114,7 @@ class RTC:
             day_carry = (value & 0b10000000) >> 7
 
             self.halt = halt
-            if self.halt == 0:
-                pass # TODO: Start the timer
-            else:
+            if self.halt != 0:
                 logger.warning("Stopping RTC is not implemented!")
 
             self.timezero -= int(t / 3600 / 24) - (day_high << 8)

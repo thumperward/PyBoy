@@ -113,21 +113,20 @@ class WindowOpenGL(PyBoyWindowPlugin):
                 self.events.append(WindowEvent(WindowEvent.RELEASE_BUTTON_START))
             elif c == "o":
                 self.events.append(WindowEvent(WindowEvent.SCREENSHOT_RECORD))
-        else:
-            if c == "a":
-                self.events.append(WindowEvent(WindowEvent.PRESS_BUTTON_A))
-            elif c == "s":
-                self.events.append(WindowEvent(WindowEvent.PRESS_BUTTON_B))
-            elif c == chr(27):
-                self.events.append(WindowEvent(WindowEvent.QUIT))
-            elif c == " ":
-                self.events.append(WindowEvent(WindowEvent.PRESS_SPEED_UP))
-            elif c == "i":
-                self.events.append(WindowEvent(WindowEvent.SCREEN_RECORDING_TOGGLE))
-            elif c == chr(8):
-                self.events.append(WindowEvent(WindowEvent.PRESS_BUTTON_SELECT))
-            elif c == chr(13):
-                self.events.append(WindowEvent(WindowEvent.PRESS_BUTTON_START))
+        elif c == "a":
+            self.events.append(WindowEvent(WindowEvent.PRESS_BUTTON_A))
+        elif c == "s":
+            self.events.append(WindowEvent(WindowEvent.PRESS_BUTTON_B))
+        elif c == chr(27):
+            self.events.append(WindowEvent(WindowEvent.QUIT))
+        elif c == " ":
+            self.events.append(WindowEvent(WindowEvent.PRESS_SPEED_UP))
+        elif c == "i":
+            self.events.append(WindowEvent(WindowEvent.SCREEN_RECORDING_TOGGLE))
+        elif c == chr(8):
+            self.events.append(WindowEvent(WindowEvent.PRESS_BUTTON_SELECT))
+        elif c == chr(13):
+            self.events.append(WindowEvent(WindowEvent.PRESS_BUTTON_START))
 
     def _glreshape(self, width, height):
         scale = max(min(height / ROWS, width / COLS), 1)

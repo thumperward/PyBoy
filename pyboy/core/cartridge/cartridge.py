@@ -32,7 +32,7 @@ def load_cartridge(filename):
     carttype = rombanks[0][0x0147]
     cartinfo = CARTRIDGE_TABLE.get(carttype, None)
     if cartinfo is None:
-        raise Exception("Catridge type invalid: %s" % carttype)
+        raise Exception(f"Catridge type invalid: {carttype}")
 
     cartdata = (
         carttype, cartinfo[0].__name__, ", ".join([x for x, y in zip(["SRAM", "Battery", "RTC"], cartinfo[1:]) if y])
@@ -68,9 +68,8 @@ def load_romfile(filename):
 
     if cythonmode:
         return memoryview(romdata).cast("B", shape=(len(romdata) // banksize, banksize))
-    else:
-        v = memoryview(romdata)
-        return [v[i:i + banksize] for i in range(0, len(romdata), banksize)]
+    v = memoryview(romdata)
+    return [v[i:i + banksize] for i in range(0, len(romdata), banksize)]
 
 
 # yapf: disable

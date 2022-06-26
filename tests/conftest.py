@@ -137,7 +137,7 @@ def samesuite_dir():
             samesuite_data = io.BytesIO(url_open("https://pyboy.dk/mirror/SameSuite.zip"))
             with ZipFile(samesuite_data) as _zip:
                 _zip.extractall(path)
-    return str(path) + "/"
+    return f"{str(path)}/"
 
 
 @pytest.fixture(scope="session")
@@ -149,7 +149,7 @@ def mooneye_dir():
             mooneye_data = io.BytesIO(url_open("https://pyboy.dk/mirror/mooneye.zip"))
             with ZipFile(mooneye_data) as _zip:
                 _zip.extractall(path)
-    return str(path) + "/"
+    return f"{str(path)}/"
 
 
 @pytest.fixture(scope="session")
@@ -222,7 +222,7 @@ def shonumi_dir():
             shonumi_data = io.BytesIO(url_open("https://pyboy.dk/mirror/GB%20Tests.zip"))
             with ZipFile(shonumi_data) as _zip:
                 _zip.extractall(path)
-    return str(path) + "/"
+    return f"{str(path)}/"
 
 
 @pytest.fixture(scope="session")
@@ -304,7 +304,7 @@ def pack_secrets():
 
     data = io.BytesIO()
     with ZipFile(data, "w") as _zip:
-        for rom in [globals()[x] for x in globals().keys() if x.endswith("_rom") and x != "any_rom"]:
+        for rom in [globals()[x] for x in globals() if x.endswith("_rom") and x != "any_rom"]:
             _secrets_fixture = None
             _rom = rom.__pytest_wrapped__.obj(_secrets_fixture)
             _zip.write(_rom, os.path.basename(_rom))

@@ -62,9 +62,7 @@ for name in ["P1", "P2", "Y1", "B2", "O", "Y2"]: # Order is important, so we can
     rows = [int(f"0b{row.replace('.', '0').replace('x', '1')}", base=2) for row in TILES[name].split()]
     asm_out += f".{name}\n"
     asm_out += "    DB "
-    line = []
-    for row in rows:
-        line.append(f"${row:02x}")
+    line = [f"${row:02x}" for row in rows]
     asm_out += ", ".join(line)
     asm_out += "\n"
 

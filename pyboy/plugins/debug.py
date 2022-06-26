@@ -93,7 +93,7 @@ class Debug(PyBoyWindowPlugin):
         self.rom_symbols = {}
         if pyboy_argv.get("ROM"):
             gamerom_file_no_ext, rom_ext = os.path.splitext(pyboy_argv.get("ROM"))
-            for sym_ext in [".sym", rom_ext + ".sym"]:
+            for sym_ext in [".sym", f"{rom_ext}.sym"]:
                 sym_path = gamerom_file_no_ext + sym_ext
                 if os.path.isfile(sym_path):
                     with open(sym_path) as f:
@@ -113,7 +113,7 @@ class Debug(PyBoyWindowPlugin):
                                 bank, addr, sym_label = re.split(":| ", line.strip())
                                 bank = int(bank, 16)
                                 addr = int(addr, 16)
-                                if not bank in self.rom_symbols:
+                                if bank not in self.rom_symbols:
                                     self.rom_symbols[bank] = {}
 
                                 self.rom_symbols[bank][addr] = sym_label
@@ -257,14 +257,12 @@ class Debug(PyBoyWindowPlugin):
             sdl2.SDL_Quit()
 
     def enabled(self):
-        if self.pyboy_argv.get("debug"):
-            if not sdl2:
-                logger.error("Failed to import sdl2, needed for debug window")
-                return False
-            else:
-                return True
-        else:
+        if not self.pyboy_argv.get("debug"):
             return False
+        if sdl2:
+            return True
+        logger.error("Failed to import sdl2, needed for debug window")
+        return False
 
     def parse_bank_addr_sym_label(self, command):
         if ":" in command:
@@ -283,10 +281,7 @@ class Debug(PyBoyWindowPlugin):
         while True:
             self.post_tick()
 
-            if self.mb.cpu.PC < 0x4000:
-                bank = 0
-            else:
-                bank = self.mb.cartridge.rombank_selected
+            bank = 0 if self.mb.cpu.PC < 0x4000 else self.mb.cartridge.rombank_selected
             sym_label = self.rom_symbols.get(bank, {}).get(self.mb.cpu.PC, "")
 
             print(self.mb.cpu.dump_state(sym_label))
@@ -530,10 +525,10 @@ class TileViewWindow(BaseDebugWindow):
             " [LOW MAP 0x9800-0x9BFF]"
         title += " [HIGH DATA (SIGNED) 0x8800-0x97FF]" if self.tilemap.signed_tile_data else \
             " [LOW DATA (UNSIGNED) 0x8000-0x8FFF]"
-        if self.tilemap._select == "WINDOW":
-            title += " [Window]"
         if self.tilemap._select == "BACKGROUND":
             title += " [Background]"
+        elif self.tilemap._select == "WINDOW":
+            title += " [Window]"
         sdl2.SDL_SetWindowTitle(self._window, title.encode("utf8"))
 
     def draw_overlay(self):
@@ -550,7 +545,7 @@ class TileViewWindow(BaseDebugWindow):
 
             if background_view: # Background
                 # Wraps around edges of the screen
-                if y == 0 or y == constants.ROWS - 1: # Draw top/bottom bar
+                if y in [0, constants.ROWS - 1]: # Draw top/bottom bar
                     for x in range(constants.COLS):
                         self.buf0[(yy+y) % 0xFF][(xx+x) % 0xFF] = COLOR
                 else: # Draw body
@@ -566,13 +561,12 @@ class TileViewWindow(BaseDebugWindow):
                     for x in range(constants.COLS):
                         if 0 <= xx + x < constants.COLS:
                             self.buf0[yy + y][xx + x] = COLOR
-                else: # Draw body
-                    if 0 <= yy + y:
-                        self.buf0[yy + y][max(xx, 0)] = COLOR
-                        for x in range(constants.COLS):
-                            if 0 <= xx + x < constants.COLS:
-                                self.buf0[yy + y][xx + x] &= self.color
-                        self.buf0[yy + y][xx + constants.COLS] = COLOR
+                elif yy + y >= 0:
+                    self.buf0[yy + y][max(xx, 0)] = COLOR
+                    for x in range(constants.COLS):
+                        if 0 <= xx + x < constants.COLS:
+                            self.buf0[yy + y][xx + x] &= self.color
+                    self.buf0[yy + y][xx + constants.COLS] = COLOR
 
         # Mark selected tiles
         for t, match in zip(
@@ -584,11 +578,11 @@ class TileViewWindow(BaseDebugWindow):
             self.mark_tile(self.hover_x, self.hover_y, HOVER, 8, 8, True)
 
         # Mark current scanline directly from LY,SCX,SCY,WX,WY
-        if background_view:
-            for x in range(constants.COLS):
+        for x in range(constants.COLS):
+            # Mark current scanline directly from LY,SCX,SCY,WX,WY
+            if background_view:
                 self.buf0[(self.mb.lcd.SCY + self.mb.lcd.LY) % 0xFF][(self.mb.lcd.SCX + x) % 0xFF] = 0xFF00CE12
-        else:
-            for x in range(constants.COLS):
+            else:
                 self.buf0[(self.mb.lcd.WY + self.mb.lcd.LY) % 0xFF][(self.mb.lcd.WX + x) % 0xFF] = 0xFF00CE12
 
 
@@ -852,7 +846,8 @@ class MemoryWindow(BaseDebugWindow):
         self.text_buffer[self.NROWS - 1][self.NCOLS - 1] = 0xBC
 
     def write_addresses(self):
-        header = (f"Memory from 0x{self.start_address:04X} " f"to 0x{self.start_address+0x3FF:04X}").encode("cp437")
+        header = (f"Memory from 0x{self.start_address:04X} "
+                  f"to 0x{self.start_address+0x3FF:04X}").encode("cp437")
         if cythonmode:
             for x in range(28):
                 self.text_buffer[1][x + 2] = header[x]
@@ -884,7 +879,7 @@ class MemoryWindow(BaseDebugWindow):
     def draw_text(self, x, y, text):
         self.dst.x = x
         self.dst.y = y
-        for i, c in enumerate(text):
+        for c in text:
             if not 0 <= c < 256:
                 logger.warn(f"Invalid character {c} in {bytes(text).decode('cp437')}") # This may error too...
                 c = 0
