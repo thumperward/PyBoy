@@ -33,4 +33,4 @@ GitPython = "^3.1.27"
 autopep8 = "^1.6.0"
 
 [tool.poetry.scripts]
-pyboy = "pyboy:main"
+pyboy = "pyboy.__main__:main"
