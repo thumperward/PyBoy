@@ -7,15 +7,24 @@ import re
 # Plugins and priority!
 # E.g. DisableInput first
 windows = [
-    "WindowSDL2", "WindowOpenGL", "WindowHeadless", "WindowDummy", "Debug"
+    "WindowSDL2",
+    "WindowOpenGL",
+    "WindowHeadless",
+    "WindowDummy",
+    "Debug",
 ]
 game_wrappers = [
-    "GameWrapperSuperMarioLand", "GameWrapperTetris",
-    "GameWrapperKirbyDreamLand"
+    "GameWrapperSuperMarioLand",
+    "GameWrapperTetris",
+    "GameWrapperKirbyDreamLand",
 ]
 plugins = [
-    "DisableInput", "AutoPause", "RecordReplay", "Rewind", "ScreenRecorder",
-    "ScreenshotRecorder"
+    "DisableInput",
+    "AutoPause",
+    "RecordReplay",
+    "Rewind",
+    "ScreenRecorder",
+    "ScreenshotRecorder",
 ] + game_wrappers
 all_plugins = windows + plugins
 
@@ -42,7 +51,6 @@ if __name__ == "__main__":
 
             # Find place to inject
             if line.strip().startswith("# foreach"):
-
                 lines = [line.strip() + "\n"]
                 indentation = " " * line.index("# foreach")
 
@@ -60,7 +68,6 @@ if __name__ == "__main__":
                 lines.append("# foreach end\n")
                 out_lines.extend([indentation + l for l in lines])
             elif line.strip().startswith("# plugins_enabled"):
-
                 lines = [line.strip() + "\n"]
                 indentation = " " * line.index("# plugins_enabled")
 
@@ -69,14 +76,15 @@ if __name__ == "__main__":
                 for p in all_plugins:
                     p_name = to_snake_case(p)
                     lines.append(
-                        f"self.{p_name} = {p}(pyboy, mb, pyboy_argv)\n")
+                        f"self.{p_name} = {p}(pyboy, mb, pyboy_argv)\n"
+                    )
                     lines.append(
-                        f"self.{p_name}_enabled = self.{p_name}.enabled()\n")
+                        f"self.{p_name}_enabled = self.{p_name}.enabled()\n"
+                    )
 
                 lines.append("# plugins_enabled end\n")
                 out_lines.extend([indentation + l for l in lines])
             elif line.strip().startswith("# yield_plugins"):
-
                 lines = [line.strip() + "\n"]
                 indentation = " " * line.index("# yield_plugins")
 
@@ -89,7 +97,6 @@ if __name__ == "__main__":
                 lines.append("# yield_plugins end\n")
                 out_lines.extend([indentation + l for l in lines])
             elif line.strip().startswith("# imports"):
-
                 lines = [line.strip() + "\n"]
                 indentation = " " * line.index("# imports")
 
@@ -104,7 +111,6 @@ if __name__ == "__main__":
                 lines.append("# imports end\n")
                 out_lines.extend([indentation + l for l in lines])
             elif line.strip().startswith("# gamewrapper"):
-
                 lines = [line.strip() + "\n"]
                 indentation = " " * line.index("# gamewrapper")
 
@@ -113,7 +119,8 @@ if __name__ == "__main__":
                 for p in game_wrappers:
                     p_name = to_snake_case(p)
                     lines.append(
-                        f"if self.{p_name}_enabled: return self.{p_name}\n")
+                        f"if self.{p_name}_enabled: return self.{p_name}\n"
+                    )
 
                 lines.append("# gamewrapper end\n")
                 out_lines.extend([indentation + l for l in lines])
@@ -133,7 +140,6 @@ if __name__ == "__main__":
 
             # Find place to inject
             if line.strip().startswith("# plugin_cdef"):
-
                 lines = [line.strip() + "\n"]
                 indentation = " " * line.index("# plugin_cdef")
 
@@ -150,7 +156,6 @@ if __name__ == "__main__":
                 lines.append("# plugin_cdef end\n")
                 out_lines.extend([indentation + l for l in lines])
             elif line.strip().startswith("# imports"):
-
                 lines = [line.strip() + "\n"]
                 indentation = " " * line.index("# imports")
 
@@ -178,16 +183,17 @@ if __name__ == "__main__":
 
             # Find place to inject
             if line.strip().startswith("# docs exclude"):
-
                 lines = [line.strip() + "\n"]
                 indentation = " " * line.index("# docs exclude")
 
                 skip_lines(line_iter, "# docs exclude end")
 
-                for p in (set(all_plugins) - set(game_wrappers)
-                          | {"manager", "manager_gen"}):
+                for p in set(all_plugins) - set(game_wrappers) | {
+                    "manager",
+                    "manager_gen",
+                }:
                     p_name = to_snake_case(p)
-                    lines.append(f"\"{p_name}\": False,\n")
+                    lines.append(f'"{p_name}": False,\n')
 
                 lines.append("# docs exclude end\n")
                 out_lines.extend([indentation + l for l in lines])

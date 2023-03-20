@@ -24,7 +24,6 @@ except ImportError:
 
 
 class Tile:
-
     def __init__(self, mb, identifier):
         """
         The Game Boy uses tiles as the building block for all graphics on the screen. This base-class is used for
@@ -90,7 +89,7 @@ class Tile:
             Image of tile in 8x8 pixels and RGBA colors.
         """
         if Image is None:
-            logger.error(f"{__name__}: Missing dependency \"Pillow\".")
+            logger.error(f'{__name__}: Missing dependency "Pillow".')
             return None
         return Image.frombytes("RGBA", (8, 8), bytes(self.image_data()))
 
@@ -107,8 +106,9 @@ class Tile:
         numpy.ndarray :
             Array of shape (8, 8, 4) with data type of `numpy.uint8`.
         """
-        return np.asarray(self.image_data()).view(dtype=np.uint8).reshape(
-            8, 8, 4)
+        return (
+            np.asarray(self.image_data()).view(dtype=np.uint8).reshape(8, 8, 4)
+        )
 
     def image_data(self):
         """
@@ -131,8 +131,9 @@ class Tile:
 
             for x in range(8):
                 colorcode = utils.color_code(byte1, byte2, 7 - x)
-                self.data[k // 2][x] = self.mb.lcd.BGP.getcolor(
-                    colorcode) >> 8 | old_A_format
+                self.data[k // 2][x] = (
+                    self.mb.lcd.BGP.getcolor(colorcode) >> 8 | old_A_format
+                )
 
         return self.data
 

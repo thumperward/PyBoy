@@ -1,8 +1,7 @@
 """Outputs a .asm file that holds the tile data for the boot rom logo"""
 
 TILES = {
-    "P1":
-    """
+    "P1": """
 ........
 ........
 ........
@@ -11,8 +10,7 @@ TILES = {
 .xx..xx.
 .xx..xx.
 .xx..xx.""",
-    "P2":
-    """
+    "P2": """
 .xxxxxx.
 .xxxxx..
 .xx.....
@@ -21,8 +19,7 @@ TILES = {
 .xx.....
 .xx.....
 ........""",
-    "Y1":
-    """
+    "Y1": """
 ........
 .xx..xx.
 .xx..xx.
@@ -31,8 +28,7 @@ TILES = {
 .xxxxxx.
 ..xxxx..
 ...xxx..""",
-    "Y2":
-    """
+    "Y2": """
 ...xx...
 xxxx....
 xxx.....
@@ -41,8 +37,7 @@ xxx.....
 ........
 ........
 ........""",
-    "O":
-    """
+    "O": """
 ........
 ..xxxx..
 .xxxxxx.
@@ -51,8 +46,7 @@ xxx.....
 .xxxxxx.
 ..xxxx..
 ........""",
-    "B2":
-    """
+    "B2": """
 .xxxxxx.
 .xxxxx..
 .xx..xx.
@@ -60,12 +54,18 @@ xxx.....
 .xx..xx.
 .xxxxxx.
 .xxxxx..
-........"""
+........""",
 }
 
 asm_out = ".logo:\n"
-for name in ["P1", "P2", "Y1", "B2", "O",
-             "Y2"]:  # Order is important, so we can't iterate on TILES
+for name in [
+    "P1",
+    "P2",
+    "Y1",
+    "B2",
+    "O",
+    "Y2",
+]:  # Order is important, so we can't iterate on TILES
     rows = [
         int(f"0b{row.replace('.', '0').replace('x', '1')}", base=2)
         for row in TILES[name].split()

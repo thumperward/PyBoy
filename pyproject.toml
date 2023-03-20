@@ -9,6 +9,12 @@ description = "Game Boy emulator written in Python"
 authors = ["Mads Ynddal <mads-pyboy@ynddal.dk>"]
 license = "LGPL3"
 
+[tool.poetry.scripts]
+pyboy = "pyboy.__main__:main"
+
+[tool.black]
+line-length = 80
+
 [tool.poetry.dependencies]
 python = ">=3.8,<4.0"
 Cython = "^0.29.30"
@@ -16,7 +22,7 @@ numpy = "^1.23.0"
 PySDL2 = "^0.9.11"
 pysdl2-dll = "^2.0.20"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 Cython = "^0.29.30"
 numpy = "^1.23.0"
 PySDL2 = "^0.9.11"
@@ -31,6 +37,5 @@ filelock = "^3.7.1"
 cryptography = "^37.0.3"
 GitPython = "^3.1.27"
 autopep8 = "^1.6.0"
+black = "^23.1.0"
 
-[tool.poetry.scripts]
-pyboy = "pyboy.__main__:main"

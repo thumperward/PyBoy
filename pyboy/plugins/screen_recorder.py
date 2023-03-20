@@ -21,7 +21,6 @@ FPS = 60
 
 
 class ScreenRecorder(PyBoyPlugin):
-
     def __init__(self, *args):
         super().__init__(*args)
 
@@ -43,7 +42,8 @@ class ScreenRecorder(PyBoyPlugin):
         # Plugin: Screen Recorder
         if self.recording:
             self.add_frame(
-                self.pyboy.botsupport_manager().screen().screen_image())
+                self.pyboy.botsupport_manager().screen().screen_image()
+            )
 
     def add_frame(self, frame):
         # Pillow makes artifacts in the output, if we use 'RGB', which is PyBoy's default format
@@ -59,16 +59,20 @@ class ScreenRecorder(PyBoyPlugin):
             path = os.path.join(
                 directory,
                 time.strftime(
-                    f"{self.pyboy.cartridge_title()}-%Y.%m.%d-%H.%M.%S.gif"))
+                    f"{self.pyboy.cartridge_title()}-%Y.%m.%d-%H.%M.%S.gif"
+                ),
+            )
 
         if len(self.frames) > 0:
-            self.frames[0].save(path,
-                                save_all=True,
-                                interlace=False,
-                                loop=0,
-                                optimize=True,
-                                append_images=self.frames[1:],
-                                duration=int(round(1000 / fps, -1)))
+            self.frames[0].save(
+                path,
+                save_all=True,
+                interlace=False,
+                loop=0,
+                optimize=True,
+                append_images=self.frames[1:],
+                duration=int(round(1000 / fps, -1)),
+            )
 
             logger.info(f"Screen recording saved in {path}")
         else:
@@ -78,7 +82,7 @@ class ScreenRecorder(PyBoyPlugin):
     def enabled(self):
         if Image is None:
             logger.warning(
-                f"{__name__}: Missing dependency \"Pillow\". Recording disabled"
+                f'{__name__}: Missing dependency "Pillow". Recording disabled'
             )
             return False
         return True

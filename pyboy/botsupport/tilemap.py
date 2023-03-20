@@ -16,7 +16,6 @@ from .tile import Tile
 
 
 class TileMap:
-
     def __init__(self, mb, select):
         """
         The Game Boy has two tile maps, which defines what is rendered on the screen. These are also referred to as
@@ -68,10 +67,14 @@ class TileMap:
         """
         LCDC = LCDCRegister(self.mb.getitem(LCDC_OFFSET))
         if self._select == "WINDOW":
-            self.map_offset = HIGH_TILEMAP if LCDC.windowmap_select else LOW_TILEMAP
+            self.map_offset = (
+                HIGH_TILEMAP if LCDC.windowmap_select else LOW_TILEMAP
+            )
             self.signed_tile_data = not bool(LCDC.tiledata_select)
         elif self._select == "BACKGROUND":
-            self.map_offset = HIGH_TILEMAP if LCDC.backgroundmap_select else LOW_TILEMAP
+            self.map_offset = (
+                HIGH_TILEMAP if LCDC.backgroundmap_select else LOW_TILEMAP
+            )
             self.signed_tile_data = not bool(LCDC.tiledata_select)
         else:
             raise KeyError(f"Invalid tilemap selected: {self._select}")
@@ -101,9 +104,10 @@ class TileMap:
         """
         # TODO: Crude implementation
         tilemap_identifiers = np.asarray(self[:, :], dtype=np.uint32)
-        return [[[int(y) for y in x]
-                 for x in np.argwhere(tilemap_identifiers == i)]
-                for i in identifiers]
+        return [
+            [[int(y) for y in x] for x in np.argwhere(tilemap_identifiers == i)]
+            for i in identifiers
+        ]
 
     def _tile_address(self, column, row):
         """
@@ -134,10 +138,12 @@ class TileMap:
 
         if not 0 <= column < 32:
             raise IndexError(
-                "column is out of bounds. Value of 0 to 31 is allowed")
+                "column is out of bounds. Value of 0 to 31 is allowed"
+            )
         if not 0 <= row < 32:
             raise IndexError(
-                "row is out of bounds. Value of 0 to 31 is allowed")
+                "row is out of bounds. Value of 0 to 31 is allowed"
+            )
         return self.map_offset + 32 * row + column
 
     def tile(self, column, row):
@@ -242,11 +248,15 @@ class TileMap:
         if self._use_tile_objects:
             tile_fun = self.tile
         else:
-            def tile_fun(x, y): return self.tile_identifier(x, y)
+
+            def tile_fun(x, y):
+                return self.tile_identifier(x, y)
 
         if x_slice and y_slice:
-            return [[tile_fun(_x, _y) for _x in range(x.stop)[x]]
-                    for _y in range(y.stop)[y]]
+            return [
+                [tile_fun(_x, _y) for _x in range(x.stop)[x]]
+                for _y in range(y.stop)[y]
+            ]
         elif x_slice:
             return [tile_fun(_x, y) for _x in range(x.stop)[x]]
         elif y_slice:

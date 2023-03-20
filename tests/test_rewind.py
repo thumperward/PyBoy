@@ -18,12 +18,11 @@ def write_bytes(buf, values):
 
 @pytest.mark.skipif(not is_pypy, reason="This test doesn't work in Cython")
 class TestRewind:
-
     def test_all(self):
         for buf in [
-                FixedAllocBuffers(),
-                CompressedFixedAllocBuffers(),
-                DeltaFixedAllocBuffers()
+            FixedAllocBuffers(),
+            CompressedFixedAllocBuffers(),
+            DeltaFixedAllocBuffers(),
         ]:
             A = [1] * 16
             B = [2] * 16
@@ -93,15 +92,21 @@ class TestRewind:
         write_bytes(buf, [0 for _ in range(256)])
         buf.flush()
         assert all(
-            map(lambda x: x[0] == x[1],
-                zip(buf.buffer[2:8], [0, 255, 0, 1] + [FILL_VALUE] * 2)))
+            map(
+                lambda x: x[0] == x[1],
+                zip(buf.buffer[2:8], [0, 255, 0, 1] + [FILL_VALUE] * 2),
+            )
+        )
 
         # Fit exactly within 8-bit counter
         write_bytes(buf, [0 for _ in range(255)])
         buf.flush()
         assert all(
-            map(lambda x: x[0] == x[1],
-                zip(buf.buffer[6:10], [0, 255] + [FILL_VALUE] * 4)))
+            map(
+                lambda x: x[0] == x[1],
+                zip(buf.buffer[6:10], [0, 255] + [FILL_VALUE] * 4),
+            )
+        )
 
     def verify_buffer_length(self, buf):
         # Now, we should see one pair of '0' and length
@@ -120,13 +125,19 @@ class TestRewind:
         assert all(
             map(
                 lambda x: x[0] == x[1],
-                zip(buf.buffer[:60],
-                    [0, 1] + list(range(1, 20)) + [FILL_VALUE] * 40)))
+                zip(
+                    buf.buffer[:60],
+                    [0, 1] + list(range(1, 20)) + [FILL_VALUE] * 40,
+                ),
+            )
+        )
         # The compression doesn't exist in the internal buffer
         assert all(
-            map(lambda x: x[0] == x[1],
-                zip(buf.internal_buffer[:60],
-                    list(range(20)) + [0] * 40)))
+            map(
+                lambda x: x[0] == x[1],
+                zip(buf.internal_buffer[:60], list(range(20)) + [0] * 40),
+            )
+        )
         buf.new()
 
         # Write same range(20), but add 0x80 to set the 7th bit.
@@ -136,25 +147,45 @@ class TestRewind:
         assert all(
             map(
                 lambda x: x[0] == x[1],
-                zip(buf.buffer[:60], [0, 1] + list(range(1, 20)) +
-                    [0x80] * 20 + [FILL_VALUE] * 20)))
+                zip(
+                    buf.buffer[:60],
+                    [0, 1]
+                    + list(range(1, 20))
+                    + [0x80] * 20
+                    + [FILL_VALUE] * 20,
+                ),
+            )
+        )
         assert all(
             map(
                 lambda x: x[0] == x[1],
-                zip(buf.internal_buffer[:60],
-                    list(range(0x80, 0x80 + 20)) + [0] * 40)))
+                zip(
+                    buf.internal_buffer[:60],
+                    list(range(0x80, 0x80 + 20)) + [0] * 40,
+                ),
+            )
+        )
         buf.new()
 
         write_bytes(buf, [0xFF] * 20)
         assert all(
             map(
                 lambda x: x[0] == x[1],
-                zip(buf.buffer[:61],
-                    [0, 1] + list(range(1, 20)) + [0x80] * 20 +
-                    [x ^ 0xFF for x in list(range(0x80, 0x80 + 20))])))
+                zip(
+                    buf.buffer[:61],
+                    [0, 1]
+                    + list(range(1, 20))
+                    + [0x80] * 20
+                    + [x ^ 0xFF for x in list(range(0x80, 0x80 + 20))],
+                ),
+            )
+        )
         assert all(
-            map(lambda x: x[0] == x[1],
-                zip(buf.internal_buffer[:60], [0xFF] * 20 + [0] * 40)))
+            map(
+                lambda x: x[0] == x[1],
+                zip(buf.internal_buffer[:60], [0xFF] * 20 + [0] * 40),
+            )
+        )
         buf.new()
 
     def test_delta_buffer_repeat_pattern(self):
@@ -168,12 +199,16 @@ class TestRewind:
         assert all(
             map(
                 lambda x: x[0] == x[1],
-                zip(buf.buffer[:60],
-                    [0xAA] * 20 + [0, 20] + [FILL_VALUE] * 38)))
+                zip(buf.buffer[:60], [0xAA] * 20 + [0, 20] + [FILL_VALUE] * 38),
+            )
+        )
         # The internal buffer always reflect the current image, so nothing has changed.
         assert all(
-            map(lambda x: x[0] == x[1],
-                zip(buf.internal_buffer[:60], [0xAA] * 20 + [0] * 40)))
+            map(
+                lambda x: x[0] == x[1],
+                zip(buf.internal_buffer[:60], [0xAA] * 20 + [0] * 40),
+            )
+        )
 
         write_bytes(buf, [0xAA] * 20)
         buf.new()
@@ -181,21 +216,34 @@ class TestRewind:
         assert all(
             map(
                 lambda x: x[0] == x[1],
-                zip(buf.buffer[:60],
-                    [0xAA] * 20 + [0, 20, 0, 20] + [FILL_VALUE] * 36)))
+                zip(
+                    buf.buffer[:60],
+                    [0xAA] * 20 + [0, 20, 0, 20] + [FILL_VALUE] * 36,
+                ),
+            )
+        )
         assert all(
-            map(lambda x: x[0] == x[1],
-                zip(buf.internal_buffer[:60], [0xAA] * 20 + [0] * 40)))
+            map(
+                lambda x: x[0] == x[1],
+                zip(buf.internal_buffer[:60], [0xAA] * 20 + [0] * 40),
+            )
+        )
 
     def verify_initial_frame(self, buf):
         # Initial frame will just show up directly in the underlying buffer
         write_bytes(buf, [0xAA] * 20)
         assert all(
-            map(lambda x: x[0] == x[1],
-                zip(buf.buffer[:60], [0xAA] * 20 + [FILL_VALUE] * 40)))
+            map(
+                lambda x: x[0] == x[1],
+                zip(buf.buffer[:60], [0xAA] * 20 + [FILL_VALUE] * 40),
+            )
+        )
         assert all(
-            map(lambda x: x[0] == x[1],
-                zip(buf.internal_buffer[:60], [0xAA] * 20 + [0] * 40)))
+            map(
+                lambda x: x[0] == x[1],
+                zip(buf.internal_buffer[:60], [0xAA] * 20 + [0] * 40),
+            )
+        )
         buf.new()
 
     def test_buffer_overrun(self):

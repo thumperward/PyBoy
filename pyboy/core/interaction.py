@@ -17,7 +17,6 @@ def set_bit(x, bit):
 
 
 class Interaction:
-
     def __init__(self):
         self.directional = 0xF
         self.standard = 0xF
@@ -63,8 +62,9 @@ class Interaction:
 
         # XOR to find the changed bits, AND it to see if it was high before.
         # Test for both directional and standard buttons.
-        return ((_directional ^ self.directional) & _directional) or \
-               ((_standard ^ self.standard) & _standard)
+        return ((_directional ^ self.directional) & _directional) or (
+            (_standard ^ self.standard) & _standard
+        )
 
     def pull(self, joystickbyte):
         P14 = (joystickbyte >> 4) & 1

@@ -22,7 +22,6 @@ FPS = 60
 
 
 class ScreenshotRecorder(PyBoyPlugin):
-
     def handle_events(self, events):
         for event in events:
             if event == WindowEvent.SCREENSHOT_RECORD:
@@ -31,7 +30,6 @@ class ScreenshotRecorder(PyBoyPlugin):
         return events
 
     def save(self, path=None):
-
         if path is None:
             directory = os.path.join(os.path.curdir, "screenshots")
             if not os.path.exists(directory):
@@ -39,7 +37,9 @@ class ScreenshotRecorder(PyBoyPlugin):
             path = os.path.join(
                 directory,
                 time.strftime(
-                    f"{self.pyboy.cartridge_title()}-%Y.%m.%d-%H.%M.%S.png"))
+                    f"{self.pyboy.cartridge_title()}-%Y.%m.%d-%H.%M.%S.png"
+                ),
+            )
 
         self.pyboy.botsupport_manager().screen().screen_image().save(path)
 
@@ -48,7 +48,7 @@ class ScreenshotRecorder(PyBoyPlugin):
     def enabled(self):
         if Image is None:
             logger.warning(
-                f"{__name__}: Missing dependency \"Pillow\". Screenshots disabled"
+                f'{__name__}: Missing dependency "Pillow". Screenshots disabled'
             )
             return False
         return True

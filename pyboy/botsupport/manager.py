@@ -10,13 +10,13 @@ from . import tilemap as _tilemap
 
 try:
     from cython import compiled
+
     cythonmode = compiled
 except ImportError:
     cythonmode = False
 
 
 class BotSupportManager:
-
     def __init__(self, pyboy, mb):
         if not cythonmode:
             self.pyboy = pyboy
@@ -88,9 +88,12 @@ class BotSupportManager:
             match = []
             for s in range(_constants.SPRITES):
                 sprite = _sprite.Sprite(self.mb, s)
-                match.extend(s for t in sprite.tiles
-                             if t.tile_identifier == i and (
-                                 not on_screen or sprite.on_screen))
+                match.extend(
+                    s
+                    for t in sprite.tiles
+                    if t.tile_identifier == i
+                    and (not on_screen or sprite.on_screen)
+                )
             matches.append(match)
         return matches
 

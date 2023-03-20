@@ -18,7 +18,6 @@
 
 
 class Timer:
-
     def __init__(self):
         self.DIV = 0  # Always showing self.counter with mode 3 divider
         self.TIMA = 0  # Can be set from RAM 0xFF05
@@ -36,7 +35,7 @@ class Timer:
 
     def tick(self, cycles):
         self.DIV_counter += cycles
-        self.DIV += (self.DIV_counter >> 8)  # Add overflown bits to DIV
+        self.DIV += self.DIV_counter >> 8  # Add overflown bits to DIV
         self.DIV_counter &= 0xFF  # Remove the overflown bits
         self.DIV &= 0xFF
 

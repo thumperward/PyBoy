@@ -27,6 +27,7 @@ try:
                              glutKeyboardFunc, glutKeyboardUpFunc,
                              glutReshapeFunc, glutSetWindowTitle,
                              glutSpecialFunc, glutSpecialUpFunc)
+
     opengl_enabled = True
 except ImportError:
     opengl_enabled = False
@@ -35,7 +36,6 @@ ROWS, COLS = 144, 160
 
 
 class WindowOpenGL(PyBoyWindowPlugin):
-
     def __init__(self, pyboy, mb, pyboy_argv):
         super().__init__(pyboy, mb, pyboy_argv)
 
@@ -90,8 +90,7 @@ class WindowOpenGL(PyBoyWindowPlugin):
             if c == GLUT_KEY_LEFT:
                 self.events.append(WindowEvent(WindowEvent.RELEASE_ARROW_LEFT))
             if c == GLUT_KEY_RIGHT:
-                self.events.append(WindowEvent(
-                    WindowEvent.RELEASE_ARROW_RIGHT))
+                self.events.append(WindowEvent(WindowEvent.RELEASE_ARROW_RIGHT))
         else:
             if c == GLUT_KEY_UP:
                 self.events.append(WindowEvent(WindowEvent.PRESS_ARROW_UP))
@@ -116,10 +115,12 @@ class WindowOpenGL(PyBoyWindowPlugin):
                 self.events.append(WindowEvent(WindowEvent.RELEASE_SPEED_UP))
             elif c == chr(8):
                 self.events.append(
-                    WindowEvent(WindowEvent.RELEASE_BUTTON_SELECT))
+                    WindowEvent(WindowEvent.RELEASE_BUTTON_SELECT)
+                )
             elif c == chr(13):
                 self.events.append(
-                    WindowEvent(WindowEvent.RELEASE_BUTTON_START))
+                    WindowEvent(WindowEvent.RELEASE_BUTTON_START)
+                )
             elif c == "o":
                 self.events.append(WindowEvent(WindowEvent.SCREENSHOT_RECORD))
         elif c == "a":
@@ -131,8 +132,7 @@ class WindowOpenGL(PyBoyWindowPlugin):
         elif c == " ":
             self.events.append(WindowEvent(WindowEvent.PRESS_SPEED_UP))
         elif c == "i":
-            self.events.append(WindowEvent(
-                WindowEvent.SCREEN_RECORDING_TOGGLE))
+            self.events.append(WindowEvent(WindowEvent.SCREEN_RECORDING_TOGGLE))
         elif c == chr(8):
             self.events.append(WindowEvent(WindowEvent.PRESS_BUTTON_SELECT))
         elif c == chr(13):
@@ -156,7 +156,8 @@ class WindowOpenGL(PyBoyWindowPlugin):
                 return True
             else:
                 logger.error(
-                    "Missing depencency \"PyOpenGL\". OpenGL window disabled")
+                    'Missing depencency "PyOpenGL". OpenGL window disabled'
+                )
         return False
 
     def post_tick(self):

@@ -20,7 +20,6 @@ CPU_FREQ = 4213440  # hz
 
 
 class Sound:
-
     def __init__(self, enabled):
         self.enabled = enabled and (sdl2 is not None)
         if self.enabled:
@@ -30,8 +29,9 @@ class Sound:
             # Open audio device
             spec_want = sdl2.SDL_AudioSpec(32768, sdl2.AUDIO_S8, 2, 64)
             spec_have = sdl2.SDL_AudioSpec(0, 0, 0, 0)
-            self.device = sdl2.SDL_OpenAudioDevice(None, 0, spec_want,
-                                                   spec_have, 0)
+            self.device = sdl2.SDL_OpenAudioDevice(
+                None, 0, spec_want, spec_have, 0
+            )
 
             # Start playback (move out of __init__ if needed, maybe for headless)
             sdl2.SDL_PauseAudioDevice(self.device, 0)
@@ -73,30 +73,39 @@ class Sound:
                 return self.wavechannel.getreg(offset % 5)
             elif i == 3:
                 return self.noisechannel.getreg(offset % 5)
-        elif offset == 20:  # Control register NR50: Vin enable and volume -- not implemented
+        elif (
+            offset == 20
+        ):  # Control register NR50: Vin enable and volume -- not implemented
             return 0
-        elif offset == 21:  # Control register NR51: Channel stereo enable/panning
-            return ((0x80 if self.leftnoise else 0) |
-                    (0x40 if self.leftwave else 0) |
-                    (0x20 if self.lefttone else 0) |
-                    (0x10 if self.leftsweep else 0) |
-                    (0x08 if self.rightnoise else 0) |
-                    (0x04 if self.rightwave else 0) |
-                    (0x02 if self.righttone else 0) |
-                    (0x01 if self.rightsweep else 0))
+        elif (
+            offset == 21
+        ):  # Control register NR51: Channel stereo enable/panning
+            return (
+                (0x80 if self.leftnoise else 0)
+                | (0x40 if self.leftwave else 0)
+                | (0x20 if self.lefttone else 0)
+                | (0x10 if self.leftsweep else 0)
+                | (0x08 if self.rightnoise else 0)
+                | (0x04 if self.rightwave else 0)
+                | (0x02 if self.righttone else 0)
+                | (0x01 if self.rightsweep else 0)
+            )
         elif offset == 22:  # Control register NR52: Sound/channel enable
-            return 0x70 | ((0x80 if self.poweron else 0) |
-                           (0x08 if self.noisechannel.enable else 0) |
-                           (0x04 if self.wavechannel.enable else 0) |
-                           (0x02 if self.tonechannel.enable else 0) |
-                           (0x01 if self.sweepchannel.enable else 0))
+            return 0x70 | (
+                (0x80 if self.poweron else 0)
+                | (0x08 if self.noisechannel.enable else 0)
+                | (0x04 if self.wavechannel.enable else 0)
+                | (0x02 if self.tonechannel.enable else 0)
+                | (0x01 if self.sweepchannel.enable else 0)
+            )
         elif offset < 32:  # Unused registers, read as 0xFF
             return 0xFF
         elif offset < 48:  # Wave Table
             return self.wavechannel.getwavebyte(offset - 32)
         else:
             raise IndexError(
-                f"Attempted to read register {offset} in sound memory")
+                f"Attempted to read register {offset} in sound memory"
+            )
 
     def set(self, offset, value):
         self.sync()
@@ -110,9 +119,13 @@ class Sound:
                 self.wavechannel.setreg(offset % 5, value)
             elif i == 3:
                 self.noisechannel.setreg(offset % 5, value)
-        elif offset == 20 and self.poweron:  # Control register NR50: Vin enable and volume -- not implemented
+        elif (
+            offset == 20 and self.poweron
+        ):  # Control register NR50: Vin enable and volume -- not implemented
             return
-        elif offset == 21 and self.poweron:  # Control register NR51: Channel stereo enable/panning
+        elif (
+            offset == 21 and self.poweron
+        ):  # Control register NR51: Channel stereo enable/panning
             return self.channel_stereo_set(value)
         elif offset == 22:  # Control register NR52: Sound on/off
             if value & 0x80 == 0:  # Sound power off
@@ -128,7 +141,8 @@ class Sound:
             self.wavechannel.setwavebyte(offset - 32, value)
         else:
             raise IndexError(
-                f"Attempted to write register {offset} in sound memory")
+                f"Attempted to write register {offset} in sound memory"
+            )
 
     def channel_stereo_set(self, value):
         self.leftnoise = value & 0x80
@@ -152,16 +166,18 @@ class Sound:
                 self.wavechannel.run(self.sampleclocks)
                 self.noisechannel.run(self.sampleclocks)
                 sample = (
-                    (self.sweepchannel.sample() if self.leftsweep else 0) +
-                    (self.tonechannel.sample() if self.lefttone else 0) +
-                    (self.wavechannel.sample() if self.leftwave else 0) +
-                    (self.noisechannel.sample() if self.leftnoise else 0))
+                    (self.sweepchannel.sample() if self.leftsweep else 0)
+                    + (self.tonechannel.sample() if self.lefttone else 0)
+                    + (self.wavechannel.sample() if self.leftwave else 0)
+                    + (self.noisechannel.sample() if self.leftnoise else 0)
+                )
                 self.audiobuffer[2 * i] = min(max(sample, 0), 127)
                 sample = (
-                    (self.sweepchannel.sample() if self.rightsweep else 0) +
-                    (self.tonechannel.sample() if self.righttone else 0) +
-                    (self.wavechannel.sample() if self.rightwave else 0) +
-                    (self.noisechannel.sample() if self.rightnoise else 0))
+                    (self.sweepchannel.sample() if self.rightsweep else 0)
+                    + (self.tonechannel.sample() if self.righttone else 0)
+                    + (self.wavechannel.sample() if self.rightwave else 0)
+                    + (self.noisechannel.sample() if self.rightnoise else 0)
+                )
                 self.audiobuffer[2 * i + 1] = min(max(sample, 0), 127)
                 self.clock -= self.sampleclocks
             else:
@@ -172,8 +188,8 @@ class Sound:
             # Clear queue, if we are behind
             queued_time = sdl2.SDL_GetQueuedAudioSize(self.device)
             samples_per_frame = (
-                self.sample_rate /
-                60) * 2  # Data of 1 frame's worth (60) in stereo (2)
+                self.sample_rate / 60
+            ) * 2  # Data of 1 frame's worth (60) in stereo (2)
             if queued_time > samples_per_frame * SOUND_DESYNC_THRESHOLD:
                 sdl2.SDL_ClearQueuedAudio(self.device)
 
@@ -201,7 +217,7 @@ class ToneChannel:
             [0, 0, 0, 0, 0, 0, 0, 1],  # 12.5% Duty cycle square
             [1, 0, 0, 0, 0, 0, 0, 1],  # 25%
             [1, 0, 0, 0, 0, 1, 1, 1],  # 50%
-            [0, 1, 1, 1, 1, 1, 1, 0]
+            [0, 1, 1, 1, 1, 1, 1, 0],
         ]  # 75% (25% inverted)
 
         # Register values (abbreviated to keep track of what's external)
@@ -223,9 +239,15 @@ class ToneChannel:
 
         # Internal values
         self.enable = False  # Enable flag, turned on by trigger bit and off by length timer
-        self.lengthtimer = 64  # Length timer, counts down to disable channel automatically
-        self.periodtimer = 0  # Period timer, counts down to signal change in wave frame
-        self.envelopetimer = 0  # Volume envelope timer, counts down to signal change in volume
+        self.lengthtimer = (
+            64  # Length timer, counts down to disable channel automatically
+        )
+        self.periodtimer = (
+            0  # Period timer, counts down to signal change in wave frame
+        )
+        self.envelopetimer = (
+            0  # Volume envelope timer, counts down to signal change in volume
+        )
         self.period = 4  # Calculated copy of period, 4 * (2048 - sndper)
         self.waveframe = 0  # Wave frame index into wave table entries
         # Frame sequencer timer, underflows to signal change in frame sequences
@@ -262,16 +284,16 @@ class ToneChannel:
             if self.envini == 0 and self.envdir == 0:
                 self.enable = False
         elif reg == 3:
-            self.sndper = (self.sndper
-                           & 0x700) + val  # Is this ever written solo?
+            self.sndper = (
+                self.sndper & 0x700
+            ) + val  # Is this ever written solo?
             self.period = 4 * (0x800 - self.sndper)
         elif reg == 4:
             self.uselen = (val >> 6) & 0x01
             self.sndper = ((val << 8) & 0x0700) + (self.sndper & 0xFF)
             self.period = 4 * (0x800 - self.sndper)
             if val & 0x80:
-                self.trigger(
-                )  # Sync is called first in Sound.set so it's okay to trigger immediately
+                self.trigger()  # Sync is called first in Sound.set so it's okay to trigger immediately
         else:
             raise IndexError(f"Attempt to write register {reg} in ToneChannel")
 
@@ -313,8 +335,11 @@ class ToneChannel:
                 # Note that setting envelopetimer to 0 disables it
 
     def sample(self):
-        return self.volume * self.wavetables[self.wavsel][
-            self.waveframe] if self.enable else 0
+        return (
+            self.volume * self.wavetables[self.wavsel][self.waveframe]
+            if self.enable
+            else 0
+        )
 
     def trigger(self):
         self.lengthtimer = self.lengthtimer or 64
@@ -330,7 +355,6 @@ class ToneChannel:
 
 
 class SweepChannel(ToneChannel):
-
     def __init__(self):
         ToneChannel.__init__(self)
 
@@ -342,7 +366,9 @@ class SweepChannel(ToneChannel):
         # Internal Values
         self.sweeptimer = 0  # Sweep timer, counts down to shift pitch
         self.sweepenable = False  # Internal sweep enable flag
-        self.shadow = 0  # Shadow copy of period register for ignoring writes to sndper
+        self.shadow = (
+            0  # Shadow copy of period register for ignoring writes to sndper
+        )
 
     def getreg(self, reg):
         if reg == 0:
@@ -411,8 +437,12 @@ class WaveChannel:
 
         # Internal values
         self.enable = False  # Enable flag, turned on by trigger bit and off by length timer
-        self.lengthtimer = 256  # Length timer, counts down to disable channel automatically
-        self.periodtimer = 0  # Period timer, counts down to signal change in wave frame
+        self.lengthtimer = (
+            256  # Length timer, counts down to disable channel automatically
+        )
+        self.periodtimer = (
+            0  # Period timer, counts down to signal change in wave frame
+        )
         self.period = 4  # Calculated copy of period, 4 * (2048 - sndper)
         self.waveframe = 0  # Wave frame index into wave table entries
         # Frame sequencer timer, underflows to signal change in frame sequences
@@ -448,16 +478,16 @@ class WaveChannel:
             self.volreg = val >> 5 & 0x03
             self.volumeshift = self.volreg - 1 if self.volreg > 0 else 4
         elif reg == 3:
-            self.sndper = (self.sndper
-                           & 0x700) + val  # Is this ever written solo?
+            self.sndper = (
+                self.sndper & 0x700
+            ) + val  # Is this ever written solo?
             self.period = 2 * (0x800 - self.sndper)
         elif reg == 4:
             self.uselen = val >> 6 & 0x01
             self.sndper = (val << 8 & 0x0700) + (self.sndper & 0xFF)
             self.period = 2 * (0x800 - self.sndper)
             if val & 0x80:
-                self.trigger(
-                )  # Sync is called first in Sound.set so it's okay to trigger immediately
+                self.trigger()  # Sync is called first in Sound.set so it's okay to trigger immediately
         else:
             raise IndexError(f"Attempt to write register {reg} in WaveChannel")
 
@@ -498,8 +528,11 @@ class WaveChannel:
 
     def sample(self):
         if self.enable and self.dacpow:
-            sample = self.wavetable[self.waveframe // 2] >> (
-                0 if self.waveframe % 2 else 4) & 0x0F
+            sample = (
+                self.wavetable[self.waveframe // 2]
+                >> (0 if self.waveframe % 2 else 4)
+                & 0x0F
+            )
             return sample >> self.volumeshift
         else:
             return 0
@@ -534,12 +567,20 @@ class NoiseChannel:
 
         # Internal values
         self.enable = False  # Enable flag, turned on by trigger bit and off by length timer
-        self.lengthtimer = 64  # Length timer, counts down to disable channel automatically
-        self.periodtimer = 0  # Period timer, counts down to signal change in wave frame
-        self.envelopetimer = 0  # Volume envelope timer, counts down to signal change in volume
+        self.lengthtimer = (
+            64  # Length timer, counts down to disable channel automatically
+        )
+        self.periodtimer = (
+            0  # Period timer, counts down to signal change in wave frame
+        )
+        self.envelopetimer = (
+            0  # Volume envelope timer, counts down to signal change in volume
+        )
         self.period = 8  # Calculated copy of period, 8 << 0
         self.shiftregister = 1  # Internal shift register value
-        self.lfsrfeed = 0x4000  # Bit mask for inserting feedback in shift register
+        self.lfsrfeed = (
+            0x4000  # Bit mask for inserting feedback in shift register
+        )
         # Frame sequencer timer, underflows to signal change in frame sequences
         self.frametimer = 0x2000
         # Frame sequencer value, generates clocks for length/envelope/(sweep)
@@ -581,8 +622,7 @@ class NoiseChannel:
         elif reg == 4:
             self.uselen = val >> 6 & 0x01
             if val & 0x80:
-                self.trigger(
-                )  # Sync is called first in Sound.set so it's okay to trigger immediately
+                self.trigger()  # Sync is called first in Sound.set so it's okay to trigger immediately
         else:
             raise IndexError(f"Attempt to write register {reg} in ToneChannel")
 

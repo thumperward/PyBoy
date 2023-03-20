@@ -17,9 +17,16 @@ logger = logging.getLogger(__name__)
 
 
 class BaseMBC:
-
-    def __init__(self, filename, rombanks, external_ram_count, carttype, sram,
-                 battery, rtc_enabled):
+    def __init__(
+        self,
+        filename,
+        rombanks,
+        external_ram_count,
+        carttype,
+        sram,
+        battery,
+        rtc_enabled,
+    ):
         self.filename = f"{filename}.ram"
         self.rombanks = rombanks
         self.carttype = carttype
@@ -79,8 +86,9 @@ class BaseMBC:
             logger.warning(f"Saving RAM is not supported on {self.carttype}")
             return
 
-        for bank, byte in itertools.product(range(self.external_ram_count),
-                                            range(8 * 1024)):
+        for bank, byte in itertools.product(
+            range(self.external_ram_count), range(8 * 1024)
+        ):
             f.write(self.rambanks[bank][byte])
 
         logger.debug("RAM saved.")
@@ -90,8 +98,9 @@ class BaseMBC:
             logger.warning(f"Loading RAM is not supported on {self.carttype}")
             return
 
-        for bank, byte in itertools.product(range(self.external_ram_count),
-                                            range(8 * 1024)):
+        for bank, byte in itertools.product(
+            range(self.external_ram_count), range(8 * 1024)
+        ):
             self.rambanks[bank][byte] = f.read()
 
         logger.debug("RAM loaded.")
@@ -107,8 +116,9 @@ class BaseMBC:
         self.rambanks = [array.array("B", [0] * (8 * 1024)) for _ in range(16)]
 
     def getgamename(self, rombanks):
-        return "".join([chr(x)
-                        for x in rombanks[0][0x0134:0x0142]]).split("\0")[0]
+        return "".join([chr(x) for x in rombanks[0][0x0134:0x0142]]).split(
+            "\0"
+        )[0]
 
     def setitem(self, address, value):
         raise OSError("Cannot set item in MBC")
@@ -126,8 +136,9 @@ class BaseMBC:
         if 0x0000 <= address < 0x4000:
             return self.rombanks[0][address]
         elif 0x4000 <= address < 0x8000:
-            return self.rombanks[self.rombank_selected %
-                                 len(self.rombanks)][address - 0x4000]
+            return self.rombanks[self.rombank_selected % len(self.rombanks)][
+                address - 0x4000
+            ]
         elif 0xA000 <= address < 0xC000:
             if not self.rambank_initialized:
                 logger.error(f"RAM banks not initialized: {hex(address)}")
@@ -138,44 +149,49 @@ class BaseMBC:
             if self.rtc_enabled and 0x08 <= self.rambank_selected <= 0x0C:
                 return self.rtc.getregister(self.rambank_selected)
             else:
-                return self.rambanks[self.rambank_selected %
-                                     self.external_ram_count][address - 0xA000]
+                return self.rambanks[
+                    self.rambank_selected % self.external_ram_count
+                ][address - 0xA000]
         else:
             logger.error(f"Reading address invalid: {address}")
 
     def __repr__(self):
-        return "\n".join([
-            "Cartridge:",
-            f"Filename: {self.filename}",
-            f"Game name: {self.gamename}",
-            f"GB Color: {self.ROMBanks[0][323] == 128}",
-            f"Cartridge type: {hex(self.cartType)}",
-            f"Number of ROM banks: {self.external_rom_count}",
-            f"Active ROM bank: {self.rombank_selected}",
-            f"Number of RAM banks: {len(self.rambanks)}",
-            f"Active RAM bank: {self.rambank_selected}",
-            f"Battery: {self.battery}",
-            f"RTC: {self.rtc}",
-        ])
+        return "\n".join(
+            [
+                "Cartridge:",
+                f"Filename: {self.filename}",
+                f"Game name: {self.gamename}",
+                f"GB Color: {self.ROMBanks[0][323] == 128}",
+                f"Cartridge type: {hex(self.cartType)}",
+                f"Number of ROM banks: {self.external_rom_count}",
+                f"Active ROM bank: {self.rombank_selected}",
+                f"Number of RAM banks: {len(self.rambanks)}",
+                f"Active RAM bank: {self.rambank_selected}",
+                f"Battery: {self.battery}",
+                f"RTC: {self.rtc}",
+            ]
+        )
 
 
 class ROMOnly(BaseMBC):
-
     def setitem(self, address, value):
         if 0x2000 <= address < 0x4000:
             if value == 0:
                 value = 1
-            self.rombank_selected = (value & 0b1)
+            self.rombank_selected = value & 0b1
             logger.debug("Switching bank 0x%0.4x, 0x%0.2x" % (address, value))
         elif 0xA000 <= address < 0xC000:
             if self.rambanks is None:
                 from . import EXTERNAL_RAM_TABLE
+
                 logger.warning(
                     "Game tries to set value 0x%0.2x at RAM address 0x%0.4x, but "
                     "RAM banks are not initialized. Initializing %d RAM banks as "
-                    "precaution" % (value, address, EXTERNAL_RAM_TABLE[0x02]))
+                    "precaution" % (value, address, EXTERNAL_RAM_TABLE[0x02])
+                )
                 self.init_rambanks(EXTERNAL_RAM_TABLE[0x02])
             self.rambanks[self.rambank_selected][address - 0xA000] = value
         else:
-            logger.debug("Unexpected write to 0x%0.4x, value: 0x%0.2x" %
-                         (address, value))
+            logger.debug(
+                "Unexpected write to 0x%0.4x, value: 0x%0.2x" % (address, value)
+            )

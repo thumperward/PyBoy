@@ -30,17 +30,22 @@ RESET_REPLAYS = False
 
 def verify_screen_image_np(pyboy, saved_array):
     match = np.all(
-        np.frombuffer(saved_array, dtype=np.uint8).reshape(144, 160, 3) ==
-        pyboy.botsupport_manager().screen().screen_ndarray())
+        np.frombuffer(saved_array, dtype=np.uint8).reshape(144, 160, 3)
+        == pyboy.botsupport_manager().screen().screen_ndarray()
+    )
     if not match and not os.environ.get("TEST_CI"):
         from PIL import Image
+
         original = Image.frombytes(
-            "RGB", (160, 144),
-            np.frombuffer(saved_array, dtype=np.uint8).reshape(144, 160, 3))
+            "RGB",
+            (160, 144),
+            np.frombuffer(saved_array, dtype=np.uint8).reshape(144, 160, 3),
+        )
         original.show()
         new = pyboy.botsupport_manager().screen().screen_image()
         new.show()
         import PIL.ImageChops
+
         PIL.ImageChops.difference(original, new).show()
 
     assert match
@@ -58,8 +63,9 @@ def move_gif(game, dest):
     record_dir = "recordings"
     for _ in range(10):
         try:
-            gif = sorted(filter(lambda x: game in x,
-                                os.listdir(record_dir)))[-1]
+            gif = sorted(filter(lambda x: game in x, os.listdir(record_dir)))[
+                -1
+            ]
             os.replace(f"{record_dir}/{gif}", dest)
             break
         except Exception:
@@ -86,11 +92,15 @@ def replay(
 ):
     with open(replay, "rb") as f:
         recorded_input, b64_romhash, b64_state = json.loads(
-            zlib.decompress(f.read()).decode("ascii"))
+            zlib.decompress(f.read()).decode("ascii")
+        )
 
     verify_file_hash(ROM, b64_romhash)
-    state_data = io.BytesIO(base64.b64decode(
-        b64_state.encode("utf8"))) if b64_state is not None else None
+    state_data = (
+        io.BytesIO(base64.b64decode(b64_state.encode("utf8")))
+        if b64_state is not None
+        else None
+    )
 
     pyboy = PyBoy(
         ROM,
@@ -100,8 +110,9 @@ def replay(
         rewind=rewind,
         randomize=randomize,
         cgb=cgb,
-        record_input=(RESET_REPLAYS
-                      and window in ["SDL2", "headless", "OpenGL"]),
+        record_input=(
+            RESET_REPLAYS and window in ["SDL2", "headless", "OpenGL"]
+        ),
     )
     pyboy.set_emulation_speed(0)
     if state_data is not None:
@@ -113,10 +124,14 @@ def replay(
     # Filters out the blacklisted events
     recorded_input = list(
         map(
-            lambda event_tuple:
-            (event_tuple[0],
-             list(filter(lambda x: x not in event_filter, event_tuple[1])),
-             event_tuple[2]), recorded_input))
+            lambda event_tuple: (
+                event_tuple[0],
+                list(filter(lambda x: x not in event_filter, event_tuple[1])),
+                event_tuple[2],
+            ),
+            recorded_input,
+        )
+    )
 
     frame_count = 0
     next_event = recorded_input.pop(0)
@@ -131,9 +146,12 @@ def replay(
             for e in next_event[1]:
                 pyboy.send_input(e)
 
-                if verify and not overwrite and frame_count > 1:  # First frame or two might be wrong on old statefiles
+                if (
+                    verify and not overwrite and frame_count > 1
+                ):  # First frame or two might be wrong on old statefiles
                     verify_screen_image_np(
-                        pyboy, base64.b64decode(next_event[2].encode("utf8")))
+                        pyboy, base64.b64decode(next_event[2].encode("utf8"))
+                    )
             next_event = recorded_input.pop(0)
         frame_count += 1
         # if frame_count % 30 == 0:
@@ -160,8 +178,14 @@ def replay(
             f.write(
                 zlib.compress(
                     json.dumps(
-                        (pyboy.plugin_manager.record_replay.recorded_input,
-                         b64_romhash, b64_state)).encode()))
+                        (
+                            pyboy.plugin_manager.record_replay.recorded_input,
+                            b64_romhash,
+                            b64_state,
+                        )
+                    ).encode()
+                )
+            )
 
     pyboy.stop(save=False)
 

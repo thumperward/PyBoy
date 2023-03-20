@@ -18,7 +18,6 @@ logger = logging.getLogger(__name__)
 
 
 class Motherboard:
-
     def __init__(
         self,
         gamerom_file,
@@ -40,7 +39,8 @@ class Motherboard:
         if cgb is None:
             cgb = self.cartridge.cgb
             logger.debug(
-                f'Cartridge type auto-detected to {"CGB" if cgb else "DMG"}')
+                f'Cartridge type auto-detected to {"CGB" if cgb else "DMG"}'
+            )
 
         self.timer = timer.Timer()
         self.interaction = interaction.Interaction()
@@ -79,8 +79,9 @@ class Motherboard:
         self.serialbuffer = ""
 
         self.breakpoints_enabled = False  # breakpoints_enabled
-        self.breakpoints_list = [
-        ]  # [(0, 0x150), (0, 0x0040), (0, 0x0048), (0, 0x0050)]
+        self.breakpoints_list = (
+            []
+        )  # [(0, 0x150), (0, 0x0040), (0, 0x0048), (0, 0x0050)]
         self.breakpoint_latch = 0
 
     def switch_speed(self):
@@ -184,17 +185,30 @@ class Motherboard:
 
         return any(
             # Breakpoint hit
-            self.cpu.PC == pc and
-            ((pc < 0x4000 and bank == 0 and not self.bootrom_enabled) or
-             (0x4000 <= pc < 0x8000 and self.cartridge.rombank_selected == bank
-              ) or (0xA000 <= pc < 0xC000 and self.cartridge.rambank_selected
-                    == bank) or (0xC000 <= pc <= 0xFFFF and bank == -1) or
-             (pc < 0x100 and bank == -1 and self.bootrom_enabled))
-            for bank, pc in self.breakpoints_list)
+            self.cpu.PC == pc
+            and (
+                (pc < 0x4000 and bank == 0 and not self.bootrom_enabled)
+                or (
+                    0x4000 <= pc < 0x8000
+                    and self.cartridge.rombank_selected == bank
+                )
+                or (
+                    0xA000 <= pc < 0xC000
+                    and self.cartridge.rambank_selected == bank
+                )
+                or (0xC000 <= pc <= 0xFFFF and bank == -1)
+                or (pc < 0x100 and bank == -1 and self.bootrom_enabled)
+            )
+            for bank, pc in self.breakpoints_list
+        )
 
     def tick(self):
         while self.lcd.processing_frame():
-            if self.cgb and self.hdma.transfer_active and self.lcd._STAT._mode & 0b11 == 0:
+            if (
+                self.cgb
+                and self.hdma.transfer_active
+                and self.lcd._STAT._mode & 0b11 == 0
+            ):
                 cycles = self.hdma.tick(self)
             else:
                 cycles = self.cpu.tick()
@@ -216,7 +230,8 @@ class Motherboard:
                     self.lcd.cycles_to_interrupt(),
                     self.timer.cycles_to_interrupt(),
                     # self.serial.cycles_to_interrupt(),
-                    mode0_cycles)
+                    mode0_cycles,
+                )
 
                 # Profiling
                 self.cpu.add_opcode_hit(0x76, cycles // 4)
@@ -225,7 +240,9 @@ class Motherboard:
             # https://gbdev.io/pandocs/CGB_Registers.html#bit-7--0---general-purpose-dma
 
             # TODO: Unify interface
-            self.sound.clock += cycles // 2 if self.cgb and self.double_speed else cycles
+            self.sound.clock += (
+                cycles // 2 if self.cgb and self.double_speed else cycles
+            )
             if self.timer.tick(cycles):
                 self.cpu.set_interruptflag(INTR_TIMER)
 
@@ -235,8 +252,11 @@ class Motherboard:
             # Escape halt. This happens when pressing 'return' in the debugger. It will make us skip breaking on halt
             # for every cycle, but do break on the next instruction -- even in an interrupt.
             escape_halt = self.cpu.halted and self.breakpoint_latch == 1
-            if self.breakpoints_enabled and (
-                    not escape_halt) and self.breakpoint_reached():
+            if (
+                self.breakpoints_enabled
+                and (not escape_halt)
+                and self.breakpoint_reached()
+            ):
                 return True
 
         # TODO: Move SDL2 sync to plugin
@@ -249,8 +269,9 @@ class Motherboard:
     #
     def getitem(self, i):
         if 0x0000 <= i < 0x4000:  # 16kB ROM bank #0
-            if self.bootrom_enabled and (i <= 0xFF or
-                                         (self.cgb and 0x200 <= i < 0x900)):
+            if self.bootrom_enabled and (
+                i <= 0xFF or (self.cgb and 0x200 <= i < 0x900)
+            ):
                 return self.bootrom.getitem(i)
             else:
                 return self.cartridge.getitem(i)
@@ -355,11 +376,13 @@ class Motherboard:
             return self.cpu.interrupts_enabled_register
         else:
             raise IndexError(
-                f"Memory access violation. Tried to read: {hex(i)}")
+                f"Memory access violation. Tried to read: {hex(i)}"
+            )
 
     def setitem(self, i, value):
-        assert (0 <= value < 0x100
-                ), f"Memory write error! Can't write {hex(value)} to {hex(i)}"
+        assert (
+            0 <= value < 0x100
+        ), f"Memory write error! Can't write {hex(value)} to {hex(i)}"
 
         if 0x0000 <= i < 0x4000:  # 16kB ROM bank #0
             # Doesn't change the data. This is for MBC commands
@@ -373,14 +396,16 @@ class Motherboard:
                 if i < 0x9800:  # Is within tile data -- not tile maps
                     # Mask out the byte of the tile
                     self.lcd.renderer.invalidate_tile(
-                        ((i & 0xFFF0) - 0x8000) // 16, 0)
+                        ((i & 0xFFF0) - 0x8000) // 16, 0
+                    )
                     # self.lcd.renderer.tiles_changed0.add(i & 0xFFF0)
             else:
                 self.lcd.VRAM1[i - 0x8000] = value
                 if i < 0x9800:  # Is within tile data -- not tile maps
                     # Mask out the byte of the tile
                     self.lcd.renderer.invalidate_tile(
-                        ((i & 0xFFF0) - 0x8000) // 16, 1)
+                        ((i & 0xFFF0) - 0x8000) // 16, 1
+                    )
                     # self.lcd.renderer.tiles_changed1.add(i & 0xFFF0)
         elif 0xA000 <= i < 0xC000:  # 8kB switchable RAM bank
             self.cartridge.setitem(i, value)
@@ -413,7 +438,9 @@ class Motherboard:
             elif i == 0xFF06:
                 self.timer.TMA = value
             elif i == 0xFF07:
-                self.timer.TAC = value & 0b111  # TODO: Move logic to Timer class
+                self.timer.TAC = (
+                    value & 0b111
+                )  # TODO: Move logic to Timer class
             elif i == 0xFF0F:
                 self.cpu.interrupts_flag_register = value
             elif 0xFF10 <= i < 0xFF40:
@@ -501,7 +528,6 @@ class Motherboard:
 
 
 class HDMA:
-
     def __init__(self):
         self.hdma1 = 0
         self.hdma2 = 0
@@ -556,8 +582,9 @@ class HDMA:
             if transfer_type == 0:
                 # General purpose DMA transfer
                 for i in range(bytes_to_transfer):
-                    mb.setitem((dst + i) & 0xFFFF,
-                               mb.getitem((src + i) & 0xFFFF))
+                    mb.setitem(
+                        (dst + i) & 0xFFFF, mb.getitem((src + i) & 0xFFFF)
+                    )
                 # self.curr_dst += bytes_to_transfer
                 # self.curr_src += bytes_to_transfer
 

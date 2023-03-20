@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 try:
     from cython import compiled
+
     cythonmode = compiled
 except ImportError:
     cythonmode = False
@@ -23,10 +24,9 @@ FILL_VALUE = 123
 
 
 class Rewind(PyBoyPlugin):
-    argv = [("--rewind", {
-        "action": "store_true",
-        "help": "Enable rewind function"
-    })]
+    argv = [
+        ("--rewind", {"action": "store_true", "help": "Enable rewind function"})
+    ]
 
     def __init__(self, *args):
         super().__init__(*args)
@@ -41,7 +41,8 @@ class Rewind(PyBoyPlugin):
 
     def window_title(self):
         return " Rewind: %0.2fKB/s" % (
-            (self.rewind_buffer.avg_section_size * 60) / 1024)
+            (self.rewind_buffer.avg_section_size * 60) / 1024
+        )
 
     def handle_events(self, events):
         old_rewind_speed = self.rewind_speed
@@ -88,7 +89,6 @@ class Rewind(PyBoyPlugin):
 
 
 class FixedAllocBuffers(IntIOInterface):
-
     def __init__(self):
         self.buffer = _malloc(FIXED_BUFFER_SIZE)  # NOQA: F821
         for n in range(FIXED_BUFFER_SIZE):
@@ -113,11 +113,13 @@ class FixedAllocBuffers(IntIOInterface):
         # print(self.section_pointer-self.sections[-1]) # Find the actual length of the state in memory
         self.sections.append(self.section_pointer)
         self.current_section += 1
-        section_size = (self.section_head - self.section_tail +
-                        FIXED_BUFFER_SIZE) % FIXED_BUFFER_SIZE
+        section_size = (
+            self.section_head - self.section_tail + FIXED_BUFFER_SIZE
+        ) % FIXED_BUFFER_SIZE
         # Exponentially decaying moving average
-        self.avg_section_size = (0.9 * self.avg_section_size) + (0.1 *
-                                                                 section_size)
+        self.avg_section_size = (0.9 * self.avg_section_size) + (
+            0.1 * section_size
+        )
         self.section_tail = self.section_pointer
 
     def write(self, val):
@@ -144,7 +146,7 @@ class FixedAllocBuffers(IntIOInterface):
             raise OSError(
                 "Section wasn't read to finish. This would likely be unintentional"
             )
-        self.sections = self.sections[:self.current_section + 1]
+        self.sections = self.sections[: self.current_section + 1]
 
     def seek_frame(self, frames):
         # TODO: Move for loop to Delta version
@@ -175,7 +177,6 @@ class FixedAllocBuffers(IntIOInterface):
 
 
 class CompressedFixedAllocBuffers(FixedAllocBuffers):
-
     def __init__(self):
         FixedAllocBuffers.__init__(self)
         self.zeros = 0
@@ -189,7 +190,7 @@ class CompressedFixedAllocBuffers(FixedAllocBuffers):
                 FixedAllocBuffers.write(self, 0)
                 FixedAllocBuffers.write(self, 0xFF)
 
-            if (rest != 0):
+            if rest != 0:
                 FixedAllocBuffers.write(self, 0)
                 FixedAllocBuffers.write(self, rest)
 
@@ -308,4 +309,7 @@ def _malloc(n):
 
 def _free(_):
     pass
-""", globals(), locals())
+""",
+        globals(),
+        locals(),
+    )

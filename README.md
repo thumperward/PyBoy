@@ -23,6 +23,7 @@ If more features are needed, or if you find a bug, don't hesitate to make an
 issue here on GitHub, or write on our [Discord channel](https://discord.gg/Zrf2nyH).
 
 ![Pokemon in-game](docs/assets/1.gif)
+
 __If you are looking to make a bot or AI__, you can find all the external
 components in the [PyBoy
 Documentation](https://baekalfen.github.io/PyBoy/index.html).

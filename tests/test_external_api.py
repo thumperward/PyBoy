@@ -148,21 +148,28 @@ def test_screen_buffer_and_image(tetris_rom, boot_rom):
         pyboy.tick()
 
     assert pyboy.botsupport_manager().screen().raw_screen_buffer_dims() == (
-        144, 160)
-    assert pyboy.botsupport_manager().screen().raw_screen_buffer_format(
-    ) == cformat
+        144,
+        160,
+    )
+    assert (
+        pyboy.botsupport_manager().screen().raw_screen_buffer_format()
+        == cformat
+    )
 
     boot_logo_hash = hashlib.sha256()
     boot_logo_hash.update(
-        pyboy.botsupport_manager().screen().raw_screen_buffer())
+        pyboy.botsupport_manager().screen().raw_screen_buffer()
+    )
     assert boot_logo_hash.digest() == boot_logo_hash_predigested
-    assert isinstance(pyboy.botsupport_manager().screen().raw_screen_buffer(),
-                      bytes)
+    assert isinstance(
+        pyboy.botsupport_manager().screen().raw_screen_buffer(), bytes
+    )
 
     # The output of `screen_image` is supposed to be homogeneous, which means a shared hash between versions.
     boot_logo_png_hash_predigested = (
         b"\x1b\xab\x90r^\xfb\x0e\xef\xf1\xdb\xf8\xba\xb6:^\x01"
-        b"\xa4\x0eR&\xda9\xfcg\xf7\x0f|\xba}\x08\xb6$")
+        b"\xa4\x0eR&\xda9\xfcg\xf7\x0f|\xba}\x08\xb6$"
+    )
     boot_logo_png_hash = hashlib.sha256()
     image = pyboy.botsupport_manager().screen().screen_image()
     assert isinstance(image, PIL.Image.Image)
@@ -180,14 +187,17 @@ def test_screen_buffer_and_image(tetris_rom, boot_rom):
     # screen_ndarray
     numpy_hash = hashlib.sha256()
     numpy_array = np.ascontiguousarray(
-        pyboy.botsupport_manager().screen().screen_ndarray())
-    assert isinstance(pyboy.botsupport_manager().screen().screen_ndarray(),
-                      np.ndarray)
+        pyboy.botsupport_manager().screen().screen_ndarray()
+    )
+    assert isinstance(
+        pyboy.botsupport_manager().screen().screen_ndarray(), np.ndarray
+    )
     assert numpy_array.shape == (144, 160, 3)
     numpy_hash.update(numpy_array.tobytes())
     assert numpy_hash.digest() == (
         b"\r\t\x87\x131\xe8\x06\x82\xcaO=\n\x1e\xa2K$"
-        b"\xd6\x8e\x91R( H7\xd8a*B+\xc7\x1f\x19")
+        b"\xd6\x8e\x91R( H7\xd8a*B+\xc7\x1f\x19"
+    )
 
     pyboy.stop(save=False)
 
@@ -195,10 +205,12 @@ def test_screen_buffer_and_image(tetris_rom, boot_rom):
 def test_tetris(tetris_rom):
     NEXT_TETROMINO = 0xC213
 
-    pyboy = PyBoy(tetris_rom,
-                  bootrom_file="pyboy_fast",
-                  window_type="dummy",
-                  game_wrapper=True)
+    pyboy = PyBoy(
+        tetris_rom,
+        bootrom_file="pyboy_fast",
+        window_type="dummy",
+        game_wrapper=True,
+    )
     pyboy.set_emulation_speed(0)
     tetris = pyboy.game_wrapper()
     tetris.set_tetromino("T")
@@ -207,14 +219,14 @@ def test_tetris(tetris_rom):
     tile_map = pyboy.botsupport_manager().tilemap_window()
     state_data = io.BytesIO()
     for frame in range(
-            5282
+        5282
     ):  # Enough frames to get a "Game Over". Otherwise do: `while not pyboy.tick():`
         pyboy.tick()
 
-        assert pyboy.botsupport_manager().screen().tilemap_position() == ((0,
-                                                                           0),
-                                                                          (-7,
-                                                                           0))
+        assert pyboy.botsupport_manager().screen().tilemap_position() == (
+            (0, 0),
+            (-7, 0),
+        )
 
         # Start game. Just press Start and A when the game allows us.
         # The frames are not 100% accurate.
@@ -254,32 +266,35 @@ def test_tetris(tetris_rom):
             # finding the corresponding value in RAM.
 
             if not first_brick and any(
-                    filter(lambda x: x != 303, tile_map[2:12, 17])):
+                filter(lambda x: x != 303, tile_map[2:12, 17])
+            ):
                 first_brick = True
                 print(frame)
                 print("First brick touched the bottom!")
 
                 game_board_matrix = list(tile_map[2:12, :18])
-                assert game_board_matrix == ([
-                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                    [303, 303, 303, 303, 303, 303, 303, 133, 133, 133],
-                    [303, 303, 303, 303, 303, 303, 303, 303, 133, 303]
-                ])
+                assert game_board_matrix == (
+                    [
+                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                        [303, 303, 303, 303, 303, 303, 303, 133, 133, 133],
+                        [303, 303, 303, 303, 303, 303, 303, 303, 133, 303],
+                    ]
+                )
 
                 tile_map.use_tile_objects(True)
 
@@ -289,29 +304,33 @@ def test_tetris(tetris_rom):
                 assert t1 == t2, "Testing __eq__ method of Tile object"
                 assert t1 != t3, "Testing not __eq__ method of Tile object"
 
-                game_board_matrix = [[x.tile_identifier for x in row]
-                                     for row in tile_map[2:12, :18]]
+                game_board_matrix = [
+                    [x.tile_identifier for x in row]
+                    for row in tile_map[2:12, :18]
+                ]
                 tile_map.use_tile_objects(False)
-                assert game_board_matrix == ([
-                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                    [303, 303, 303, 303, 303, 303, 303, 133, 133, 133],
-                    [303, 303, 303, 303, 303, 303, 303, 303, 133, 303]
-                ])
+                assert game_board_matrix == (
+                    [
+                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                        [303, 303, 303, 303, 303, 303, 303, 133, 133, 133],
+                        [303, 303, 303, 303, 303, 303, 303, 303, 133, 303],
+                    ]
+                )
 
             if frame == 1012:
                 assert not first_brick
@@ -323,65 +342,71 @@ def test_tetris(tetris_rom):
                 s2 = pyboy.botsupport_manager().sprite(1)
                 assert s1 == s1
                 assert s1 != s2
-                assert s1.tiles[0] == s2.tiles[
-                    0], "Testing equal tiles of two different sprites"
+                assert (
+                    s1.tiles[0] == s2.tiles[0]
+                ), "Testing equal tiles of two different sprites"
 
                 # Test that both ways of getting identifiers work and provides the same result.
                 all_sprites = [
                     (s.x, s.y, s.tiles[0].tile_identifier, s.on_screen)
-                    for s in
-                    [pyboy.botsupport_manager().sprite(n) for n in range(40)]
+                    for s in [
+                        pyboy.botsupport_manager().sprite(n) for n in range(40)
+                    ]
                 ]
                 all_sprites2 = [
-                    (s.x, s.y, s.tile_identifier, s.on_screen) for s in
-                    [pyboy.botsupport_manager().sprite(n) for n in range(40)]
+                    (s.x, s.y, s.tile_identifier, s.on_screen)
+                    for s in [
+                        pyboy.botsupport_manager().sprite(n) for n in range(40)
+                    ]
                 ]
                 assert all_sprites == all_sprites2
 
                 # Verify data with known reference
                 # pyboy.botsupport_manager().screen().screen_image().show()
-                assert all_sprites == ([
-                    (-8, -16, 0, False),
-                    (-8, -16, 0, False),
-                    (-8, -16, 0, False),
-                    (-8, -16, 0, False),
-                    (72, 128, 133, True),
-                    (80, 128, 133, True),
-                    (88, 128, 133, True),
-                    (80, 136, 133, True),
-                    (120, 112, 133, True),
-                    (128, 112, 133, True),
-                    (136, 112, 133, True),
-                    (128, 120, 133, True),
-                    (-8, -16, 0, False),
-                    (-8, -16, 0, False),
-                    (-8, -16, 0, False),
-                    (-8, -16, 0, False),
-                    (-8, -16, 0, False),
-                    (-8, -16, 0, False),
-                    (-8, -16, 0, False),
-                    (-8, -16, 0, False),
-                    (-8, -16, 0, False),
-                    (-8, -16, 0, False),
-                    (-8, -16, 0, False),
-                    (-8, -16, 0, False),
-                    (-8, -16, 0, False),
-                    (-8, -16, 0, False),
-                    (-8, -16, 0, False),
-                    (-8, -16, 0, False),
-                    (-8, -16, 0, False),
-                    (-8, -16, 0, False),
-                    (-8, -16, 0, False),
-                    (-8, -16, 0, False),
-                    (-8, -16, 0, False),
-                    (-8, -16, 0, False),
-                    (-8, -16, 0, False),
-                    (-8, -16, 0, False),
-                    (-8, -16, 0, False),
-                    (-8, -16, 0, False),
-                    (-8, -16, 0, False),
-                    (-8, -16, 0, False),
-                ])
+                assert all_sprites == (
+                    [
+                        (-8, -16, 0, False),
+                        (-8, -16, 0, False),
+                        (-8, -16, 0, False),
+                        (-8, -16, 0, False),
+                        (72, 128, 133, True),
+                        (80, 128, 133, True),
+                        (88, 128, 133, True),
+                        (80, 136, 133, True),
+                        (120, 112, 133, True),
+                        (128, 112, 133, True),
+                        (136, 112, 133, True),
+                        (128, 120, 133, True),
+                        (-8, -16, 0, False),
+                        (-8, -16, 0, False),
+                        (-8, -16, 0, False),
+                        (-8, -16, 0, False),
+                        (-8, -16, 0, False),
+                        (-8, -16, 0, False),
+                        (-8, -16, 0, False),
+                        (-8, -16, 0, False),
+                        (-8, -16, 0, False),
+                        (-8, -16, 0, False),
+                        (-8, -16, 0, False),
+                        (-8, -16, 0, False),
+                        (-8, -16, 0, False),
+                        (-8, -16, 0, False),
+                        (-8, -16, 0, False),
+                        (-8, -16, 0, False),
+                        (-8, -16, 0, False),
+                        (-8, -16, 0, False),
+                        (-8, -16, 0, False),
+                        (-8, -16, 0, False),
+                        (-8, -16, 0, False),
+                        (-8, -16, 0, False),
+                        (-8, -16, 0, False),
+                        (-8, -16, 0, False),
+                        (-8, -16, 0, False),
+                        (-8, -16, 0, False),
+                        (-8, -16, 0, False),
+                        (-8, -16, 0, False),
+                    ]
+                )
 
                 assert pyboy.get_memory_value(NEXT_TETROMINO) == 24
                 assert tetris.next_tetromino() == "T"
@@ -400,36 +425,41 @@ def test_tetris(tetris_rom):
 
         if frame == 1864:
             game_board_matrix = list(tile_map[2:12, :18])
-            assert game_board_matrix == ([
-                [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                [303, 303, 303, 133, 133, 133, 303, 133, 133, 133],
-                [303, 303, 303, 303, 133, 303, 303, 303, 133, 303]
-            ])
+            assert game_board_matrix == (
+                [
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 133, 133, 133, 303, 133, 133, 133],
+                    [303, 303, 303, 303, 133, 303, 303, 303, 133, 303],
+                ]
+            )
             pre_load_game_board_matrix = game_board_matrix
 
     state_data.seek(
         0
     )  # Reset to the start of the buffer. Otherwise, we call `load_state` at end of file
     tmp_state.seek(0)
-    for _f in [tmp_state, state_data
-               ]:  # Tests both file-written state and in-memory state
+    for _f in [
+        tmp_state,
+        state_data,
+    ]:  # Tests both file-written state and in-memory state
         pyboy.load_state(
-            _f)  # Reverts memory state to before we changed the Tetromino
+            _f
+        )  # Reverts memory state to before we changed the Tetromino
         pyboy.tick()
         for frame in range(1016, 1865):
             pyboy.tick()

@@ -20,11 +20,13 @@ else:
     exit(1)
 
 quiet = "--quiet" in sys.argv
-pyboy = PyBoy(filename,
-              window_type="headless" if quiet else "SDL2",
-              window_scale=3,
-              debug=not quiet,
-              game_wrapper=True)
+pyboy = PyBoy(
+    filename,
+    window_type="headless" if quiet else "SDL2",
+    window_scale=3,
+    debug=not quiet,
+    game_wrapper=True,
+)
 pyboy.set_emulation_speed(0)
 assert pyboy.cartridge_title() == "SUPER MARIOLAN"
 

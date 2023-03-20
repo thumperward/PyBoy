@@ -11,7 +11,9 @@ LOGLEVEL = os.environ.get("PYBOY_LOGLEVEL", "INFO")
 handler = logging.StreamHandler()
 handler.setFormatter(
     logging.Formatter(
-        "%(relativeCreated)-8d %(name)-30s %(levelname)-8s %(message)s"))
+        "%(relativeCreated)-8d %(name)-30s %(levelname)-8s %(message)s"
+    )
+)
 
 logger = logging.getLogger("pyboy")
 logger.setLevel(LOGLEVEL)

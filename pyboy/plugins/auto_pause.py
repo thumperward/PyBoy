@@ -7,10 +7,15 @@ from pyboy.utils import WindowEvent
 
 
 class AutoPause(PyBoyPlugin):
-    argv = [("--autopause", {
-        "action": "store_true",
-        "help": "Enable auto-pausing when window looses focus"
-    })]
+    argv = [
+        (
+            "--autopause",
+            {
+                "action": "store_true",
+                "help": "Enable auto-pausing when window looses focus",
+            },
+        )
+    ]
 
     def handle_events(self, events):
         for event in events:

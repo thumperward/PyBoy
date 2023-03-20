@@ -38,14 +38,14 @@ def test_rtc3test(subtest, rtc3test_file):
     pyboy.tick()
 
     while pyboy.botsupport_manager().tilemap_background()[6:14, 17] != [
-            193,
-            63,
-            27,
-            40,
-            55,
-            56,
-            53,
-            49,
+        193,
+        63,
+        27,
+        40,
+        55,
+        56,
+        53,
+        49,
     ]:
         pyboy.tick()
 
@@ -61,7 +61,8 @@ def test_rtc3test(subtest, rtc3test_file):
             image.show()
             old_image.show()
             diff.show()
-        assert not diff.getbbox(
+        assert (
+            not diff.getbbox()
         ), f"Images are different! {rtc3test_file}_{subtest}"
 
     pyboy.stop(save=False)

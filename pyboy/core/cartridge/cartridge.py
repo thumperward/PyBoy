@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 try:
     from cython import compiled
+
     cythonmode = compiled
 except ImportError:
     cythonmode = False
@@ -34,22 +35,30 @@ def load_cartridge(filename):
     if cartinfo is None:
         raise OSError(f"Catridge type invalid: {carttype}")
 
-    cartdata = (carttype, cartinfo[0].__name__, ", ".join(
-        [x for x, y in zip(["SRAM", "Battery", "RTC"], cartinfo[1:]) if y]))
+    cartdata = (
+        carttype,
+        cartinfo[0].__name__,
+        ", ".join(
+            [x for x, y in zip(["SRAM", "Battery", "RTC"], cartinfo[1:]) if y]
+        ),
+    )
     logger.debug("Cartridge type: 0x%0.2x - %s, %s" % cartdata)
-    logger.debug("Cartridge size: %d ROM banks of 16KB, %s RAM banks of 8KB" %
-                 (len(rombanks), external_ram_count))
+    logger.debug(
+        "Cartridge size: %d ROM banks of 16KB, %s RAM banks of 8KB"
+        % (len(rombanks), external_ram_count)
+    )
     cartmeta = CARTRIDGE_TABLE[carttype]
 
-    return cartmeta[0](filename, rombanks, external_ram_count, carttype,
-                       *cartmeta[1:])
+    return cartmeta[0](
+        filename, rombanks, external_ram_count, carttype, *cartmeta[1:]
+    )
 
 
 def validate_checksum(rombanks):
     x = 0
     for m in range(0x134, 0x14D):
         x = x - rombanks[0][m] - 1
-        x &= 0xff
+        x &= 0xFF
     return rombanks[0][0x14D] == x
 
 
@@ -68,11 +77,11 @@ def load_romfile(filename):
         raise OSError("Bad ROM file size")
 
     if cythonmode:
-        return memoryview(romdata).cast("B",
-                                        shape=(len(romdata) // banksize,
-                                               banksize))
+        return memoryview(romdata).cast(
+            "B", shape=(len(romdata) // banksize, banksize)
+        )
     v = memoryview(romdata)
-    return [v[i:i + banksize] for i in range(0, len(romdata), banksize)]
+    return [v[i : i + banksize] for i in range(0, len(romdata), banksize)]
 
 
 # yapf: disable

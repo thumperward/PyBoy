@@ -13,7 +13,6 @@ from .tile import Tile
 
 
 class Sprite:
-
     def __init__(self, mb, sprite_index):
         """
         This class presents an interface to the sprites held in the OAM data on the Game Boy.
@@ -31,7 +30,9 @@ class Sprite:
         By knowing the tile identifiers of players, enemies, power-ups and so on, you'll be able to search for them
         using `pyboy.botsupport.BotSupportManager.sprite_by_tile_identifier` and feed it to your bot or AI.
         """
-        assert 0 <= sprite_index < SPRITES, f"Sprite index of {sprite_index} is out of range (0-{SPRITES})"
+        assert (
+            0 <= sprite_index < SPRITES
+        ), f"Sprite index of {sprite_index} is out of range (0-{SPRITES})"
         self.mb = mb
         self._offset = sprite_index * 4
 
@@ -159,7 +160,7 @@ class Sprite:
         if sprite_height == 16:
             self.tiles += [Tile(self.mb, self.tile_identifier + 1)]
 
-        self.on_screen = (-sprite_height < self.y < 144 and -8 < self.x < 160)
+        self.on_screen = -sprite_height < self.y < 144 and -8 < self.x < 160
         """
         To disable sprites from being rendered on screen, developers will place the sprite outside the area of the
         screen. This is often a good way to determine if the sprite is inactive.

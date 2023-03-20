@@ -61,7 +61,7 @@ def test_mario_game_over(supermarioland_rom):
     mario.set_lives_left(0)
     pyboy.send_input(WindowEvent.PRESS_ARROW_RIGHT)
     for _ in range(
-            500
+        500
     ):  # Enough to game over correctly, and not long enough it'll work without setting the lives
         pyboy.tick()
         if mario.game_over():
@@ -70,19 +70,20 @@ def test_mario_game_over(supermarioland_rom):
 
 
 @pytest.mark.skipif(
-    is_pypy, reason="This requires gym, which doesn't work on this platform")
+    is_pypy, reason="This requires gym, which doesn't work on this platform"
+)
 class TestOpenAIGym:
-
     def test_observation_type_compressed(self, supermarioland_rom):
-        pyboy = PyBoy(supermarioland_rom,
-                      window_type="dummy",
-                      game_wrapper=True)
+        pyboy = PyBoy(
+            supermarioland_rom, window_type="dummy", game_wrapper=True
+        )
         pyboy.set_emulation_speed(0)
 
         env = pyboy.openai_gym(observation_type="compressed")
         if env is None:
             raise ImportError(
-                "'env' is None. Did you remember to install 'gym'?")
+                "'env' is None. Did you remember to install 'gym'?"
+            )
         observation = env.reset()
 
         expected_observation = np.zeros_like(observation)
@@ -96,15 +97,16 @@ class TestOpenAIGym:
         assert np.all(observation == expected_observation)
 
     def test_observation_type_minimal(self, supermarioland_rom):
-        pyboy = PyBoy(supermarioland_rom,
-                      window_type="dummy",
-                      game_wrapper=True)
+        pyboy = PyBoy(
+            supermarioland_rom, window_type="dummy", game_wrapper=True
+        )
         pyboy.set_emulation_speed(0)
 
         env = pyboy.openai_gym(observation_type="minimal")
         if env is None:
             raise ImportError(
-                "'env' is None. Did you remember to install 'gym'?")
+                "'env' is None. Did you remember to install 'gym'?"
+            )
         observation = env.reset()
 
         expected_observation = np.zeros_like(observation)
@@ -118,18 +120,21 @@ class TestOpenAIGym:
         assert np.all(observation == expected_observation)
 
     def test_start_level(self, supermarioland_rom):
-        pyboy = PyBoy(supermarioland_rom,
-                      window_type="dummy",
-                      game_wrapper=True)
+        pyboy = PyBoy(
+            supermarioland_rom, window_type="dummy", game_wrapper=True
+        )
         pyboy.set_emulation_speed(0)
 
         starting_level = (2, 1)
-        env = pyboy.openai_gym(observation_type="minimal",
-                               action_type="toggle",
-                               world_level=starting_level)
+        env = pyboy.openai_gym(
+            observation_type="minimal",
+            action_type="toggle",
+            world_level=starting_level,
+        )
         if env is None:
             raise ImportError(
-                "'env' is None. Did you remember to install 'gym'?")
+                "'env' is None. Did you remember to install 'gym'?"
+            )
         observation = env.reset()
 
         print(env.game_wrapper.world, starting_level)

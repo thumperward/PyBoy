@@ -10,7 +10,6 @@ STATE_VERSION = 8
 
 
 class IntIOInterface:
-
     def __init__(self, buf):
         pass
 
@@ -36,8 +35,16 @@ class IntIOInterface:
         f = self.read()
         g = self.read()
         h = self.read()
-        return a | (b << 8) | (c << 16) | (d << 24) | (e << 32) | (f << 40) | (
-            g << 48) | (h << 56)
+        return (
+            a
+            | (b << 8)
+            | (c << 16)
+            | (d << 24)
+            | (e << 32)
+            | (f << 40)
+            | (g << 48)
+            | (h << 56)
+        )
 
     def write_32bit(self, value):
         self.write(value & 0xFF)
@@ -262,15 +269,16 @@ class WindowEvent:
 
 
 class WindowEventMouse(WindowEvent):
-
-    def __init__(self,
-                 *args,
-                 window_id=-1,
-                 mouse_x=-1,
-                 mouse_y=-1,
-                 mouse_scroll_x=-1,
-                 mouse_scroll_y=-1,
-                 mouse_button=-1):
+    def __init__(
+        self,
+        *args,
+        window_id=-1,
+        mouse_x=-1,
+        mouse_y=-1,
+        mouse_scroll_x=-1,
+        mouse_scroll_y=-1,
+        mouse_button=-1
+    ):
         super().__init__(*args)
         self.window_id = window_id
         self.mouse_x = mouse_x

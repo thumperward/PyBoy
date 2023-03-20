@@ -20,17 +20,20 @@ else:
     exit(1)
 
 quiet = "--quiet" in sys.argv
-pyboy = PyBoy(filename,
-              window_type="headless" if quiet else "SDL2",
-              window_scale=3,
-              debug=not quiet,
-              game_wrapper=True)
+pyboy = PyBoy(
+    filename,
+    window_type="headless" if quiet else "SDL2",
+    window_scale=3,
+    debug=not quiet,
+    game_wrapper=True,
+)
 pyboy.set_emulation_speed(0)
 assert pyboy.cartridge_title() == "TETRIS"
 
 tetris = pyboy.game_wrapper()
 tetris.start_game(
-    timer_div=0x00)  # The timer_div works like a random seed in Tetris
+    timer_div=0x00
+)  # The timer_div works like a random seed in Tetris
 
 tetromino_at_0x00 = tetris.next_tetromino()
 assert tetromino_at_0x00 == "Z", tetris.next_tetromino()
@@ -46,7 +49,7 @@ assert tetris.next_tetromino() == tetromino_at_0x00, tetris.next_tetromino()
 blank_tile = 47
 first_brick = False
 for frame in range(
-        1000
+    1000
 ):  # Enough frames for the test. Otherwise do: `while not pyboy.tick():`
     pyboy.tick()
 
@@ -61,7 +64,8 @@ for frame in range(
     # game_area is accessed as [<row>, <column>].
     # 'game_area[-1,:]' is asking for all (:) the columns in the last row (-1)
     if not first_brick and any(
-            filter(lambda x: x != blank_tile, game_area[-1, :])):
+        filter(lambda x: x != blank_tile, game_area[-1, :])
+    ):
         first_brick = True
         print("First brick touched the bottom!")
         print(tetris)
@@ -86,7 +90,8 @@ assert tetris.next_tetromino() == tetromino_at_0x00, tetris.next_tetromino()
 assert all(filter(lambda x: x != blank_tile, game_area[-1, :]))
 
 tetris.reset_game(
-    timer_div=0x55)  # The timer_div works like a random seed in Tetris
+    timer_div=0x55
+)  # The timer_div works like a random seed in Tetris
 assert tetris.next_tetromino() != tetromino_at_0x00, tetris.next_tetromino()
 
 # Testing that it defaults to random Tetrominos

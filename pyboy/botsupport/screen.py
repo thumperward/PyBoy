@@ -64,8 +64,10 @@ class Screen:
             Nested list of SCX, SCY, WX and WY for each scanline (144x4). Returns (0, 0, 0, 0) when LCD is off.
         """
         if self.mb.lcd._LCDC.lcd_enable:
-            return [[line[0], line[1], line[2], line[3]]
-                    for line in self.mb.lcd.renderer._scanlineparameters]
+            return [
+                [line[0], line[1], line[2], line[3]]
+                for line in self.mb.lcd.renderer._scanlineparameters
+            ]
         else:
             return [[0, 0, 0, 0] for _ in range(144)]
 
@@ -115,8 +117,9 @@ class Screen:
         numpy.ndarray:
             Screendata in `ndarray` of bytes with shape (160, 144, 3)
         """
-        return np.frombuffer(self.raw_screen_buffer(),
-                             dtype=np.uint8).reshape(ROWS, COLS, 4)[:, :, 1:]
+        return np.frombuffer(self.raw_screen_buffer(), dtype=np.uint8).reshape(
+            ROWS, COLS, 4
+        )[:, :, 1:]
         # return self.mb.lcd.renderer.screen_buffer_as_ndarray()
 
     def screen_image(self):
@@ -134,7 +137,8 @@ class Screen:
         """
         if not Image:
             logger.error(
-                "Cannot generate screen image. Missing dependency \"Pillow\".")
+                'Cannot generate screen image. Missing dependency "Pillow".'
+            )
             return None
 
         # NOTE: Might have room for performance improvement

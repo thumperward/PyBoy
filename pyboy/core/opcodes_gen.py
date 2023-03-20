@@ -51,7 +51,6 @@ opcodes = []
 
 
 class MyHTMLParser(HTMLParser):
-
     def __init__(self):
         HTMLParser.__init__(self)
 
@@ -70,8 +69,11 @@ class MyHTMLParser(HTMLParser):
             self.tagstack.append(tag)
 
     def handle_endtag(self, tag):
-        if not self.founddata and self.tagstack[
-                -1] == "td" and self.counter % 0x100 != 0:
+        if (
+            not self.founddata
+            and self.tagstack[-1] == "td"
+            and self.counter % 0x100 != 0
+        ):
             self.counter += 1
             opcodes.append(None)  # Blank operations
         self.tagstack.pop()
@@ -87,9 +89,12 @@ class MyHTMLParser(HTMLParser):
 
             if len(self.cell_lines) == 4:
                 opcodes.append(
-                    self.make_opcode(self.cell_lines,
-                                     ("bgcolor", "#ccffcc") in self._attrs
-                                     or ("bgcolor", "#ffcccc") in self._attrs))
+                    self.make_opcode(
+                        self.cell_lines,
+                        ("bgcolor", "#ccffcc") in self._attrs
+                        or ("bgcolor", "#ffcccc") in self._attrs,
+                    )
+                )
                 self.counter += 1
                 self.cell_lines = []
 
@@ -107,7 +112,6 @@ class MyHTMLParser(HTMLParser):
 
 
 class Operand:
-
     def __init__(self, operand):
         self.postoperation = None
         self.pointer = False
@@ -152,8 +156,9 @@ class Operand:
                     "cpu.mb.setitem(%s"
                     % self.codegen(
                         False,
-                        operand=re.search(
-                            r"\(([a-zA-Z]+\d*)[\+-]?\)", operand)[1],
+                        operand=re.search(r"\(([a-zA-Z]+\d*)[\+-]?\)", operand)[
+                            1
+                        ],
                     )
                 ) + ", %s)"
             else:
@@ -173,7 +178,11 @@ class Operand:
         elif operand in ["A", "F", "B", "C", "D", "E", "SP", "PC", "HL"]:
             return f"cpu.{operand} = %s" if assign else f"cpu.{operand}"
         elif operand == "H":
-            return "cpu.HL = (cpu.HL & 0x00FF) | (%s << 8)" if assign else "(cpu.HL >> 8)"
+            return (
+                "cpu.HL = (cpu.HL & 0x00FF) | (%s << 8)"
+                if assign
+                else "(cpu.HL >> 8)"
+            )
         elif operand == "L":
             if assign:
                 return "cpu.HL = (cpu.HL & 0xFF00) | (%s & 0xFF)"
@@ -209,7 +218,6 @@ class Operand:
 
 
 class Literal:
-
     def __init__(self, value):
         if isinstance(value, str) and value.find("H") > 0:
             self.value = int(value[:-1], 16)
@@ -224,15 +232,16 @@ class Literal:
 
 
 class Code:
-
-    def __init__(self,
-                 function_name,
-                 opcode,
-                 name,
-                 takes_immediate,
-                 length,
-                 cycles,
-                 branch_op=False):
+    def __init__(
+        self,
+        function_name,
+        opcode,
+        name,
+        takes_immediate,
+        length,
+        cycles,
+        branch_op=False,
+    ):
         self.function_name = function_name
         self.opcode = opcode
         self.name = name
@@ -252,32 +261,36 @@ class Code:
     def getcode(self):
         code = ""
         code += [
-            "def %s_%0.2X(cpu): # %0.2X %s" %
-            (self.function_name, self.opcode, self.opcode, self.name),
-            "def %s_%0.2X(cpu, v): # %0.2X %s" %
-            (self.function_name, self.opcode, self.opcode, self.name)
+            "def %s_%0.2X(cpu): # %0.2X %s"
+            % (self.function_name, self.opcode, self.opcode, self.name),
+            "def %s_%0.2X(cpu, v): # %0.2X %s"
+            % (self.function_name, self.opcode, self.opcode, self.name),
         ][self.takes_immediate]
         code += "\n\t"
 
         if not self.branch_op:
             self.lines.append("cpu.PC += %d" % self.length)
             self.lines.append("cpu.PC &= 0xFFFF")
-            self.lines.append("return " +
-                              self.cycles[0])  # Choose the 0th cycle count
+            self.lines.append(
+                "return " + self.cycles[0]
+            )  # Choose the 0th cycle count
 
         code += "\n\t".join(self.lines)
 
         pxd = [
-            "cdef uint8_t %s_%0.2X(cpu.CPU) # %0.2X %s" %
-            (self.function_name, self.opcode, self.opcode, self.name),
+            "cdef uint8_t %s_%0.2X(cpu.CPU) # %0.2X %s"
+            % (self.function_name, self.opcode, self.opcode, self.name),
             # TODO: Differentiate between 16-bit values
             # (01,11,21,31 ops) and 8-bit values for 'v'
-            "cdef uint8_t %s_%0.2X(cpu.CPU, int v) # %0.2X %s" %
-            (self.function_name, self.opcode, self.opcode, self.name),
+            "cdef uint8_t %s_%0.2X(cpu.CPU, int v) # %0.2X %s"
+            % (self.function_name, self.opcode, self.opcode, self.name),
         ][self.takes_immediate]
 
         if self.opcode == 0x27:
-            pxd = "@cython.locals(v=int, flag=uint8_t, t=int, corr=ushort)\n" + pxd
+            pxd = (
+                "@cython.locals(v=int, flag=uint8_t, t=int, corr=ushort)\n"
+                + pxd
+            )
         else:
             pxd = "@cython.locals(v=int, flag=uint8_t, t=int)\n" + pxd
 
@@ -285,9 +298,18 @@ class Code:
 
 
 class OpcodeData:
-
-    def __init__(self, opcode, name, length, cycles, bit16, flag_z, flag_n,
-                 flag_h, flag_c):
+    def __init__(
+        self,
+        opcode,
+        name,
+        length,
+        cycles,
+        bit16,
+        flag_z,
+        flag_n,
+        flag_h,
+        flag_c,
+    ):
         self.opcode = opcode
         self.name = name
         self.length = int(length)
@@ -297,7 +319,8 @@ class OpcodeData:
         self.flag_h = flag_h
         self.flag_c = flag_c
         self.flags = tuple(
-            enumerate([self.flag_c, self.flag_h, self.flag_n, self.flag_z]))
+            enumerate([self.flag_c, self.flag_h, self.flag_n, self.flag_z])
+        )
         self.is16bit = bit16
 
         # TODO: There's no need for this to be so explicit
@@ -356,8 +379,11 @@ class OpcodeData:
         # Compensate for CB operations being "2 bytes long"
         if self.opcode > 0xFF:
             self.length -= 1
-        return (self.length, "%s_%0.2X" % (self.name.split()[0], self.opcode),
-                self.name), text
+        return (
+            self.length,
+            "%s_%0.2X" % (self.name.split()[0], self.opcode),
+            self.name,
+        ), text
 
     # Special carry and half-carry for E8 and F8:
     # http://forums.nesdev.com/viewtopic.php?p=42138
@@ -368,7 +394,8 @@ class OpcodeData:
     # respectively."
     def handleflags16bit_E8_F8(self, r0, r1, op, carry=False):
         flagmask = sum(
-            map(lambda nf: (nf[1] == "-") << (nf[0] + 4), self.flags))
+            map(lambda nf: (nf[1] == "-") << (nf[0] + 4), self.flags)
+        )
 
         # Only in case we do a dynamic operation, do we include the
         # following calculations
@@ -380,8 +407,11 @@ class OpcodeData:
             (
                 "flag = "
                 + format(
-                    sum(map(lambda nf: (nf[1] == "1")
-                        << (nf[0] + 4), self.flags)),
+                    sum(
+                        map(
+                            lambda nf: (nf[1] == "1") << (nf[0] + 4), self.flags
+                        )
+                    ),
                     "#010b",
                 )
             )
@@ -390,7 +420,8 @@ class OpcodeData:
         if self.flag_h == "H":
             c = f" {op} cpu.f_c()" if carry else ""
             lines.append(
-                f"flag += ((({r0} & 0xF) {op} ({r1} & 0xF){c}) > 0xF) << FLAGH")
+                f"flag += ((({r0} & 0xF) {op} ({r1} & 0xF){c}) > 0xF) << FLAGH"
+            )
 
         # flag += (((cpu.SP & 0xFF) + (v & 0xFF)) > 0xFF) << FLAGC
         if self.flag_c == "C":
@@ -399,13 +430,13 @@ class OpcodeData:
             )
 
         # Clears all flags affected by the operation
-        lines.extend(
-            ("cpu.F &= " + format(flagmask, "#010b"), "cpu.F |= flag"))
+        lines.extend(("cpu.F &= " + format(flagmask, "#010b"), "cpu.F |= flag"))
         return lines
 
     def handleflags16bit(self, r0, r1, op, carry=False):
         flagmask = sum(
-            map(lambda nf: (nf[1] == "-") << (nf[0] + 4), self.flags))
+            map(lambda nf: (nf[1] == "-") << (nf[0] + 4), self.flags)
+        )
 
         # Only in case we do a dynamic operation, do we include the
         # following calculations
@@ -417,8 +448,11 @@ class OpcodeData:
             (
                 "flag = "
                 + format(
-                    sum(map(lambda nf: (nf[1] == "1")
-                        << (nf[0] + 4), self.flags)),
+                    sum(
+                        map(
+                            lambda nf: (nf[1] == "1") << (nf[0] + 4), self.flags
+                        )
+                    ),
                     "#010b",
                 )
             )
@@ -432,13 +466,13 @@ class OpcodeData:
         if self.flag_c == "C":
             lines.append("flag += (t > 0xFFFF) << FLAGC")
 
-        lines.extend(
-            ("cpu.F &= " + format(flagmask, "#010b"), "cpu.F |= flag"))
+        lines.extend(("cpu.F &= " + format(flagmask, "#010b"), "cpu.F |= flag"))
         return lines
 
     def handleflags8bit(self, r0, r1, op, carry=False):
         flagmask = sum(
-            map(lambda nf: (nf[1] == "-") << (nf[0] + 4), self.flags))
+            map(lambda nf: (nf[1] == "-") << (nf[0] + 4), self.flags)
+        )
 
         # Only in case we do a dynamic operation, do we include the
         # following calculations
@@ -460,10 +494,12 @@ class OpcodeData:
             c = f" {op} cpu.f_c()" if carry else ""
             if op == "-":
                 lines.append(
-                    f"flag += ((({r0} & 0xF) {op} ({r1} & 0xF){c}) < 0) << FLAGH")
+                    f"flag += ((({r0} & 0xF) {op} ({r1} & 0xF){c}) < 0) << FLAGH"
+                )
             else:
                 lines.append(
-                    f"flag += ((({r0} & 0xF) {op} ({r1} & 0xF){c}) > 0xF) << FLAGH")
+                    f"flag += ((({r0} & 0xF) {op} ({r1} & 0xF){c}) > 0xF) << FLAGH"
+                )
 
         if self.flag_c == "C":
             if op == "-":
@@ -472,8 +508,7 @@ class OpcodeData:
                 lines.append("flag += (t > 0xFF) << FLAGC")
 
         # Clears all flags affected by the operation
-        lines.extend(
-            ("cpu.F &= " + format(flagmask, "#010b"), "cpu.F |= flag"))
+        lines.extend(("cpu.F &= " + format(flagmask, "#010b"), "cpu.F |= flag"))
         return lines
 
     ###################################################################
@@ -481,100 +516,162 @@ class OpcodeData:
     # MISC OPERATIONS
     #
     def NOP(self):
-        code = Code(self.name.split()[0], self.opcode, self.name, 0,
-                    self.length, self.cycles)
+        code = Code(
+            self.name.split()[0],
+            self.opcode,
+            self.name,
+            0,
+            self.length,
+            self.cycles,
+        )
         return code.getcode()
 
     def HALT(self):
-        code = Code(self.name.split()[0],
-                    self.opcode,
-                    self.name,
-                    0,
-                    self.length,
-                    self.cycles,
-                    branch_op=True)
+        code = Code(
+            self.name.split()[0],
+            self.opcode,
+            self.name,
+            0,
+            self.length,
+            self.cycles,
+            branch_op=True,
+        )
 
         # TODO: Implement HALT bug.
         code.addlines(["cpu.halted = True", f"return {self.cycles[0]}"])
         return code.getcode()
 
     def CB(self):
-        code = Code(self.name.split()[0], self.opcode, self.name, 0,
-                    self.length, self.cycles)
+        code = Code(
+            self.name.split()[0],
+            self.opcode,
+            self.name,
+            0,
+            self.length,
+            self.cycles,
+        )
         code.addline("logger.critical('CB cannot be called!')")
         return code.getcode()
 
     def EI(self):
-        code = Code(self.name.split()[0], self.opcode, self.name, 0,
-                    self.length, self.cycles)
+        code = Code(
+            self.name.split()[0],
+            self.opcode,
+            self.name,
+            0,
+            self.length,
+            self.cycles,
+        )
         code.addline("cpu.interrupt_master_enable = True")
         return code.getcode()
 
     def DI(self):
-        code = Code(self.name.split()[0], self.opcode, self.name, 0,
-                    self.length, self.cycles)
+        code = Code(
+            self.name.split()[0],
+            self.opcode,
+            self.name,
+            0,
+            self.length,
+            self.cycles,
+        )
         code.addline("cpu.interrupt_master_enable = False")
         return code.getcode()
 
     def STOP(self):
-        code = Code(self.name.split()[0], self.opcode, self.name, True,
-                    self.length, self.cycles)
-        code.addlines([
-            "if cpu.mb.cgb:",
-            "    cpu.mb.switch_speed()",
-            "    cpu.mb.setitem(0xFF04, 0)",
-        ])
+        code = Code(
+            self.name.split()[0],
+            self.opcode,
+            self.name,
+            True,
+            self.length,
+            self.cycles,
+        )
+        code.addlines(
+            [
+                "if cpu.mb.cgb:",
+                "    cpu.mb.switch_speed()",
+                "    cpu.mb.setitem(0xFF04, 0)",
+            ]
+        )
         # code.addLine("raise Exception('STOP not implemented!')")
         return code.getcode()
 
     def DAA(self):
         left = Operand("A")
-        code = Code(self.name.split()[0], self.opcode, self.name, False,
-                    self.length, self.cycles)
+        code = Code(
+            self.name.split()[0],
+            self.opcode,
+            self.name,
+            False,
+            self.length,
+            self.cycles,
+        )
 
         # http://stackoverflow.com/a/29990058/3831206
         # http://forums.nesdev.com/viewtopic.php?t=9088
-        code.addlines([
-            f"t = {left.get}",
-            "corr = 0",
-            "corr |= 0x06 if cpu.f_h() else 0x00",
-            "corr |= 0x60 if cpu.f_c() else 0x00",
-            "if cpu.f_n():",
-            "\tt -= corr",
-            "else:",
-            "\tcorr |= 0x06 if (t & 0x0F) > 0x09 else 0x00",
-            "\tcorr |= 0x60 if t > 0x99 else 0x00",
-            "\tt += corr",
-            "flag = 0",
-            "flag += ((t & 0xFF) == 0) << FLAGZ",
-            "flag += (corr & 0x60 != 0) << FLAGC",
-            "cpu.F &= 0b01000000",
-            "cpu.F |= flag",
-            "t &= 0xFF",
-            left.set % "t",
-        ])
+        code.addlines(
+            [
+                f"t = {left.get}",
+                "corr = 0",
+                "corr |= 0x06 if cpu.f_h() else 0x00",
+                "corr |= 0x60 if cpu.f_c() else 0x00",
+                "if cpu.f_n():",
+                "\tt -= corr",
+                "else:",
+                "\tcorr |= 0x06 if (t & 0x0F) > 0x09 else 0x00",
+                "\tcorr |= 0x60 if t > 0x99 else 0x00",
+                "\tt += corr",
+                "flag = 0",
+                "flag += ((t & 0xFF) == 0) << FLAGZ",
+                "flag += (corr & 0x60 != 0) << FLAGC",
+                "cpu.F &= 0b01000000",
+                "cpu.F |= flag",
+                "t &= 0xFF",
+                left.set % "t",
+            ]
+        )
         return code.getcode()
 
     def SCF(self):
-        code = Code(self.name.split()[0], self.opcode, self.name, False,
-                    self.length, self.cycles)
+        code = Code(
+            self.name.split()[0],
+            self.opcode,
+            self.name,
+            False,
+            self.length,
+            self.cycles,
+        )
         code.addlines(self.handleflags8bit(None, None, None))
         return code.getcode()
 
     def CCF(self):
-        code = Code(self.name.split()[0], self.opcode, self.name, False,
-                    self.length, self.cycles)
-        code.addlines([
-            "flag = (cpu.F & 0b00010000) ^ 0b00010000",
-            "cpu.F &= 0b10000000",
-            "cpu.F |= flag",
-        ])
+        code = Code(
+            self.name.split()[0],
+            self.opcode,
+            self.name,
+            False,
+            self.length,
+            self.cycles,
+        )
+        code.addlines(
+            [
+                "flag = (cpu.F & 0b00010000) ^ 0b00010000",
+                "cpu.F &= 0b10000000",
+                "cpu.F |= flag",
+            ]
+        )
         return code.getcode()
 
     def CPL(self):
         left = Operand("A")
-        code = Code(self.name.split()[0], self.opcode, self.name, False,
-                    self.length, self.cycles)
+        code = Code(
+            self.name.split()[0],
+            self.opcode,
+            self.name,
+            False,
+            self.length,
+            self.cycles,
+        )
         code.addline(left.set % f"(~{left.get}) & 0xFF")
         code.addlines(self.handleflags8bit(None, None, None))
         return code.getcode()
@@ -592,9 +689,14 @@ class OpcodeData:
         if self.opcode in [0xE2, 0xF2]:
             self.length = 1
 
-        code = Code(self.name.split()[0], self.opcode, self.name,
-                    left.immediate or right.immediate, self.length,
-                    self.cycles)
+        code = Code(
+            self.name.split()[0],
+            self.opcode,
+            self.name,
+            left.immediate or right.immediate,
+            self.length,
+            self.cycles,
+        )
         if self.is16bit and left.immediate and left.pointer:
             code.addline(left.set % f"{right.get} & 0xFF")
             a, b = left.set.split(",")
@@ -615,7 +717,8 @@ class OpcodeData:
             # E8 and F8 http://forums.nesdev.com/viewtopic.php?p=42138
             code.addline("t = cpu.HL")
             code.addlines(
-                self.handleflags16bit_E8_F8("cpu.SP", "v", "+", False))
+                self.handleflags16bit_E8_F8("cpu.SP", "v", "+", False)
+            )
             code.addline("cpu.HL &= 0xFFFF")
 
         return code.getcode()
@@ -659,9 +762,14 @@ class OpcodeData:
             r1 = self.name.split()[1]
             left = Operand("A")
         right = Operand(r1)
-        code = Code(self.name.split()[0], self.opcode, self.name,
-                    left.immediate or right.immediate, self.length,
-                    self.cycles)
+        code = Code(
+            self.name.split()[0],
+            self.opcode,
+            self.name,
+            left.immediate or right.immediate,
+            self.length,
+            self.cycles,
+        )
         code.addlines(self.ALU(left, right, "+"))
         return code.getcode()
 
@@ -673,9 +781,14 @@ class OpcodeData:
             r1 = self.name.split()[1]
             left = Operand("A")
         right = Operand(r1)
-        code = Code(self.name.split()[0], self.opcode, self.name,
-                    left.immediate or right.immediate, self.length,
-                    self.cycles)
+        code = Code(
+            self.name.split()[0],
+            self.opcode,
+            self.name,
+            left.immediate or right.immediate,
+            self.length,
+            self.cycles,
+        )
         code.addlines(self.ALU(left, right, "-"))
         return code.getcode()
 
@@ -684,9 +797,14 @@ class OpcodeData:
         left = Operand(r0)
         right = Literal(1)
 
-        code = Code(self.name.split()[0], self.opcode, self.name,
-                    left.immediate or right.immediate, self.length,
-                    self.cycles)
+        code = Code(
+            self.name.split()[0],
+            self.opcode,
+            self.name,
+            left.immediate or right.immediate,
+            self.length,
+            self.cycles,
+        )
         code.addlines(self.ALU(left, right, "+"))
         return code.getcode()
 
@@ -695,9 +813,14 @@ class OpcodeData:
         left = Operand(r0)
         right = Literal(1)
 
-        code = Code(self.name.split()[0], self.opcode, self.name,
-                    left.immediate or right.immediate, self.length,
-                    self.cycles)
+        code = Code(
+            self.name.split()[0],
+            self.opcode,
+            self.name,
+            left.immediate or right.immediate,
+            self.length,
+            self.cycles,
+        )
         code.addlines(self.ALU(left, right, "-"))
         return code.getcode()
 
@@ -709,9 +832,14 @@ class OpcodeData:
             r1 = self.name.split()[1]
             left = Operand("A")
         right = Operand(r1)
-        code = Code(self.name.split()[0], self.opcode, self.name,
-                    left.immediate or right.immediate, self.length,
-                    self.cycles)
+        code = Code(
+            self.name.split()[0],
+            self.opcode,
+            self.name,
+            left.immediate or right.immediate,
+            self.length,
+            self.cycles,
+        )
         code.addlines(self.ALU(left, right, "+", carry=True))
         return code.getcode()
 
@@ -723,9 +851,14 @@ class OpcodeData:
             r1 = self.name.split()[1]
             left = Operand("A")
         right = Operand(r1)
-        code = Code(self.name.split()[0], self.opcode, self.name,
-                    left.immediate or right.immediate, self.length,
-                    self.cycles)
+        code = Code(
+            self.name.split()[0],
+            self.opcode,
+            self.name,
+            left.immediate or right.immediate,
+            self.length,
+            self.cycles,
+        )
         code.addlines(self.ALU(left, right, "-", carry=True))
         return code.getcode()
 
@@ -737,9 +870,14 @@ class OpcodeData:
             r1 = self.name.split()[1]
             left = Operand("A")
         right = Operand(r1)
-        code = Code(self.name.split()[0], self.opcode, self.name,
-                    left.immediate or right.immediate, self.length,
-                    self.cycles)
+        code = Code(
+            self.name.split()[0],
+            self.opcode,
+            self.name,
+            left.immediate or right.immediate,
+            self.length,
+            self.cycles,
+        )
         code.addlines(self.ALU(left, right, "&"))
         return code.getcode()
 
@@ -751,9 +889,14 @@ class OpcodeData:
             r1 = self.name.split()[1]
             left = Operand("A")
         right = Operand(r1)
-        code = Code(self.name.split()[0], self.opcode, self.name,
-                    left.immediate or right.immediate, self.length,
-                    self.cycles)
+        code = Code(
+            self.name.split()[0],
+            self.opcode,
+            self.name,
+            left.immediate or right.immediate,
+            self.length,
+            self.cycles,
+        )
         code.addlines(self.ALU(left, right, "|"))
         return code.getcode()
 
@@ -765,9 +908,14 @@ class OpcodeData:
             r1 = self.name.split()[1]
             left = Operand("A")
         right = Operand(r1)
-        code = Code(self.name.split()[0], self.opcode, self.name,
-                    left.immediate or right.immediate, self.length,
-                    self.cycles)
+        code = Code(
+            self.name.split()[0],
+            self.opcode,
+            self.name,
+            left.immediate or right.immediate,
+            self.length,
+            self.cycles,
+        )
         code.addlines(self.ALU(left, right, "^"))
         return code.getcode()
 
@@ -776,9 +924,14 @@ class OpcodeData:
         left = Operand("A")
         right = Operand(r1)
 
-        code = Code(self.name.split()[0], self.opcode, self.name,
-                    left.immediate or right.immediate, self.length,
-                    self.cycles)
+        code = Code(
+            self.name.split()[0],
+            self.opcode,
+            self.name,
+            left.immediate or right.immediate,
+            self.length,
+            self.cycles,
+        )
         # CP is equal to SUB, but without saving the result.
         # Therefore; we discard the last instruction.
         code.addlines(self.ALU(left, right, "-")[:-1])
@@ -792,15 +945,23 @@ class OpcodeData:
         r0 = self.name.split()[1]
         left = Operand(r0)
 
-        code = Code(self.name.split()[0], self.opcode, self.name, False,
-                    self.length, self.cycles)
+        code = Code(
+            self.name.split()[0],
+            self.opcode,
+            self.name,
+            False,
+            self.length,
+            self.cycles,
+        )
         if "HL" in left.get:
-            code.addlines([
-                "cpu.mb.setitem((cpu.SP-1) & 0xFFFF, cpu.HL >> 8) # High",
-                "cpu.mb.setitem((cpu.SP-2) & 0xFFFF, cpu.HL & 0xFF) # Low",
-                "cpu.SP -= 2",
-                "cpu.SP &= 0xFFFF",
-            ])
+            code.addlines(
+                [
+                    "cpu.mb.setitem((cpu.SP-1) & 0xFFFF, cpu.HL >> 8) # High",
+                    "cpu.mb.setitem((cpu.SP-2) & 0xFFFF, cpu.HL & 0xFF) # Low",
+                    "cpu.SP -= 2",
+                    "cpu.SP &= 0xFFFF",
+                ]
+            )
         else:
             # A bit of a hack, but you can only push double registers
             code.addline(
@@ -825,15 +986,27 @@ class OpcodeData:
         r0 = self.name.split()[1]
         left = Operand(r0)
 
-        code = Code(self.name.split()[0], self.opcode, self.name, False,
-                    self.length, self.cycles)
+        code = Code(
+            self.name.split()[0],
+            self.opcode,
+            self.name,
+            False,
+            self.length,
+            self.cycles,
+        )
         if "HL" in left.get:
-            code.addlines([
-                (left.set % "(cpu.mb.getitem((cpu.SP + 1) & 0xFFFF) << 8) + "
-                 "cpu.mb.getitem(cpu.SP)") + " # High",
-                "cpu.SP += 2",
-                "cpu.SP &= 0xFFFF",
-            ])
+            code.addlines(
+                [
+                    (
+                        left.set
+                        % "(cpu.mb.getitem((cpu.SP + 1) & 0xFFFF) << 8) + "
+                        "cpu.mb.getitem(cpu.SP)"
+                    )
+                    + " # High",
+                    "cpu.SP += 2",
+                    "cpu.SP &= 0xFFFF",
+                ]
+            )
         else:
             fmask = " & 0xF0" if left.operand.endswith("F") else ""
             # See comment from PUSH
@@ -846,7 +1019,8 @@ class OpcodeData:
                 )
             else:
                 code.addline(
-                    f"cpu.{left.operand[-1]} = cpu.mb.getitem(cpu.SP){fmask} # Low")
+                    f"cpu.{left.operand[-1]} = cpu.mb.getitem(cpu.SP){fmask} # Low"
+                )
             code.addline("cpu.SP += 2")
             code.addline("cpu.SP &= 0xFFFF")
 
@@ -878,28 +1052,34 @@ class OpcodeData:
         else:
             assert right.immediate
 
-        code = Code(self.name.split()[0],
-                    self.opcode,
-                    self.name,
-                    right.immediate,
-                    self.length,
-                    self.cycles,
-                    branch_op=True)
+        code = Code(
+            self.name.split()[0],
+            self.opcode,
+            self.name,
+            right.immediate,
+            self.length,
+            self.cycles,
+            branch_op=True,
+        )
         if left is None:
-            code.addlines([
-                f'cpu.PC = {"v" if right.immediate else r_code}',
-                f"return {self.cycles[0]}",
-            ])
+            code.addlines(
+                [
+                    f'cpu.PC = {"v" if right.immediate else r_code}',
+                    f"return {self.cycles[0]}",
+                ]
+            )
         else:
-            code.addlines([
-                f"if {l_code}:",
-                "\tcpu.PC = %s" % ("v" if right.immediate else r_code),
-                "\treturn " + self.cycles[0],
-                "else:",
-                "\tcpu.PC += %s" % self.length,
-                "\tcpu.PC &= 0xFFFF",
-                "\treturn " + self.cycles[1],
-            ])
+            code.addlines(
+                [
+                    f"if {l_code}:",
+                    "\tcpu.PC = %s" % ("v" if right.immediate else r_code),
+                    "\treturn " + self.cycles[0],
+                    "else:",
+                    "\tcpu.PC += %s" % self.length,
+                    "\tcpu.PC &= 0xFFFF",
+                    "\treturn " + self.cycles[1],
+                ]
+            )
 
         return code.getcode()
 
@@ -919,30 +1099,36 @@ class OpcodeData:
             assert left.flag
         assert right.immediate
 
-        code = Code(self.name.split()[0],
-                    self.opcode,
-                    self.name,
-                    right.immediate,
-                    self.length,
-                    self.cycles,
-                    branch_op=True)
+        code = Code(
+            self.name.split()[0],
+            self.opcode,
+            self.name,
+            right.immediate,
+            self.length,
+            self.cycles,
+            branch_op=True,
+        )
         if left is None:
-            code.addlines([
-                "cpu.PC += %d + " % self.length + inline_signed_int8("v"),
-                "cpu.PC &= 0xFFFF",
-                f"return {self.cycles[0]}",
-            ])
+            code.addlines(
+                [
+                    "cpu.PC += %d + " % self.length + inline_signed_int8("v"),
+                    "cpu.PC &= 0xFFFF",
+                    f"return {self.cycles[0]}",
+                ]
+            )
         else:
-            code.addlines([
-                "cpu.PC += %d" % self.length,
-                f"if {l_code}:",
-                "\tcpu.PC += " + inline_signed_int8("v"),
-                "\tcpu.PC &= 0xFFFF",
-                "\treturn " + self.cycles[0],
-                "else:",
-                "\tcpu.PC &= 0xFFFF",
-                "\treturn " + self.cycles[1],
-            ])
+            code.addlines(
+                [
+                    "cpu.PC += %d" % self.length,
+                    f"if {l_code}:",
+                    "\tcpu.PC += " + inline_signed_int8("v"),
+                    "\tcpu.PC &= 0xFFFF",
+                    "\treturn " + self.cycles[0],
+                    "else:",
+                    "\tcpu.PC &= 0xFFFF",
+                    "\treturn " + self.cycles[1],
+                ]
+            )
 
         return code.getcode()
 
@@ -962,38 +1148,44 @@ class OpcodeData:
             assert left.flag
         assert right.immediate
 
-        code = Code(self.name.split()[0],
-                    self.opcode,
-                    self.name,
-                    right.immediate,
-                    self.length,
-                    self.cycles,
-                    branch_op=True)
+        code = Code(
+            self.name.split()[0],
+            self.opcode,
+            self.name,
+            right.immediate,
+            self.length,
+            self.cycles,
+            branch_op=True,
+        )
 
         # Taken from PUSH
         code.addlines([f"cpu.PC += {self.length}", "cpu.PC &= 0xFFFF"])
 
         if left is None:
-            code.addlines([
-                "cpu.mb.setitem((cpu.SP-1) & 0xFFFF, cpu.PC >> 8) # High",
-                "cpu.mb.setitem((cpu.SP-2) & 0xFFFF, cpu.PC & 0xFF) # Low",
-                "cpu.SP -= 2",
-                "cpu.SP &= 0xFFFF",
-                f'cpu.PC = {"v" if right.immediate else right.get}',
-                f"return {self.cycles[0]}",
-            ])
+            code.addlines(
+                [
+                    "cpu.mb.setitem((cpu.SP-1) & 0xFFFF, cpu.PC >> 8) # High",
+                    "cpu.mb.setitem((cpu.SP-2) & 0xFFFF, cpu.PC & 0xFF) # Low",
+                    "cpu.SP -= 2",
+                    "cpu.SP &= 0xFFFF",
+                    f'cpu.PC = {"v" if right.immediate else right.get}',
+                    f"return {self.cycles[0]}",
+                ]
+            )
         else:
-            code.addlines([
-                f"if {l_code}:",
-                "\tcpu.mb.setitem((cpu.SP-1) & 0xFFFF, cpu.PC >> 8) # High",
-                "\tcpu.mb.setitem((cpu.SP-2) & 0xFFFF, cpu.PC & 0xFF) # Low",
-                "\tcpu.SP -= 2",
-                "\tcpu.SP &= 0xFFFF",
-                "\tcpu.PC = %s" % ("v" if right.immediate else right.get),
-                "\treturn " + self.cycles[0],
-                "else:",
-                "\treturn " + self.cycles[1],
-            ])
+            code.addlines(
+                [
+                    f"if {l_code}:",
+                    "\tcpu.mb.setitem((cpu.SP-1) & 0xFFFF, cpu.PC >> 8) # High",
+                    "\tcpu.mb.setitem((cpu.SP-2) & 0xFFFF, cpu.PC & 0xFF) # Low",
+                    "\tcpu.SP -= 2",
+                    "\tcpu.SP &= 0xFFFF",
+                    "\tcpu.PC = %s" % ("v" if right.immediate else right.get),
+                    "\treturn " + self.cycles[0],
+                    "else:",
+                    "\treturn " + self.cycles[1],
+                ]
+            )
 
         return code.getcode()
 
@@ -1011,53 +1203,63 @@ class OpcodeData:
                     l_code = "cpu.f_c()"
                 assert left.flag
 
-        code = Code(self.name.split()[0],
-                    self.opcode,
-                    self.name,
-                    False,
-                    self.length,
-                    self.cycles,
-                    branch_op=True)
+        code = Code(
+            self.name.split()[0],
+            self.opcode,
+            self.name,
+            False,
+            self.length,
+            self.cycles,
+            branch_op=True,
+        )
         if left is None:
-            code.addlines([
+            code.addlines(
+                [
+                    "cpu.PC = cpu.mb.getitem((cpu.SP + 1) & 0xFFFF) << 8 # High",
+                    "cpu.PC |= cpu.mb.getitem(cpu.SP) # Low",
+                    "cpu.SP += 2",
+                    "cpu.SP &= 0xFFFF",
+                    f"return {self.cycles[0]}",
+                ]
+            )
+        else:
+            code.addlines(
+                [
+                    f"if {l_code}:",
+                    "\tcpu.PC = cpu.mb.getitem((cpu.SP + 1) & 0xFFFF) << 8 # High",
+                    "\tcpu.PC |= cpu.mb.getitem(cpu.SP) # Low",
+                    "\tcpu.SP += 2",
+                    "\tcpu.SP &= 0xFFFF",
+                    "\treturn " + self.cycles[0],
+                    "else:",
+                    "\tcpu.PC += %s" % self.length,
+                    "\tcpu.PC &= 0xFFFF",
+                    "\treturn " + self.cycles[1],
+                ]
+            )
+
+        return code.getcode()
+
+    def RETI(self):
+        code = Code(
+            self.name.split()[0],
+            self.opcode,
+            self.name,
+            False,
+            self.length,
+            self.cycles,
+            branch_op=True,
+        )
+        code.addline("cpu.interrupt_master_enable = True")
+        code.addlines(
+            [
                 "cpu.PC = cpu.mb.getitem((cpu.SP + 1) & 0xFFFF) << 8 # High",
                 "cpu.PC |= cpu.mb.getitem(cpu.SP) # Low",
                 "cpu.SP += 2",
                 "cpu.SP &= 0xFFFF",
                 f"return {self.cycles[0]}",
-            ])
-        else:
-            code.addlines([
-                f"if {l_code}:",
-                "\tcpu.PC = cpu.mb.getitem((cpu.SP + 1) & 0xFFFF) << 8 # High",
-                "\tcpu.PC |= cpu.mb.getitem(cpu.SP) # Low",
-                "\tcpu.SP += 2",
-                "\tcpu.SP &= 0xFFFF",
-                "\treturn " + self.cycles[0],
-                "else:",
-                "\tcpu.PC += %s" % self.length,
-                "\tcpu.PC &= 0xFFFF",
-                "\treturn " + self.cycles[1],
-            ])
-
-        return code.getcode()
-
-    def RETI(self):
-        code = Code(self.name.split()[0],
-                    self.opcode,
-                    self.name,
-                    False,
-                    self.length,
-                    self.cycles,
-                    branch_op=True)
-        code.addline("cpu.interrupt_master_enable = True")
-        code.addlines([
-            "cpu.PC = cpu.mb.getitem((cpu.SP + 1) & 0xFFFF) << 8 # High",
-            "cpu.PC |= cpu.mb.getitem(cpu.SP) # Low",
-            "cpu.SP += 2",
-            "cpu.SP &= 0xFFFF",
-            f"return {self.cycles[0]}",
-        ])
+            ]
+        )
 
         return code.getcode()
 
@@ -1065,23 +1267,27 @@ class OpcodeData:
         r1 = self.name.split()[1]
         right = Literal(r1)
 
-        code = Code(self.name.split()[0],
-                    self.opcode,
-                    self.name,
-                    False,
-                    self.length,
-                    self.cycles,
-                    branch_op=True)
+        code = Code(
+            self.name.split()[0],
+            self.opcode,
+            self.name,
+            False,
+            self.length,
+            self.cycles,
+            branch_op=True,
+        )
 
         # Taken from PUSH and CALL
-        code.addlines([
-            f"cpu.PC += {self.length}",
-            "cpu.PC &= 0xFFFF",
-            "cpu.mb.setitem((cpu.SP-1) & 0xFFFF, cpu.PC >> 8) # High",
-            "cpu.mb.setitem((cpu.SP-2) & 0xFFFF, cpu.PC & 0xFF) # Low",
-            "cpu.SP -= 2",
-            "cpu.SP &= 0xFFFF",
-        ])
+        code.addlines(
+            [
+                f"cpu.PC += {self.length}",
+                "cpu.PC &= 0xFFFF",
+                "cpu.mb.setitem((cpu.SP-1) & 0xFFFF, cpu.PC >> 8) # High",
+                "cpu.mb.setitem((cpu.SP-2) & 0xFFFF, cpu.PC & 0xFF) # Low",
+                "cpu.SP -= 2",
+                "cpu.SP &= 0xFFFF",
+            ]
+        )
 
         code.addlines([f"cpu.PC = {right.code}", f"return {self.cycles[0]}"])
 
@@ -1092,8 +1298,9 @@ class OpcodeData:
     # ROTATE/SHIFT OPERATIONS
     #
     def rotateleft(self, name, left, throughcarry=False):
-        code = Code(name, self.opcode, self.name, False, self.length,
-                    self.cycles)
+        code = Code(
+            name, self.opcode, self.name, False, self.length, self.cycles
+        )
         left.assign = False
         if throughcarry:
             code.addline(f"t = ({left.get} << 1) + cpu.f_c()")
@@ -1128,21 +1335,26 @@ class OpcodeData:
         return code.getcode()
 
     def rotateright(self, name, left, throughcarry=False):
-        code = Code(name, self.opcode, self.name, False, self.length,
-                    self.cycles)
+        code = Code(
+            name, self.opcode, self.name, False, self.length, self.cycles
+        )
         left.assign = False
         if throughcarry:
             # Trigger "overflow" for carry flag
-            code.addline((
-                f"t = ({left.get} >> 1) + (cpu.f_c() << 7)"
-                + f" + (({left.get} & 1) << 8)"
-            ))
+            code.addline(
+                (
+                    f"t = ({left.get} >> 1) + (cpu.f_c() << 7)"
+                    + f" + (({left.get} & 1) << 8)"
+                )
+            )
         else:
             # Trigger "overflow" for carry flag
-            code.addline((
-                f"t = ({left.get} >> 1) + (({left.get} & 1) << 7)"
-                + f" + (({left.get} & 1) << 8)"
-            ))
+            code.addline(
+                (
+                    f"t = ({left.get} >> 1) + (({left.get} & 1) << 7)"
+                    + f" + (({left.get} & 1) << 8)"
+                )
+            )
         code.addlines(self.handleflags8bit(left.get, None, None, throughcarry))
         code.addline("t &= 0xFF")
         code.addline(left.set % "t")
@@ -1173,8 +1385,14 @@ class OpcodeData:
     def SLA(self):
         r0 = self.name.split()[1]
         left = Operand(r0)
-        code = Code(self.name.split()[0], self.opcode, self.name, False,
-                    self.length, self.cycles)
+        code = Code(
+            self.name.split()[0],
+            self.opcode,
+            self.name,
+            False,
+            self.length,
+            self.cycles,
+        )
         code.addline(f"t = ({left.get} << 1)")
         code.addlines(self.handleflags8bit(left.get, None, None, False))
         code.addline("t &= 0xFF")
@@ -1186,8 +1404,14 @@ class OpcodeData:
         left = Operand(r0)
         # FIX: All documentation tells it should have carry enabled
         self.flag_c = "C"
-        code = Code(self.name.split()[0], self.opcode, self.name, False,
-                    self.length, self.cycles)
+        code = Code(
+            self.name.split()[0],
+            self.opcode,
+            self.name,
+            False,
+            self.length,
+            self.cycles,
+        )
         # Actual shift / MSB unchanged / Trigger "overflow" for carry flag
         code.addline(
             f"t = (({left.get} >> 1) | ({left.get} & 0x80)) + (({left.get} & 1) << 8)"
@@ -1200,8 +1424,14 @@ class OpcodeData:
     def SRL(self):
         r0 = self.name.split()[1]
         left = Operand(r0)
-        code = Code(self.name.split()[0], self.opcode, self.name, False,
-                    self.length, self.cycles)
+        code = Code(
+            self.name.split()[0],
+            self.opcode,
+            self.name,
+            False,
+            self.length,
+            self.cycles,
+        )
         #              Actual shift / Trigger "overflow" for carry flag
         code.addline(f"t = ({left.get} >> 1) + (({left.get} & 1) << 8)")
         code.addlines(self.handleflags8bit(left.get, None, None, False))
@@ -1212,10 +1442,17 @@ class OpcodeData:
     def SWAP(self):
         r0 = self.name.split()[1]
         left = Operand(r0)
-        code = Code(self.name.split()[0], self.opcode, self.name, False,
-                    self.length, self.cycles)
+        code = Code(
+            self.name.split()[0],
+            self.opcode,
+            self.name,
+            False,
+            self.length,
+            self.cycles,
+        )
         code.addline(
-            f"t = (({left.get} & 0xF0) >> 4) | (({left.get} & 0x0F) << 4)")
+            f"t = (({left.get} & 0xF0) >> 4) | (({left.get} & 0x0F) << 4)"
+        )
         code.addlines(self.handleflags8bit(left.get, None, None, False))
         code.addline("t &= 0xFF")
         code.addline(left.set % "t")
@@ -1229,8 +1466,14 @@ class OpcodeData:
         r0, r1 = self.name.split()[1].split(",")
         left = Literal(r0)
         right = Operand(r1)
-        code = Code(self.name.split()[0], self.opcode, self.name, False,
-                    self.length, self.cycles)
+        code = Code(
+            self.name.split()[0],
+            self.opcode,
+            self.name,
+            False,
+            self.length,
+            self.cycles,
+        )
         code.addline(f"t = {right.get} & (1 << {left.get})")
         code.addlines(self.handleflags8bit(left.get, right.get, None, False))
 
@@ -1241,8 +1484,14 @@ class OpcodeData:
         left = Literal(r0)
         right = Operand(r1)
 
-        code = Code(self.name.split()[0], self.opcode, self.name, False,
-                    self.length, self.cycles)
+        code = Code(
+            self.name.split()[0],
+            self.opcode,
+            self.name,
+            False,
+            self.length,
+            self.cycles,
+        )
         code.addline(f"t = {right.get} & ~(1 << {left.get})")
         code.addline(right.set % "t")
         return code.getcode()
@@ -1251,25 +1500,31 @@ class OpcodeData:
         r0, r1 = self.name.split()[1].split(",")
         left = Literal(r0)
         right = Operand(r1)
-        code = Code(self.name.split()[0], self.opcode, self.name, False,
-                    self.length, self.cycles)
+        code = Code(
+            self.name.split()[0],
+            self.opcode,
+            self.name,
+            False,
+            self.length,
+            self.cycles,
+        )
         code.addline(f"t = {right.get} | (1 << {left.get})")
         code.addline(right.set % "t")
         return code.getcode()
 
 
 def update():
-    response = urlopen(
-        "http://pastraiser.com/cpu/gameboy/gameboy_opcodes.html")
+    response = urlopen("http://pastraiser.com/cpu/gameboy/gameboy_opcodes.html")
     html = response.read().replace(b"&nbsp;", b"<br>").decode()
 
     parser = MyHTMLParser()
     parser.feed(html)
 
     opcodefunctions = map(
-        lambda x: (None, None) if x is None else x.createfunction(), opcodes)
+        lambda x: (None, None) if x is None else x.createfunction(), opcodes
+    )
 
-    with (open(destination, "w") as f, open(pxd_destination, "w") as f_pxd):
+    with open(destination, "w") as f, open(pxd_destination, "w") as f_pxd:
         f.write(warning)
         f.write(imports)
         f_pxd.write(warning)
@@ -1289,7 +1544,8 @@ def update():
 
         f.write("def no_opcode(cpu):\n    return 0\n\n\n")
 
-        f.write("""
+        f.write(
+            """
 def execute_opcode(cpu, opcode):
     oplen = OPCODE_LENGTHS[opcode]
     v = 0
@@ -1304,15 +1560,22 @@ def execute_opcode(cpu, opcode):
         b = cpu.mb.getitem(pc+1)
         v = (a << 8) + b
 
-""")
+"""
+        )
 
         indent = 4
         for i, t in enumerate(lookuplist):
             t = t if t is not None else (0, "no_opcode", "")
-            f.write(" " * indent + ("if" if i == 0 else "elif") +
-                    " opcode == 0x%0.2X:\n" % i + " " * (indent + 4) +
-                    "return " + str(t[1]).replace("'", "") +
-                    ("(cpu)" if t[0] <= 1 else "(cpu, v)") + "\n")
+            f.write(
+                " " * indent
+                + ("if" if i == 0 else "elif")
+                + " opcode == 0x%0.2X:\n" % i
+                + " " * (indent + 4)
+                + "return "
+                + str(t[1]).replace("'", "")
+                + ("(cpu)" if t[0] <= 1 else "(cpu, v)")
+                + "\n"
+            )
         f.write("\n\n")
 
         f.write('OPCODE_LENGTHS = array.array("B", [\n    ')
@@ -1330,7 +1593,7 @@ def execute_opcode(cpu, opcode):
         f.write("CPU_COMMANDS = [\n    ")
         for t in lookuplist:
             t = t if t is not None else (0, "no_opcode", "")
-            f.write(f"\"{t[2]}\",\n" + " " * 4)
+            f.write(f'"{t[2]}",\n' + " " * 4)
 
         f.write("]\n")
 

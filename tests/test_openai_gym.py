@@ -19,10 +19,9 @@ is_pypy = platform.python_implementation() == "PyPy"
 
 @pytest.fixture
 def pyboy(tetris_rom):
-    pyboy = PyBoy(tetris_rom,
-                  window_type="dummy",
-                  disable_input=True,
-                  game_wrapper=True)
+    pyboy = PyBoy(
+        tetris_rom, window_type="dummy", disable_input=True, game_wrapper=True
+    )
     pyboy.set_emulation_speed(0)
     return pyboy
 
@@ -43,9 +42,9 @@ def tiles_id():
 
 
 @pytest.mark.skipif(
-    is_pypy, reason="This requires gym, which doesn't work on this platform")
+    is_pypy, reason="This requires gym, which doesn't work on this platform"
+)
 class TestOpenAIGym:
-
     def test_raw(self, pyboy):
         env = pyboy.openai_gym(observation_type="raw", action_type="press")
         observation = env.reset()
@@ -64,8 +63,9 @@ class TestOpenAIGym:
 
         # Build the expected first observation
         game_area_shape = pyboy.game_wrapper().shape[::-1]
-        expected_observation = tiles_id["BLANK"] * np.ones(game_area_shape,
-                                                           dtype=np.uint16)
+        expected_observation = tiles_id["BLANK"] * np.ones(
+            game_area_shape, dtype=np.uint16
+        )
         expected_observation[id0_block, id1_block] = tiles_id["Z"]
         print(observation, expected_observation)
         assert np.all(observation == expected_observation)
@@ -141,8 +141,9 @@ class TestOpenAIGym:
         observation, _, _, _ = env.step(0)  # Press NOTHING
 
         game_area_shape = pyboy.game_wrapper().shape[::-1]
-        expected_observation = tiles_id["BLANK"] * np.ones(game_area_shape,
-                                                           dtype=np.uint16)
+        expected_observation = tiles_id["BLANK"] * np.ones(
+            game_area_shape, dtype=np.uint16
+        )
         expected_observation[id0_block, id1_block + 1] = tiles_id["Z"]
         print(observation, expected_observation)
         assert np.all(observation == expected_observation)
@@ -165,8 +166,9 @@ class TestOpenAIGym:
         observation, _, _, _ = env.step(0)  # Press NOTHING
 
         game_area_shape = pyboy.game_wrapper().shape[::-1]
-        expected_observation = tiles_id["BLANK"] * np.ones(game_area_shape,
-                                                           dtype=np.uint16)
+        expected_observation = tiles_id["BLANK"] * np.ones(
+            game_area_shape, dtype=np.uint16
+        )
         expected_observation[id0_block, id1_block + 1] = tiles_id["Z"]
         print(observation, expected_observation)
         assert np.all(observation == expected_observation)

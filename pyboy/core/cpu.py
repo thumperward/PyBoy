@@ -17,7 +17,6 @@ logger = logging.getLogger(__name__)
 
 
 class CPU:
-
     def set_bc(self, x):
         self.B = x >> 8
         self.C = x & 0x00FF
@@ -105,8 +104,9 @@ class CPU:
         logger.debug("State loaded: " + self.dump_state(""))
 
     def dump_state(self, sym_label):
-        opcode_data = [self.mb.getitem(self.mb.cpu.PC + n) for n in range(3)
-                       ]  # Max 3 length, then we don't need to backtrack
+        opcode_data = [
+            self.mb.getitem(self.mb.cpu.PC + n) for n in range(3)
+        ]  # Max 3 length, then we don't need to backtrack
 
         opcode = opcode_data[0]
         opcode_length = opcodes.OPCODE_LENGTHS[opcode]
@@ -114,8 +114,9 @@ class CPU:
         if opcode == 0xCB:
             opcode_str += f" {opcodes.CPU_COMMANDS[opcode_data[1]+0x100]}"
         else:
-            opcode_str += " " + " ".join(f"{d:02X}"
-                                         for d in opcode_data[1:opcode_length])
+            opcode_str += " " + " ".join(
+                f"{d:02X}" for d in opcode_data[1:opcode_length]
+            )
 
         return (
             "\n"
@@ -130,7 +131,8 @@ class CPU:
             f"Timer Intr.: {self.mb.timer.cycles_to_interrupt()}\n"
             f"halted:{self.halted}, "
             f"interrupt_queued:{self.interrupt_queued}, "
-            f"stopped:{self.stopped}\n")
+            f"stopped:{self.stopped}\n"
+        )
 
     def set_interruptflag(self, flag):
         self.interrupts_flag_register |= flag
@@ -155,7 +157,12 @@ class CPU:
         # Sometimes a RET can go to the same PC, so we check the SP too.
         old_sp = self.SP
         cycles = self.fetch_and_execute()
-        if not self.halted and old_pc == self.PC and old_sp == self.SP and not self.is_stuck:
+        if (
+            not self.halted
+            and old_pc == self.PC
+            and old_sp == self.SP
+            and not self.is_stuck
+        ):
             logger.error("CPU is stuck: " + self.dump_state(""))
             self.is_stuck = True
         self.interrupt_queued = False
@@ -166,8 +173,9 @@ class CPU:
             # Interrupt already queued. This happens only when using a debugger.
             return False
 
-        if (self.interrupts_flag_register
-                & 0b11111) & (self.interrupts_enabled_register & 0b11111):
+        if (self.interrupts_flag_register & 0b11111) & (
+            self.interrupts_enabled_register & 0b11111
+        ):
             if self.handle_interrupt(INTR_VBLANK, 0x0040):
                 self.interrupt_queued = True
             elif self.handle_interrupt(INTR_LCDC, 0x0048):
@@ -187,8 +195,10 @@ class CPU:
         return False
 
     def handle_interrupt(self, flag, addr):
-        if (not self.interrupts_enabled_register & flag
-                or not self.interrupts_flag_register & flag):
+        if (
+            not self.interrupts_enabled_register & flag
+            or not self.interrupts_flag_register & flag
+        ):
             return False
         # Clear interrupt flag
         if self.halted:

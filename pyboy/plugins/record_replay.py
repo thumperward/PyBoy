@@ -18,10 +18,15 @@ logger = logging.getLogger(__name__)
 
 
 class RecordReplay(PyBoyPlugin):
-    argv = [("--record-input", {
-        "action": "store_true",
-        "help": "Record user input and save to a file (internal use)"
-    })]
+    argv = [
+        (
+            "--record-input",
+            {
+                "action": "store_true",
+                "help": "Record user input and save to a file (internal use)",
+            },
+        )
+    ]
 
     def __init__(self, *args):
         super().__init__(*args)
@@ -32,7 +37,8 @@ class RecordReplay(PyBoyPlugin):
         if not self.pyboy_argv.get("loadstate"):
             logger.warning(
                 "To replay input consistently later, it is recommended to load a state at boot. This will be"
-                "embedded into the .replay file.")
+                "embedded into the .replay file."
+            )
 
         logger.info("Recording event inputs")
         self.recorded_input = []
@@ -41,10 +47,18 @@ class RecordReplay(PyBoyPlugin):
         # Input recorder
         if len(events) != 0:
             self.recorded_input.append(
-                (self.pyboy.frame_count, [e.event for e in events],
-                 base64.b64encode(
-                     np.ascontiguousarray(self.pyboy.botsupport_manager(
-                     ).screen().screen_ndarray())).decode("utf8")))
+                (
+                    self.pyboy.frame_count,
+                    [e.event for e in events],
+                    base64.b64encode(
+                        np.ascontiguousarray(
+                            self.pyboy.botsupport_manager()
+                            .screen()
+                            .screen_ndarray()
+                        )
+                    ).decode("utf8"),
+                )
+            )
         return events
 
     def stop(self):

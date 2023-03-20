@@ -105,11 +105,13 @@ def sdl2_event_pump(events):
         elif event.type == sdl2.SDL_KEYDOWN:
             events.append(
                 WindowEvent(
-                    KEY_DOWN.get(event.key.keysym.sym, WindowEvent.PASS)))
+                    KEY_DOWN.get(event.key.keysym.sym, WindowEvent.PASS)
+                )
+            )
         elif event.type == sdl2.SDL_KEYUP:
             events.append(
-                WindowEvent(KEY_UP.get(event.key.keysym.sym,
-                                       WindowEvent.PASS)))
+                WindowEvent(KEY_UP.get(event.key.keysym.sym, WindowEvent.PASS))
+            )
         elif event.type == sdl2.SDL_WINDOWEVENT:
             if event.window.windowID == 1:
                 if event.window.event == sdl2.SDL_WINDOWEVENT_FOCUS_LOST:
@@ -118,10 +120,13 @@ def sdl2_event_pump(events):
                     events.append(WindowEvent(WindowEvent.WINDOW_FOCUS))
         elif event.type == sdl2.SDL_MOUSEWHEEL:
             events.append(
-                WindowEventMouse(WindowEvent._INTERNAL_MOUSE,
-                                 window_id=event.motion.windowID,
-                                 mouse_scroll_x=event.wheel.x,
-                                 mouse_scroll_y=event.wheel.y))
+                WindowEventMouse(
+                    WindowEvent._INTERNAL_MOUSE,
+                    window_id=event.motion.windowID,
+                    mouse_scroll_x=event.wheel.x,
+                    mouse_scroll_y=event.wheel.y,
+                )
+            )
         elif event.type in [sdl2.SDL_MOUSEMOTION, sdl2.SDL_MOUSEBUTTONUP]:
             mouse_button = -1
             if event.type == sdl2.SDL_MOUSEBUTTONUP:
@@ -131,11 +136,14 @@ def sdl2_event_pump(events):
                     mouse_button = 1
 
             events.append(
-                WindowEventMouse(WindowEvent._INTERNAL_MOUSE,
-                                 window_id=event.motion.windowID,
-                                 mouse_x=event.motion.x,
-                                 mouse_y=event.motion.y,
-                                 mouse_button=mouse_button))
+                WindowEventMouse(
+                    WindowEvent._INTERNAL_MOUSE,
+                    window_id=event.motion.windowID,
+                    mouse_x=event.motion.x,
+                    mouse_y=event.motion.y,
+                    mouse_button=mouse_button,
+                )
+            )
         elif event.type == sdl2.SDL_CONTROLLERDEVICEADDED:
             _sdlcontroller = sdl2.SDL_GameControllerOpen(event.cdevice.which)
         elif event.type == sdl2.SDL_CONTROLLERDEVICEREMOVED:
@@ -143,17 +151,19 @@ def sdl2_event_pump(events):
         elif event.type == sdl2.SDL_CONTROLLERBUTTONDOWN:
             events.append(
                 WindowEvent(
-                    CONTROLLER_DOWN.get(event.cbutton.button,
-                                        WindowEvent.PASS)))
+                    CONTROLLER_DOWN.get(event.cbutton.button, WindowEvent.PASS)
+                )
+            )
         elif event.type == sdl2.SDL_CONTROLLERBUTTONUP:
             events.append(
                 WindowEvent(
-                    CONTROLLER_UP.get(event.cbutton.button, WindowEvent.PASS)))
+                    CONTROLLER_UP.get(event.cbutton.button, WindowEvent.PASS)
+                )
+            )
     return events
 
 
 class WindowSDL2(PyBoyWindowPlugin):
-
     def __init__(self, pyboy, mb, pyboy_argv):
         super().__init__(pyboy, mb, pyboy_argv)
 
@@ -163,19 +173,26 @@ class WindowSDL2(PyBoyWindowPlugin):
         sdl2.SDL_Init(sdl2.SDL_INIT_VIDEO | sdl2.SDL_INIT_GAMECONTROLLER)
         self._ftime = time.perf_counter_ns()
 
-        self._window = sdl2.SDL_CreateWindow(b"PyBoy",
-                                             sdl2.SDL_WINDOWPOS_CENTERED,
-                                             sdl2.SDL_WINDOWPOS_CENTERED,
-                                             self._scaledresolution[0],
-                                             self._scaledresolution[1],
-                                             sdl2.SDL_WINDOW_RESIZABLE)
+        self._window = sdl2.SDL_CreateWindow(
+            b"PyBoy",
+            sdl2.SDL_WINDOWPOS_CENTERED,
+            sdl2.SDL_WINDOWPOS_CENTERED,
+            self._scaledresolution[0],
+            self._scaledresolution[1],
+            sdl2.SDL_WINDOW_RESIZABLE,
+        )
 
         self._sdlrenderer = sdl2.SDL_CreateRenderer(
-            self._window, -1, sdl2.SDL_RENDERER_ACCELERATED)
+            self._window, -1, sdl2.SDL_RENDERER_ACCELERATED
+        )
         sdl2.SDL_RenderSetLogicalSize(self._sdlrenderer, COLS, ROWS)
         self._sdltexturebuffer = sdl2.SDL_CreateTexture(
-            self._sdlrenderer, sdl2.SDL_PIXELFORMAT_RGBA8888,
-            sdl2.SDL_TEXTUREACCESS_STATIC, COLS, ROWS)
+            self._sdlrenderer,
+            sdl2.SDL_PIXELFORMAT_RGBA8888,
+            sdl2.SDL_TEXTUREACCESS_STATIC,
+            COLS,
+            ROWS,
+        )
 
         sdl2.SDL_ShowWindow(self._window)
         self.fullscreen = False
@@ -191,15 +208,21 @@ class WindowSDL2(PyBoyWindowPlugin):
                     sdl2.SDL_SetWindowFullscreen(self._window, 0)
                 else:
                     sdl2.SDL_SetWindowFullscreen(
-                        self._window, sdl2.SDL_WINDOW_FULLSCREEN_DESKTOP)
+                        self._window, sdl2.SDL_WINDOW_FULLSCREEN_DESKTOP
+                    )
                 self.fullscreen ^= True
         return events
 
     def post_tick(self):
-        sdl2.SDL_UpdateTexture(self._sdltexturebuffer, None,
-                               self.renderer._screenbuffer_ptr, COLS * 4)
-        sdl2.SDL_RenderCopy(self._sdlrenderer, self._sdltexturebuffer, None,
-                            None)
+        sdl2.SDL_UpdateTexture(
+            self._sdltexturebuffer,
+            None,
+            self.renderer._screenbuffer_ptr,
+            COLS * 4,
+        )
+        sdl2.SDL_RenderCopy(
+            self._sdlrenderer, self._sdltexturebuffer, None, None
+        )
         sdl2.SDL_RenderPresent(self._sdlrenderer)
         sdl2.SDL_RenderClear(self._sdlrenderer)
 
@@ -214,7 +237,7 @@ class WindowSDL2(PyBoyWindowPlugin):
     def frame_limiter(self, speed):
         self._ftime += int((1.0 / (60.0 * speed)) * 1_000_000_000)
         now = time.perf_counter_ns()
-        if (self._ftime > now):
+        if self._ftime > now:
             delay = (self._ftime - now) // 1_000_000
             sdl2.SDL_Delay(delay)
         else:

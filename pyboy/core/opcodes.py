@@ -1,4 +1,3 @@
-
 # THIS FILE IS AUTO-GENERATED!!!
 # DO NOT MODIFY THIS FILE.
 # CHANGES TO THE CODE SHOULD BE MADE IN 'opcodes_gen.py'.
@@ -91,7 +90,7 @@ def RLCA_07(cpu):  # 07 RLCA
 
 def LD_08(cpu, v):  # 08 LD (a16),SP
     cpu.mb.setitem(v, cpu.SP & 0xFF)
-    cpu.mb.setitem(v+1, cpu.SP >> 8)
+    cpu.mb.setitem(v + 1, cpu.SP >> 8)
     cpu.PC += 3
     cpu.PC &= 0xFFFF
     return 20
@@ -100,7 +99,9 @@ def LD_08(cpu, v):  # 08 LD (a16),SP
 def ADD_09(cpu):  # 09 ADD HL,BC
     t = cpu.HL + ((cpu.B << 8) + cpu.C)
     flag = 0b00000000
-    flag += (((cpu.HL & 0xFFF) + (((cpu.B << 8) + cpu.C) & 0xFFF)) > 0xFFF) << FLAGH
+    flag += (
+        ((cpu.HL & 0xFFF) + (((cpu.B << 8) + cpu.C) & 0xFFF)) > 0xFFF
+    ) << FLAGH
     flag += (t > 0xFFFF) << FLAGC
     cpu.F &= 0b10000000
     cpu.F |= flag
@@ -266,7 +267,9 @@ def JR_18(cpu, v):  # 18 JR r8
 def ADD_19(cpu):  # 19 ADD HL,DE
     t = cpu.HL + ((cpu.D << 8) + cpu.E)
     flag = 0b00000000
-    flag += (((cpu.HL & 0xFFF) + (((cpu.D << 8) + cpu.E) & 0xFFF)) > 0xFFF) << FLAGH
+    flag += (
+        ((cpu.HL & 0xFFF) + (((cpu.D << 8) + cpu.E) & 0xFFF)) > 0xFFF
+    ) << FLAGH
     flag += (t > 0xFFFF) << FLAGC
     cpu.F &= 0b10000000
     cpu.F |= flag
@@ -345,7 +348,7 @@ def RRA_1F(cpu):  # 1F RRA
 def JR_20(cpu, v):  # 20 JR NZ,r8
     cpu.PC += 2
     if cpu.f_nz():
-        cpu.PC += ((v ^ 0x80) - 0x80)
+        cpu.PC += (v ^ 0x80) - 0x80
         cpu.PC &= 0xFFFF
         return 12
     else:
@@ -440,7 +443,7 @@ def DAA_27(cpu):  # 27 DAA
 def JR_28(cpu, v):  # 28 JR Z,r8
     cpu.PC += 2
     if cpu.f_z():
-        cpu.PC += ((v ^ 0x80) - 0x80)
+        cpu.PC += (v ^ 0x80) - 0x80
         cpu.PC &= 0xFFFF
         return 12
     else:
@@ -529,7 +532,7 @@ def CPL_2F(cpu):  # 2F CPL
 def JR_30(cpu, v):  # 30 JR NC,r8
     cpu.PC += 2
     if cpu.f_nc():
-        cpu.PC += ((v ^ 0x80) - 0x80)
+        cpu.PC += (v ^ 0x80) - 0x80
         cpu.PC &= 0xFFFF
         return 12
     else:
@@ -610,7 +613,7 @@ def SCF_37(cpu):  # 37 SCF
 def JR_38(cpu, v):  # 38 JR C,r8
     cpu.PC += 2
     if cpu.f_c():
-        cpu.PC += ((v ^ 0x80) - 0x80)
+        cpu.PC += (v ^ 0x80) - 0x80
         cpu.PC &= 0xFFFF
         return 12
     else:
@@ -724,14 +727,14 @@ def LD_43(cpu):  # 43 LD B,E
 
 
 def LD_44(cpu):  # 44 LD B,H
-    cpu.B = (cpu.HL >> 8)
+    cpu.B = cpu.HL >> 8
     cpu.PC += 1
     cpu.PC &= 0xFFFF
     return 4
 
 
 def LD_45(cpu):  # 45 LD B,L
-    cpu.B = (cpu.HL & 0xFF)
+    cpu.B = cpu.HL & 0xFF
     cpu.PC += 1
     cpu.PC &= 0xFFFF
     return 4
@@ -780,14 +783,14 @@ def LD_4B(cpu):  # 4B LD C,E
 
 
 def LD_4C(cpu):  # 4C LD C,H
-    cpu.C = (cpu.HL >> 8)
+    cpu.C = cpu.HL >> 8
     cpu.PC += 1
     cpu.PC &= 0xFFFF
     return 4
 
 
 def LD_4D(cpu):  # 4D LD C,L
-    cpu.C = (cpu.HL & 0xFF)
+    cpu.C = cpu.HL & 0xFF
     cpu.PC += 1
     cpu.PC &= 0xFFFF
     return 4
@@ -836,14 +839,14 @@ def LD_53(cpu):  # 53 LD D,E
 
 
 def LD_54(cpu):  # 54 LD D,H
-    cpu.D = (cpu.HL >> 8)
+    cpu.D = cpu.HL >> 8
     cpu.PC += 1
     cpu.PC &= 0xFFFF
     return 4
 
 
 def LD_55(cpu):  # 55 LD D,L
-    cpu.D = (cpu.HL & 0xFF)
+    cpu.D = cpu.HL & 0xFF
     cpu.PC += 1
     cpu.PC &= 0xFFFF
     return 4
@@ -892,14 +895,14 @@ def LD_5B(cpu):  # 5B LD E,E
 
 
 def LD_5C(cpu):  # 5C LD E,H
-    cpu.E = (cpu.HL >> 8)
+    cpu.E = cpu.HL >> 8
     cpu.PC += 1
     cpu.PC &= 0xFFFF
     return 4
 
 
 def LD_5D(cpu):  # 5D LD E,L
-    cpu.E = (cpu.HL & 0xFF)
+    cpu.E = cpu.HL & 0xFF
     cpu.PC += 1
     cpu.PC &= 0xFFFF
     return 4
@@ -1114,14 +1117,14 @@ def LD_7B(cpu):  # 7B LD A,E
 
 
 def LD_7C(cpu):  # 7C LD A,H
-    cpu.A = (cpu.HL >> 8)
+    cpu.A = cpu.HL >> 8
     cpu.PC += 1
     cpu.PC &= 0xFFFF
     return 4
 
 
 def LD_7D(cpu):  # 7D LD A,L
-    cpu.A = (cpu.HL & 0xFF)
+    cpu.A = cpu.HL & 0xFF
     cpu.PC += 1
     cpu.PC &= 0xFFFF
     return 4
@@ -1340,7 +1343,9 @@ def ADC_8D(cpu):  # 8D ADC A,L
     t = cpu.A + (cpu.HL & 0xFF) + cpu.f_c()
     flag = 0b00000000
     flag += ((t & 0xFF) == 0) << FLAGZ
-    flag += (((cpu.A & 0xF) + ((cpu.HL & 0xFF) & 0xF) + cpu.f_c()) > 0xF) << FLAGH
+    flag += (
+        ((cpu.A & 0xF) + ((cpu.HL & 0xFF) & 0xF) + cpu.f_c()) > 0xF
+    ) << FLAGH
     flag += (t > 0xFF) << FLAGC
     cpu.F &= 0b00000000
     cpu.F |= flag
@@ -1355,8 +1360,9 @@ def ADC_8E(cpu):  # 8E ADC A,(HL)
     t = cpu.A + cpu.mb.getitem(cpu.HL) + cpu.f_c()
     flag = 0b00000000
     flag += ((t & 0xFF) == 0) << FLAGZ
-    flag += (((cpu.A & 0xF) + (cpu.mb.getitem(cpu.HL)
-             & 0xF) + cpu.f_c()) > 0xF) << FLAGH
+    flag += (
+        ((cpu.A & 0xF) + (cpu.mb.getitem(cpu.HL) & 0xF) + cpu.f_c()) > 0xF
+    ) << FLAGH
     flag += (t > 0xFF) << FLAGC
     cpu.F &= 0b00000000
     cpu.F |= flag
@@ -1596,8 +1602,9 @@ def SBC_9E(cpu):  # 9E SBC A,(HL)
     t = cpu.A - cpu.mb.getitem(cpu.HL) - cpu.f_c()
     flag = 0b01000000
     flag += ((t & 0xFF) == 0) << FLAGZ
-    flag += (((cpu.A & 0xF) - (cpu.mb.getitem(cpu.HL)
-             & 0xF) - cpu.f_c()) < 0) << FLAGH
+    flag += (
+        ((cpu.A & 0xF) - (cpu.mb.getitem(cpu.HL) & 0xF) - cpu.f_c()) < 0
+    ) << FLAGH
     flag += (t < 0) << FLAGC
     cpu.F &= 0b00000000
     cpu.F |= flag
@@ -2092,8 +2099,8 @@ def CALL_C4(cpu, v):  # C4 CALL NZ,a16
 
 
 def CALL_C4_result(cpu, v):
-    cpu.mb.setitem((cpu.SP-1) & 0xFFFF, cpu.PC >> 8)  # High
-    cpu.mb.setitem((cpu.SP-2) & 0xFFFF, cpu.PC & 0xFF)  # Low
+    cpu.mb.setitem((cpu.SP - 1) & 0xFFFF, cpu.PC >> 8)  # High
+    cpu.mb.setitem((cpu.SP - 2) & 0xFFFF, cpu.PC & 0xFF)  # Low
     cpu.SP -= 2
     cpu.SP &= 0xFFFF
     cpu.PC = v
@@ -2101,8 +2108,8 @@ def CALL_C4_result(cpu, v):
 
 
 def PUSH_C5(cpu):  # C5 PUSH BC
-    cpu.mb.setitem((cpu.SP-1) & 0xFFFF, cpu.B)  # High
-    cpu.mb.setitem((cpu.SP-2) & 0xFFFF, cpu.C)  # Low
+    cpu.mb.setitem((cpu.SP - 1) & 0xFFFF, cpu.B)  # High
+    cpu.mb.setitem((cpu.SP - 2) & 0xFFFF, cpu.C)  # Low
     cpu.SP -= 2
     cpu.SP &= 0xFFFF
     cpu.PC += 1
@@ -2128,8 +2135,8 @@ def ADD_C6(cpu, v):  # C6 ADD A,d8
 def RST_C7(cpu):  # C7 RST 00H
     cpu.PC += 1
     cpu.PC &= 0xFFFF
-    cpu.mb.setitem((cpu.SP-1) & 0xFFFF, cpu.PC >> 8)  # High
-    cpu.mb.setitem((cpu.SP-2) & 0xFFFF, cpu.PC & 0xFF)  # Low
+    cpu.mb.setitem((cpu.SP - 1) & 0xFFFF, cpu.PC >> 8)  # High
+    cpu.mb.setitem((cpu.SP - 2) & 0xFFFF, cpu.PC & 0xFF)  # Low
     cpu.SP -= 2
     cpu.SP &= 0xFFFF
     cpu.PC = 0
@@ -2168,7 +2175,7 @@ def JP_CA(cpu, v):  # CA JP Z,a16
 
 
 def PREFIX_CB(cpu):  # CB PREFIX CB
-    logger.critical('CB cannot be called!')
+    logger.critical("CB cannot be called!")
     cpu.PC += 1
     cpu.PC &= 0xFFFF
     return 4
@@ -2181,8 +2188,8 @@ def CALL_CC(cpu, v):  # CC CALL Z,a16
 
 
 def CALL_CC_result(cpu, v):
-    cpu.mb.setitem((cpu.SP-1) & 0xFFFF, cpu.PC >> 8)  # High
-    cpu.mb.setitem((cpu.SP-2) & 0xFFFF, cpu.PC & 0xFF)  # Low
+    cpu.mb.setitem((cpu.SP - 1) & 0xFFFF, cpu.PC >> 8)  # High
+    cpu.mb.setitem((cpu.SP - 2) & 0xFFFF, cpu.PC & 0xFF)  # Low
     cpu.SP -= 2
     cpu.SP &= 0xFFFF
     cpu.PC = v
@@ -2192,8 +2199,8 @@ def CALL_CC_result(cpu, v):
 def CALL_CD(cpu, v):  # CD CALL a16
     cpu.PC += 3
     cpu.PC &= 0xFFFF
-    cpu.mb.setitem((cpu.SP-1) & 0xFFFF, cpu.PC >> 8)  # High
-    cpu.mb.setitem((cpu.SP-2) & 0xFFFF, cpu.PC & 0xFF)  # Low
+    cpu.mb.setitem((cpu.SP - 1) & 0xFFFF, cpu.PC >> 8)  # High
+    cpu.mb.setitem((cpu.SP - 2) & 0xFFFF, cpu.PC & 0xFF)  # Low
     cpu.SP -= 2
     cpu.SP &= 0xFFFF
     cpu.PC = v
@@ -2218,8 +2225,8 @@ def ADC_CE(cpu, v):  # CE ADC A,d8
 def RST_CF(cpu):  # CF RST 08H
     cpu.PC += 1
     cpu.PC &= 0xFFFF
-    cpu.mb.setitem((cpu.SP-1) & 0xFFFF, cpu.PC >> 8)  # High
-    cpu.mb.setitem((cpu.SP-2) & 0xFFFF, cpu.PC & 0xFF)  # Low
+    cpu.mb.setitem((cpu.SP - 1) & 0xFFFF, cpu.PC >> 8)  # High
+    cpu.mb.setitem((cpu.SP - 2) & 0xFFFF, cpu.PC & 0xFF)  # Low
     cpu.SP -= 2
     cpu.SP &= 0xFFFF
     cpu.PC = 8
@@ -2266,8 +2273,8 @@ def CALL_D4(cpu, v):  # D4 CALL NC,a16
 
 
 def CALL_D4_result(cpu, v):
-    cpu.mb.setitem((cpu.SP-1) & 0xFFFF, cpu.PC >> 8)  # High
-    cpu.mb.setitem((cpu.SP-2) & 0xFFFF, cpu.PC & 0xFF)  # Low
+    cpu.mb.setitem((cpu.SP - 1) & 0xFFFF, cpu.PC >> 8)  # High
+    cpu.mb.setitem((cpu.SP - 2) & 0xFFFF, cpu.PC & 0xFF)  # Low
     cpu.SP -= 2
     cpu.SP &= 0xFFFF
     cpu.PC = v
@@ -2275,8 +2282,8 @@ def CALL_D4_result(cpu, v):
 
 
 def PUSH_D5(cpu):  # D5 PUSH DE
-    cpu.mb.setitem((cpu.SP-1) & 0xFFFF, cpu.D)  # High
-    cpu.mb.setitem((cpu.SP-2) & 0xFFFF, cpu.E)  # Low
+    cpu.mb.setitem((cpu.SP - 1) & 0xFFFF, cpu.D)  # High
+    cpu.mb.setitem((cpu.SP - 2) & 0xFFFF, cpu.E)  # Low
     cpu.SP -= 2
     cpu.SP &= 0xFFFF
     cpu.PC += 1
@@ -2302,8 +2309,8 @@ def SUB_D6(cpu, v):  # D6 SUB d8
 def RST_D7(cpu):  # D7 RST 10H
     cpu.PC += 1
     cpu.PC &= 0xFFFF
-    cpu.mb.setitem((cpu.SP-1) & 0xFFFF, cpu.PC >> 8)  # High
-    cpu.mb.setitem((cpu.SP-2) & 0xFFFF, cpu.PC & 0xFF)  # Low
+    cpu.mb.setitem((cpu.SP - 1) & 0xFFFF, cpu.PC >> 8)  # High
+    cpu.mb.setitem((cpu.SP - 2) & 0xFFFF, cpu.PC & 0xFF)  # Low
     cpu.SP -= 2
     cpu.SP &= 0xFFFF
     cpu.PC = 16
@@ -2349,8 +2356,8 @@ def CALL_DC(cpu, v):  # DC CALL C,a16
 
 
 def CALL_DC_result(cpu, v):
-    cpu.mb.setitem((cpu.SP-1) & 0xFFFF, cpu.PC >> 8)  # High
-    cpu.mb.setitem((cpu.SP-2) & 0xFFFF, cpu.PC & 0xFF)  # Low
+    cpu.mb.setitem((cpu.SP - 1) & 0xFFFF, cpu.PC >> 8)  # High
+    cpu.mb.setitem((cpu.SP - 2) & 0xFFFF, cpu.PC & 0xFF)  # Low
     cpu.SP -= 2
     cpu.SP &= 0xFFFF
     cpu.PC = v
@@ -2375,8 +2382,8 @@ def SBC_DE(cpu, v):  # DE SBC A,d8
 def RST_DF(cpu):  # DF RST 18H
     cpu.PC += 1
     cpu.PC &= 0xFFFF
-    cpu.mb.setitem((cpu.SP-1) & 0xFFFF, cpu.PC >> 8)  # High
-    cpu.mb.setitem((cpu.SP-2) & 0xFFFF, cpu.PC & 0xFF)  # Low
+    cpu.mb.setitem((cpu.SP - 1) & 0xFFFF, cpu.PC >> 8)  # High
+    cpu.mb.setitem((cpu.SP - 2) & 0xFFFF, cpu.PC & 0xFF)  # Low
     cpu.SP -= 2
     cpu.SP &= 0xFFFF
     cpu.PC = 24
@@ -2391,8 +2398,9 @@ def LDH_E0(cpu, v):  # E0 LDH (a8),A
 
 
 def POP_E1(cpu):  # E1 POP HL
-    cpu.HL = (cpu.mb.getitem((cpu.SP + 1) & 0xFFFF) << 8) + \
-        cpu.mb.getitem(cpu.SP)  # High
+    cpu.HL = (cpu.mb.getitem((cpu.SP + 1) & 0xFFFF) << 8) + cpu.mb.getitem(
+        cpu.SP
+    )  # High
     cpu.SP += 2
     cpu.SP &= 0xFFFF
     cpu.PC += 1
@@ -2408,8 +2416,8 @@ def LD_E2(cpu):  # E2 LD (C),A
 
 
 def PUSH_E5(cpu):  # E5 PUSH HL
-    cpu.mb.setitem((cpu.SP-1) & 0xFFFF, cpu.HL >> 8)  # High
-    cpu.mb.setitem((cpu.SP-2) & 0xFFFF, cpu.HL & 0xFF)  # Low
+    cpu.mb.setitem((cpu.SP - 1) & 0xFFFF, cpu.HL >> 8)  # High
+    cpu.mb.setitem((cpu.SP - 2) & 0xFFFF, cpu.HL & 0xFF)  # Low
     cpu.SP -= 2
     cpu.SP &= 0xFFFF
     cpu.PC += 1
@@ -2433,8 +2441,8 @@ def AND_E6(cpu, v):  # E6 AND d8
 def RST_E7(cpu):  # E7 RST 20H
     cpu.PC += 1
     cpu.PC &= 0xFFFF
-    cpu.mb.setitem((cpu.SP-1) & 0xFFFF, cpu.PC >> 8)  # High
-    cpu.mb.setitem((cpu.SP-2) & 0xFFFF, cpu.PC & 0xFF)  # Low
+    cpu.mb.setitem((cpu.SP - 1) & 0xFFFF, cpu.PC >> 8)  # High
+    cpu.mb.setitem((cpu.SP - 2) & 0xFFFF, cpu.PC & 0xFF)  # Low
     cpu.SP -= 2
     cpu.SP &= 0xFFFF
     cpu.PC = 32
@@ -2483,8 +2491,8 @@ def XOR_EE(cpu, v):  # EE XOR d8
 def RST_EF(cpu):  # EF RST 28H
     cpu.PC += 1
     cpu.PC &= 0xFFFF
-    cpu.mb.setitem((cpu.SP-1) & 0xFFFF, cpu.PC >> 8)  # High
-    cpu.mb.setitem((cpu.SP-2) & 0xFFFF, cpu.PC & 0xFF)  # Low
+    cpu.mb.setitem((cpu.SP - 1) & 0xFFFF, cpu.PC >> 8)  # High
+    cpu.mb.setitem((cpu.SP - 2) & 0xFFFF, cpu.PC & 0xFF)  # Low
     cpu.SP -= 2
     cpu.SP &= 0xFFFF
     cpu.PC = 40
@@ -2523,8 +2531,8 @@ def DI_F3(cpu):  # F3 DI
 
 
 def PUSH_F5(cpu):  # F5 PUSH AF
-    cpu.mb.setitem((cpu.SP-1) & 0xFFFF, cpu.A)  # High
-    cpu.mb.setitem((cpu.SP-2) & 0xFFFF, cpu.F & 0xF0)  # Low
+    cpu.mb.setitem((cpu.SP - 1) & 0xFFFF, cpu.A)  # High
+    cpu.mb.setitem((cpu.SP - 2) & 0xFFFF, cpu.F & 0xF0)  # Low
     cpu.SP -= 2
     cpu.SP &= 0xFFFF
     cpu.PC += 1
@@ -2548,8 +2556,8 @@ def OR_F6(cpu, v):  # F6 OR d8
 def RST_F7(cpu):  # F7 RST 30H
     cpu.PC += 1
     cpu.PC &= 0xFFFF
-    cpu.mb.setitem((cpu.SP-1) & 0xFFFF, cpu.PC >> 8)  # High
-    cpu.mb.setitem((cpu.SP-2) & 0xFFFF, cpu.PC & 0xFF)  # Low
+    cpu.mb.setitem((cpu.SP - 1) & 0xFFFF, cpu.PC >> 8)  # High
+    cpu.mb.setitem((cpu.SP - 2) & 0xFFFF, cpu.PC & 0xFF)  # Low
     cpu.SP -= 2
     cpu.SP &= 0xFFFF
     cpu.PC = 48
@@ -2608,8 +2616,8 @@ def CP_FE(cpu, v):  # FE CP d8
 def RST_FF(cpu):  # FF RST 38H
     cpu.PC += 1
     cpu.PC &= 0xFFFF
-    cpu.mb.setitem((cpu.SP-1) & 0xFFFF, cpu.PC >> 8)  # High
-    cpu.mb.setitem((cpu.SP-2) & 0xFFFF, cpu.PC & 0xFF)  # Low
+    cpu.mb.setitem((cpu.SP - 1) & 0xFFFF, cpu.PC >> 8)  # High
+    cpu.mb.setitem((cpu.SP - 2) & 0xFFFF, cpu.PC & 0xFF)  # Low
     cpu.SP -= 2
     cpu.SP &= 0xFFFF
     cpu.PC = 56
@@ -2785,8 +2793,11 @@ def RRC_10B(cpu):  # 10B RRC E
 
 
 def RRC_10C(cpu):  # 10C RRC H
-    t = ((cpu.HL >> 8) >> 1) + (((cpu.HL >> 8) & 1) << 7) + \
-        (((cpu.HL >> 8) & 1) << 8)
+    t = (
+        ((cpu.HL >> 8) >> 1)
+        + (((cpu.HL >> 8) & 1) << 7)
+        + (((cpu.HL >> 8) & 1) << 8)
+    )
     flag = 0b00000000
     flag += ((t & 0xFF) == 0) << FLAGZ
     flag += (t > 0xFF) << FLAGC
@@ -2800,8 +2811,11 @@ def RRC_10C(cpu):  # 10C RRC H
 
 
 def RRC_10D(cpu):  # 10D RRC L
-    t = ((cpu.HL & 0xFF) >> 1) + (((cpu.HL & 0xFF) & 1) << 7) + \
-        (((cpu.HL & 0xFF) & 1) << 8)
+    t = (
+        ((cpu.HL & 0xFF) >> 1)
+        + (((cpu.HL & 0xFF) & 1) << 7)
+        + (((cpu.HL & 0xFF) & 1) << 8)
+    )
     flag = 0b00000000
     flag += ((t & 0xFF) == 0) << FLAGZ
     flag += (t > 0xFF) << FLAGC
@@ -2815,8 +2829,11 @@ def RRC_10D(cpu):  # 10D RRC L
 
 
 def RRC_10E(cpu):  # 10E RRC (HL)
-    t = (cpu.mb.getitem(cpu.HL) >> 1) + ((cpu.mb.getitem(cpu.HL) & 1)
-                                         << 7) + ((cpu.mb.getitem(cpu.HL) & 1) << 8)
+    t = (
+        (cpu.mb.getitem(cpu.HL) >> 1)
+        + ((cpu.mb.getitem(cpu.HL) & 1) << 7)
+        + ((cpu.mb.getitem(cpu.HL) & 1) << 8)
+    )
     flag = 0b00000000
     flag += ((t & 0xFF) == 0) << FLAGZ
     flag += (t > 0xFF) << FLAGC
@@ -3026,8 +3043,7 @@ def RR_11C(cpu):  # 11C RR H
 
 
 def RR_11D(cpu):  # 11D RR L
-    t = ((cpu.HL & 0xFF) >> 1) + (cpu.f_c() << 7) + \
-        (((cpu.HL & 0xFF) & 1) << 8)
+    t = ((cpu.HL & 0xFF) >> 1) + (cpu.f_c() << 7) + (((cpu.HL & 0xFF) & 1) << 8)
     flag = 0b00000000
     flag += ((t & 0xFF) == 0) << FLAGZ
     flag += (t > 0xFF) << FLAGC
@@ -3041,8 +3057,11 @@ def RR_11D(cpu):  # 11D RR L
 
 
 def RR_11E(cpu):  # 11E RR (HL)
-    t = (cpu.mb.getitem(cpu.HL) >> 1) + (cpu.f_c() << 7) + \
-        ((cpu.mb.getitem(cpu.HL) & 1) << 8)
+    t = (
+        (cpu.mb.getitem(cpu.HL) >> 1)
+        + (cpu.f_c() << 7)
+        + ((cpu.mb.getitem(cpu.HL) & 1) << 8)
+    )
     flag = 0b00000000
     flag += ((t & 0xFF) == 0) << FLAGZ
     flag += (t > 0xFF) << FLAGC
@@ -3070,7 +3089,7 @@ def RR_11F(cpu):  # 11F RR A
 
 
 def SLA_120(cpu):  # 120 SLA B
-    t = (cpu.B << 1)
+    t = cpu.B << 1
     flag = 0b00000000
     flag += ((t & 0xFF) == 0) << FLAGZ
     flag += (t > 0xFF) << FLAGC
@@ -3084,7 +3103,7 @@ def SLA_120(cpu):  # 120 SLA B
 
 
 def SLA_121(cpu):  # 121 SLA C
-    t = (cpu.C << 1)
+    t = cpu.C << 1
     flag = 0b00000000
     flag += ((t & 0xFF) == 0) << FLAGZ
     flag += (t > 0xFF) << FLAGC
@@ -3098,7 +3117,7 @@ def SLA_121(cpu):  # 121 SLA C
 
 
 def SLA_122(cpu):  # 122 SLA D
-    t = (cpu.D << 1)
+    t = cpu.D << 1
     flag = 0b00000000
     flag += ((t & 0xFF) == 0) << FLAGZ
     flag += (t > 0xFF) << FLAGC
@@ -3112,7 +3131,7 @@ def SLA_122(cpu):  # 122 SLA D
 
 
 def SLA_123(cpu):  # 123 SLA E
-    t = (cpu.E << 1)
+    t = cpu.E << 1
     flag = 0b00000000
     flag += ((t & 0xFF) == 0) << FLAGZ
     flag += (t > 0xFF) << FLAGC
@@ -3126,7 +3145,7 @@ def SLA_123(cpu):  # 123 SLA E
 
 
 def SLA_124(cpu):  # 124 SLA H
-    t = ((cpu.HL >> 8) << 1)
+    t = (cpu.HL >> 8) << 1
     flag = 0b00000000
     flag += ((t & 0xFF) == 0) << FLAGZ
     flag += (t > 0xFF) << FLAGC
@@ -3140,7 +3159,7 @@ def SLA_124(cpu):  # 124 SLA H
 
 
 def SLA_125(cpu):  # 125 SLA L
-    t = ((cpu.HL & 0xFF) << 1)
+    t = (cpu.HL & 0xFF) << 1
     flag = 0b00000000
     flag += ((t & 0xFF) == 0) << FLAGZ
     flag += (t > 0xFF) << FLAGC
@@ -3154,7 +3173,7 @@ def SLA_125(cpu):  # 125 SLA L
 
 
 def SLA_126(cpu):  # 126 SLA (HL)
-    t = (cpu.mb.getitem(cpu.HL) << 1)
+    t = cpu.mb.getitem(cpu.HL) << 1
     flag = 0b00000000
     flag += ((t & 0xFF) == 0) << FLAGZ
     flag += (t > 0xFF) << FLAGC
@@ -3168,7 +3187,7 @@ def SLA_126(cpu):  # 126 SLA (HL)
 
 
 def SLA_127(cpu):  # 127 SLA A
-    t = (cpu.A << 1)
+    t = cpu.A << 1
     flag = 0b00000000
     flag += ((t & 0xFF) == 0) << FLAGZ
     flag += (t > 0xFF) << FLAGC
@@ -3238,8 +3257,9 @@ def SRA_12B(cpu):  # 12B SRA E
 
 
 def SRA_12C(cpu):  # 12C SRA H
-    t = (((cpu.HL >> 8) >> 1) | ((cpu.HL >> 8) & 0x80)) + \
-        (((cpu.HL >> 8) & 1) << 8)
+    t = (((cpu.HL >> 8) >> 1) | ((cpu.HL >> 8) & 0x80)) + (
+        ((cpu.HL >> 8) & 1) << 8
+    )
     flag = 0b00000000
     flag += ((t & 0xFF) == 0) << FLAGZ
     flag += (t > 0xFF) << FLAGC
@@ -3253,8 +3273,9 @@ def SRA_12C(cpu):  # 12C SRA H
 
 
 def SRA_12D(cpu):  # 12D SRA L
-    t = (((cpu.HL & 0xFF) >> 1) | ((cpu.HL & 0xFF) & 0x80)) + \
-        (((cpu.HL & 0xFF) & 1) << 8)
+    t = (((cpu.HL & 0xFF) >> 1) | ((cpu.HL & 0xFF) & 0x80)) + (
+        ((cpu.HL & 0xFF) & 1) << 8
+    )
     flag = 0b00000000
     flag += ((t & 0xFF) == 0) << FLAGZ
     flag += (t > 0xFF) << FLAGC
@@ -3268,8 +3289,9 @@ def SRA_12D(cpu):  # 12D SRA L
 
 
 def SRA_12E(cpu):  # 12E SRA (HL)
-    t = ((cpu.mb.getitem(cpu.HL) >> 1) | (cpu.mb.getitem(cpu.HL) & 0x80)
-         ) + ((cpu.mb.getitem(cpu.HL) & 1) << 8)
+    t = ((cpu.mb.getitem(cpu.HL) >> 1) | (cpu.mb.getitem(cpu.HL) & 0x80)) + (
+        (cpu.mb.getitem(cpu.HL) & 1) << 8
+    )
     flag = 0b00000000
     flag += ((t & 0xFF) == 0) << FLAGZ
     flag += (t > 0xFF) << FLAGC
@@ -3376,7 +3398,8 @@ def SWAP_135(cpu):  # 135 SWAP L
 
 def SWAP_136(cpu):  # 136 SWAP (HL)
     t = ((cpu.mb.getitem(cpu.HL) & 0xF0) >> 4) | (
-        (cpu.mb.getitem(cpu.HL) & 0x0F) << 4)
+        (cpu.mb.getitem(cpu.HL) & 0x0F) << 4
+    )
     flag = 0b00000000
     flag += ((t & 0xFF) == 0) << FLAGZ
     cpu.F &= 0b00000000
@@ -5251,12 +5274,12 @@ def execute_opcode(cpu, opcode):
     pc = cpu.PC
     if oplen == 2:
         # 8-bit immediate
-        v = cpu.mb.getitem(pc+1)
+        v = cpu.mb.getitem(pc + 1)
     elif oplen == 3:
         # 16-bit immediate
         # Flips order of values due to big-endian
-        a = cpu.mb.getitem(pc+2)
-        b = cpu.mb.getitem(pc+1)
+        a = cpu.mb.getitem(pc + 2)
+        b = cpu.mb.getitem(pc + 1)
         v = (a << 8) + b
 
     if opcode == 0x00:
@@ -6285,40 +6308,523 @@ def execute_opcode(cpu, opcode):
         return SET_1FF(cpu)
 
 
-OPCODE_LENGTHS = array.array("B", [
-    1, 3, 1, 1, 1, 1, 2, 1, 3, 1, 1, 1, 1, 1, 2, 1,
-    2, 3, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1,
-    2, 3, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1,
-    2, 3, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 3, 3, 3, 1, 2, 1, 1, 1, 3, 1, 3, 3, 2, 1,
-    1, 1, 3, 0, 3, 1, 2, 1, 1, 1, 3, 0, 3, 0, 2, 1,
-    2, 1, 1, 0, 0, 1, 2, 1, 2, 1, 3, 0, 0, 0, 2, 1,
-    2, 1, 1, 1, 0, 1, 2, 1, 2, 1, 3, 1, 0, 0, 2, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-])
+OPCODE_LENGTHS = array.array(
+    "B",
+    [
+        1,
+        3,
+        1,
+        1,
+        1,
+        1,
+        2,
+        1,
+        3,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        1,
+        2,
+        3,
+        1,
+        1,
+        1,
+        1,
+        2,
+        1,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        1,
+        2,
+        3,
+        1,
+        1,
+        1,
+        1,
+        2,
+        1,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        1,
+        2,
+        3,
+        1,
+        1,
+        1,
+        1,
+        2,
+        1,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        3,
+        3,
+        3,
+        1,
+        2,
+        1,
+        1,
+        1,
+        3,
+        1,
+        3,
+        3,
+        2,
+        1,
+        1,
+        1,
+        3,
+        0,
+        3,
+        1,
+        2,
+        1,
+        1,
+        1,
+        3,
+        0,
+        3,
+        0,
+        2,
+        1,
+        2,
+        1,
+        1,
+        0,
+        0,
+        1,
+        2,
+        1,
+        2,
+        1,
+        3,
+        0,
+        0,
+        0,
+        2,
+        1,
+        2,
+        1,
+        1,
+        1,
+        0,
+        1,
+        2,
+        1,
+        2,
+        1,
+        3,
+        1,
+        0,
+        0,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+    ],
+)
 
 
 CPU_COMMANDS = [

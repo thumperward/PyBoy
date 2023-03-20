@@ -11,7 +11,6 @@ logger = logging.getLogger(__name__)
 
 
 class MBC3(BaseMBC):
-
     def setitem(self, address, value):
         if 0x0000 <= address < 0x2000:
             if (value & 0b00001111) == 0b1010:
@@ -25,7 +24,8 @@ class MBC3(BaseMBC):
                 self.rambank_enabled = False
                 logger.debug(
                     "Unexpected command for MBC3: Address: 0x%0.4x, Value: 0x%0.2x"
-                    % (address, value))
+                    % (address, value)
+                )
         elif 0x2000 <= address < 0x4000:
             value &= 0b01111111
             if value == 0:
@@ -41,16 +41,20 @@ class MBC3(BaseMBC):
                 # https://github.com/pret/pokered/issues/155
                 logger.debug(
                     "RTC not present. Game tried to issue RTC command: 0x%0.4x, 0x%0.2x"
-                    % (address, value))
+                    % (address, value)
+                )
         elif 0xA000 <= address < 0xC000:
             if self.rambank_enabled:
                 if self.rambank_selected <= 0x03:
-                    self.rambanks[self.rambank_selected][address -
-                                                         0xA000] = value
+                    self.rambanks[self.rambank_selected][
+                        address - 0xA000
+                    ] = value
                 elif 0x08 <= self.rambank_selected <= 0x0C:
                     self.rtc.setregister(self.rambank_selected, value)
                 else:
-                    logger.error("Invalid RAM bank selected: 0x%0.2x" %
-                                 self.rambank_selected)
+                    logger.error(
+                        "Invalid RAM bank selected: 0x%0.2x"
+                        % self.rambank_selected
+                    )
         else:
             logger.error("Invalid writing address: 0x%0.4x" % address)

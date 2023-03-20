@@ -12,9 +12,7 @@ except ImportError:
 
 # THIS IS ONLY MADE FOR 8x16 FONTS AND 256 CHARACTER CODE PAGES
 def main(bdffile, unifile, *args):
-
     class Char:
-
         def __init__(self, name):
             self.name = name
             self.meta = {}
@@ -42,12 +40,14 @@ def main(bdffile, unifile, *args):
                     chars[int(newchar.meta["ENCODING"])] = newchar
                     break
                 else:
-                    newchar.meta[line[0]] = (line[1:]
-                                             if len(line) > 2 else line[1])
+                    newchar.meta[line[0]] = (
+                        line[1:] if len(line) > 2 else line[1]
+                    )
 
     chars437 = [chars[n] for n in uni]
     with open("font.txt", "w") as f:
-        print("""
+        print(
+            """
 This project uses a portion of the bold 16 pixel height Terminus font.
 
 The Terminus font is released under the Open Font License, which is
@@ -58,7 +58,8 @@ The full source code for the Terminus font is available at
 
 -----------------------------------------------------------
 """,
-              file=f)
+            file=f,
+        )
 
         with open("OFL.txt", "r") as licensefile:
             for line in licensefile.readlines():
@@ -67,9 +68,10 @@ The full source code for the Terminus font is available at
 
         print("BASE64DATA:", file=f)
         blob = b64encode(
-            zlib.compress(b"".join((b for c in chars437 for b in c.bits))))
+            zlib.compress(b"".join((b for c in chars437 for b in c.bits)))
+        )
         for n in range(0, len(blob), 72):
-            print(blob[n:n + 72].decode(), file=f)
+            print(blob[n : n + 72].decode(), file=f)
 
     if "--bitmap" in args:
         if not Image:
