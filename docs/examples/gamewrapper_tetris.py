@@ -11,7 +11,6 @@ import sys
 file_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, f"{file_path}/..")
 
-
 # Check if the ROM is given through argv
 if len(sys.argv) > 1:
     filename = sys.argv[1]

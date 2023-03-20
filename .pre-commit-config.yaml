@@ -17,10 +17,14 @@ repos:
   #     - id: yapf
   #       additional_dependencies:
   #         - toml
-  - repo: https://github.com/pre-commit/mirrors-isort
-    rev: v5.10.1
+  # - repo: https://github.com/pre-commit/mirrors-isort
+  #   rev: v5.10.1
+  #   hooks:
+  #     - id: isort
+  - repo: https://github.com/psf/black
+    rev: "23.1.0"
     hooks:
-      - id: isort
+      - id: black
   - repo: https://github.com/Yelp/detect-secrets
     rev: v1.4.0
     hooks:
