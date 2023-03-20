@@ -9,6 +9,7 @@ import struct
 
 
 class BootROM:
+
     def __init__(self, bootrom_file, cgb):
         # TODO: Remove this, when no unittests depend on it.
         if bootrom_file == "pyboy_fast":

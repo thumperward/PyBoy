@@ -10,7 +10,7 @@ from .utils import WindowEvent
 
 try:
     from gym import Env
-    from gym.spaces import Discrete, MultiDiscrete, Box
+    from gym.spaces import Box, Discrete, MultiDiscrete
     enabled = True
 except ImportError:
 
@@ -47,7 +47,13 @@ class PyBoyGymEnv(Env):
         actions (list): The list of input IDs of allowed input for the agent (depends of action_type).
 
     """
-    def __init__(self, pyboy, observation_type="tiles", action_type="toggle", simultaneous_actions=False, **kwargs):
+
+    def __init__(self,
+                 pyboy,
+                 observation_type="tiles",
+                 action_type="toggle",
+                 simultaneous_actions=False,
+                 **kwargs):
         # Build pyboy game
         self.pyboy = pyboy
         if str(type(pyboy)) != "<class 'pyboy.pyboy.PyBoy'>":
@@ -64,18 +70,23 @@ class PyBoyGymEnv(Env):
         # Building the action_space
         self._DO_NOTHING = WindowEvent.PASS
         self._buttons = [
-            WindowEvent.PRESS_ARROW_UP, WindowEvent.PRESS_ARROW_DOWN, WindowEvent.PRESS_ARROW_RIGHT,
-            WindowEvent.PRESS_ARROW_LEFT, WindowEvent.PRESS_BUTTON_A, WindowEvent.PRESS_BUTTON_B,
+            WindowEvent.PRESS_ARROW_UP, WindowEvent.PRESS_ARROW_DOWN,
+            WindowEvent.PRESS_ARROW_RIGHT, WindowEvent.PRESS_ARROW_LEFT,
+            WindowEvent.PRESS_BUTTON_A, WindowEvent.PRESS_BUTTON_B,
             WindowEvent.PRESS_BUTTON_SELECT, WindowEvent.PRESS_BUTTON_START
         ]
         self._button_is_pressed = {button: False for button in self._buttons}
 
         self._buttons_release = [
-            WindowEvent.RELEASE_ARROW_UP, WindowEvent.RELEASE_ARROW_DOWN, WindowEvent.RELEASE_ARROW_RIGHT,
-            WindowEvent.RELEASE_ARROW_LEFT, WindowEvent.RELEASE_BUTTON_A, WindowEvent.RELEASE_BUTTON_B,
+            WindowEvent.RELEASE_ARROW_UP, WindowEvent.RELEASE_ARROW_DOWN,
+            WindowEvent.RELEASE_ARROW_RIGHT, WindowEvent.RELEASE_ARROW_LEFT,
+            WindowEvent.RELEASE_BUTTON_A, WindowEvent.RELEASE_BUTTON_B,
             WindowEvent.RELEASE_BUTTON_SELECT, WindowEvent.RELEASE_BUTTON_START
         ]
-        self._release_button = {button: r_button for button, r_button in zip(self._buttons, self._buttons_release)}
+        self._release_button = {
+            button: r_button
+            for button, r_button in zip(self._buttons, self._buttons_release)
+        }
 
         self.actions = [self._DO_NOTHING] + self._buttons
         if action_type == "all":
@@ -85,14 +96,19 @@ class PyBoyGymEnv(Env):
         self.action_type = action_type
 
         if simultaneous_actions:
-            raise NotImplementedError("Not implemented yet, raise an issue on GitHub if needed")
+            raise NotImplementedError(
+                "Not implemented yet, raise an issue on GitHub if needed")
         else:
             self.action_space = Discrete(len(self.actions))
 
         # Building the observation_space
         if observation_type == "raw":
-            screen = np.asarray(self.pyboy.botsupport_manager().screen().screen_ndarray())
-            self.observation_space = Box(low=0, high=255, shape=screen.shape, dtype=np.uint8)
+            screen = np.asarray(
+                self.pyboy.botsupport_manager().screen().screen_ndarray())
+            self.observation_space = Box(low=0,
+                                         high=255,
+                                         shape=screen.shape,
+                                         dtype=np.uint8)
         elif observation_type in ["tiles", "compressed", "minimal"]:
             size_ids = TILES
             if observation_type == "compressed":
@@ -112,7 +128,8 @@ class PyBoyGymEnv(Env):
             nvec = size_ids * np.ones(self.game_wrapper.shape)
             self.observation_space = MultiDiscrete(nvec)
         else:
-            raise NotImplementedError(f"observation_type {observation_type} is invalid")
+            raise NotImplementedError(
+                f"observation_type {observation_type} is invalid")
         self.observation_type = observation_type
 
         self._started = False
@@ -120,11 +137,15 @@ class PyBoyGymEnv(Env):
 
     def _get_observation(self):
         if self.observation_type == "raw":
-            observation = np.asarray(self.pyboy.botsupport_manager().screen().screen_ndarray(), dtype=np.uint8)
+            observation = np.asarray(
+                self.pyboy.botsupport_manager().screen().screen_ndarray(),
+                dtype=np.uint8)
         elif self.observation_type in ["tiles", "compressed", "minimal"]:
-            observation = self.game_wrapper._game_area_np(self.observation_type)
+            observation = self.game_wrapper._game_area_np(
+                self.observation_type)
         else:
-            raise NotImplementedError(f"observation_type {self.observation_type} is invalid")
+            raise NotImplementedError(
+                f"observation_type {self.observation_type} is invalid")
         return observation
 
     def step(self, action_id):

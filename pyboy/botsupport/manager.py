@@ -16,6 +16,7 @@ except ImportError:
 
 
 class BotSupportManager:
+
     def __init__(self, pyboy, mb):
         if not cythonmode:
             self.pyboy = pyboy
@@ -88,7 +89,9 @@ class BotSupportManager:
             for s in range(_constants.SPRITES):
                 sprite = _sprite.Sprite(self.mb, s)
                 for t in sprite.tiles:
-                    if t.tile_identifier == i and (not on_screen or (on_screen and sprite.on_screen)):
+                    if t.tile_identifier == i and (not on_screen or
+                                                   (on_screen
+                                                    and sprite.on_screen)):
                         match.append(s)
             matches.append(match)
         return matches

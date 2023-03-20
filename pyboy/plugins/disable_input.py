@@ -6,7 +6,10 @@ from pyboy.plugins.base_plugin import PyBoyPlugin
 
 
 class DisableInput(PyBoyPlugin):
-    argv = [("--no-input", {"action": "store_true", "help": "Disable all user-input (mostly for autonomous testing)"})]
+    argv = [("--no-input", {
+        "action": "store_true",
+        "help": "Disable all user-input (mostly for autonomous testing)"
+    })]
 
     def handle_events(self, events):
         return []

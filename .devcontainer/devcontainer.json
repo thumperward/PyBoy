@@ -19,5 +19,5 @@
 			]
 		}
 	},
-	"postStartCommand": "pre-commit install"
+	"postStartCommand": "poetry install && pre-commit install"
 }

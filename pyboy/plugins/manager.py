@@ -4,20 +4,20 @@
 #
 
 # imports
-from pyboy.plugins.window_sdl2 import WindowSDL2 # isort:skip
-from pyboy.plugins.window_open_gl import WindowOpenGL # isort:skip
-from pyboy.plugins.window_headless import WindowHeadless # isort:skip
-from pyboy.plugins.window_dummy import WindowDummy # isort:skip
-from pyboy.plugins.debug import Debug # isort:skip
-from pyboy.plugins.disable_input import DisableInput # isort:skip
-from pyboy.plugins.auto_pause import AutoPause # isort:skip
-from pyboy.plugins.record_replay import RecordReplay # isort:skip
-from pyboy.plugins.rewind import Rewind # isort:skip
-from pyboy.plugins.screen_recorder import ScreenRecorder # isort:skip
-from pyboy.plugins.screenshot_recorder import ScreenshotRecorder # isort:skip
-from pyboy.plugins.game_wrapper_super_mario_land import GameWrapperSuperMarioLand # isort:skip
-from pyboy.plugins.game_wrapper_tetris import GameWrapperTetris # isort:skip
-from pyboy.plugins.game_wrapper_kirby_dream_land import GameWrapperKirbyDreamLand # isort:skip
+from pyboy.plugins.window_sdl2 import WindowSDL2  # isort:skip
+from pyboy.plugins.window_open_gl import WindowOpenGL  # isort:skip
+from pyboy.plugins.window_headless import WindowHeadless  # isort:skip
+from pyboy.plugins.window_dummy import WindowDummy  # isort:skip
+from pyboy.plugins.debug import Debug  # isort:skip
+from pyboy.plugins.disable_input import DisableInput  # isort:skip
+from pyboy.plugins.auto_pause import AutoPause  # isort:skip
+from pyboy.plugins.record_replay import RecordReplay  # isort:skip
+from pyboy.plugins.rewind import Rewind  # isort:skip
+from pyboy.plugins.screen_recorder import ScreenRecorder  # isort:skip
+from pyboy.plugins.screenshot_recorder import ScreenshotRecorder  # isort:skip
+from pyboy.plugins.game_wrapper_super_mario_land import GameWrapperSuperMarioLand  # isort:skip
+from pyboy.plugins.game_wrapper_tetris import GameWrapperTetris  # isort:skip
+from pyboy.plugins.game_wrapper_kirby_dream_land import GameWrapperKirbyDreamLand  # isort:skip
 # imports end
 
 
@@ -42,6 +42,7 @@ def parser_arguments():
 
 
 class PluginManager:
+
     def __init__(self, pyboy, mb, pyboy_argv):
         self.pyboy = pyboy
 
@@ -68,12 +69,16 @@ class PluginManager:
         self.screen_recorder_enabled = self.screen_recorder.enabled()
         self.screenshot_recorder = ScreenshotRecorder(pyboy, mb, pyboy_argv)
         self.screenshot_recorder_enabled = self.screenshot_recorder.enabled()
-        self.game_wrapper_super_mario_land = GameWrapperSuperMarioLand(pyboy, mb, pyboy_argv)
-        self.game_wrapper_super_mario_land_enabled = self.game_wrapper_super_mario_land.enabled()
+        self.game_wrapper_super_mario_land = GameWrapperSuperMarioLand(
+            pyboy, mb, pyboy_argv)
+        self.game_wrapper_super_mario_land_enabled = self.game_wrapper_super_mario_land.enabled(
+        )
         self.game_wrapper_tetris = GameWrapperTetris(pyboy, mb, pyboy_argv)
         self.game_wrapper_tetris_enabled = self.game_wrapper_tetris.enabled()
-        self.game_wrapper_kirby_dream_land = GameWrapperKirbyDreamLand(pyboy, mb, pyboy_argv)
-        self.game_wrapper_kirby_dream_land_enabled = self.game_wrapper_kirby_dream_land.enabled()
+        self.game_wrapper_kirby_dream_land = GameWrapperKirbyDreamLand(
+            pyboy, mb, pyboy_argv)
+        self.game_wrapper_kirby_dream_land_enabled = self.game_wrapper_kirby_dream_land.enabled(
+        )
         # plugins_enabled end
 
     def gamewrapper(self):

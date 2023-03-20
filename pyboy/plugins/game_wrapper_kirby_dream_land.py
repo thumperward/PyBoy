@@ -46,7 +46,10 @@ class GameWrapperKirbyDreamLand(PyBoyGameWrapper):
         .. math::
             fitness = score \\cdot health \\cdot lives\\_left
         """
-        super().__init__(*args, game_area_section=(0, 0) + self.shape, game_area_wrap_around=True, **kwargs)
+        super().__init__(*args,
+                         game_area_section=(0, 0) + self.shape,
+                         game_area_wrap_around=True,
+                         **kwargs)
 
     def post_tick(self):
         self._tile_cache_invalid = True
@@ -79,7 +82,9 @@ class GameWrapperKirbyDreamLand(PyBoyGameWrapper):
         while True:
             self.pyboy.tick()
             self.tilemap_background.refresh_lcdc()
-            if self.tilemap_background[0:3, 16] == [231, 224, 235]: # 'HAL' on the first screen
+            if self.tilemap_background[0:3,
+                                       16] == [231, 224, 235
+                                               ]:  # 'HAL' on the first screen
                 break
 
         # Wait for transition to finish (start screen)

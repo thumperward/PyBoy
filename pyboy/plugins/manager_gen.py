@@ -6,10 +6,16 @@ import re
 
 # Plugins and priority!
 # E.g. DisableInput first
-windows = ["WindowSDL2", "WindowOpenGL", "WindowHeadless", "WindowDummy", "Debug"]
-game_wrappers = ["GameWrapperSuperMarioLand", "GameWrapperTetris", "GameWrapperKirbyDreamLand"]
+windows = [
+    "WindowSDL2", "WindowOpenGL", "WindowHeadless", "WindowDummy", "Debug"
+]
+game_wrappers = [
+    "GameWrapperSuperMarioLand", "GameWrapperTetris",
+    "GameWrapperKirbyDreamLand"
+]
 plugins = [
-    "DisableInput", "AutoPause", "RecordReplay", "Rewind", "ScreenRecorder", "ScreenshotRecorder"
+    "DisableInput", "AutoPause", "RecordReplay", "Rewind", "ScreenRecorder",
+    "ScreenshotRecorder"
 ] + game_wrappers
 all_plugins = windows + plugins
 
@@ -63,8 +69,10 @@ if __name__ == "__main__":
 
                 for p in all_plugins:
                     p_name = to_snake_case(p)
-                    lines.append(f"self.{p_name} = {p}(pyboy, mb, pyboy_argv)\n")
-                    lines.append(f"self.{p_name}_enabled = self.{p_name}.enabled()\n")
+                    lines.append(
+                        f"self.{p_name} = {p}(pyboy, mb, pyboy_argv)\n")
+                    lines.append(
+                        f"self.{p_name}_enabled = self.{p_name}.enabled()\n")
 
                 lines.append("# plugins_enabled end\n")
                 out_lines.extend([indentation + l for l in lines])
@@ -90,7 +98,9 @@ if __name__ == "__main__":
 
                 for p in all_plugins:
                     p_name = to_snake_case(p)
-                    lines.append(f"from pyboy.plugins.{p_name} import {p} # isort:skip\n")
+                    lines.append(
+                        f"from pyboy.plugins.{p_name} import {p} # isort:skip\n"
+                    )
 
                 lines.append("# imports end\n")
                 out_lines.extend([indentation + l for l in lines])
@@ -103,7 +113,8 @@ if __name__ == "__main__":
 
                 for p in game_wrappers:
                     p_name = to_snake_case(p)
-                    lines.append(f"if self.{p_name}_enabled: return self.{p_name}\n")
+                    lines.append(
+                        f"if self.{p_name}_enabled: return self.{p_name}\n")
 
                 lines.append("# gamewrapper end\n")
                 out_lines.extend([indentation + l for l in lines])
@@ -174,7 +185,8 @@ if __name__ == "__main__":
 
                 skip_lines(line_iter, "# docs exclude end")
 
-                for p in (set(all_plugins) - set(game_wrappers)) | set(["manager", "manager_gen"]):
+                for p in (set(all_plugins) - set(game_wrappers)) | set(
+                    ["manager", "manager_gen"]):
                     p_name = to_snake_case(p)
                     lines.append(f"\"{p_name}\": False,\n")
 

@@ -34,14 +34,15 @@ def load_cartridge(filename):
     if cartinfo is None:
         raise Exception("Catridge type invalid: %s" % carttype)
 
-    cartdata = (
-        carttype, cartinfo[0].__name__, ", ".join([x for x, y in zip(["SRAM", "Battery", "RTC"], cartinfo[1:]) if y])
-    )
+    cartdata = (carttype, cartinfo[0].__name__, ", ".join(
+        [x for x, y in zip(["SRAM", "Battery", "RTC"], cartinfo[1:]) if y]))
     logger.debug("Cartridge type: 0x%0.2x - %s, %s" % cartdata)
-    logger.debug("Cartridge size: %d ROM banks of 16KB, %s RAM banks of 8KB" % (len(rombanks), external_ram_count))
+    logger.debug("Cartridge size: %d ROM banks of 16KB, %s RAM banks of 8KB" %
+                 (len(rombanks), external_ram_count))
     cartmeta = CARTRIDGE_TABLE[carttype]
 
-    return cartmeta[0](filename, rombanks, external_ram_count, carttype, *cartmeta[1:])
+    return cartmeta[0](filename, rombanks, external_ram_count, carttype,
+                       *cartmeta[1:])
 
 
 def validate_checksum(rombanks):
@@ -67,7 +68,9 @@ def load_romfile(filename):
         raise Exception("Bad ROM file size")
 
     if cythonmode:
-        return memoryview(romdata).cast("B", shape=(len(romdata) // banksize, banksize))
+        return memoryview(romdata).cast("B",
+                                        shape=(len(romdata) // banksize,
+                                               banksize))
     else:
         v = memoryview(romdata)
         return [v[i:i + banksize] for i in range(0, len(romdata), banksize)]
@@ -100,8 +103,8 @@ CARTRIDGE_TABLE = {
 
 # Number of external 8KB banks in the cartridge. Taken from Pan Docs
 EXTERNAL_RAM_TABLE = {
-    0x00: 1, # We wrongfully allocate some RAM, to help Cython
-    0x01: 1, # Only supposed to be 2KB, but we allocate 8KB.
+    0x00: 1,  # We wrongfully allocate some RAM, to help Cython
+    0x01: 1,  # Only supposed to be 2KB, but we allocate 8KB.
     0x02: 1,
     0x03: 4,
     0x04: 16,

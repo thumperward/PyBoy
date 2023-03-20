@@ -11,6 +11,7 @@ import logging
 from array import array
 
 import numpy as np
+
 from pyboy.utils import WindowEvent
 
 from .base_plugin import PyBoyGameWrapper
@@ -43,15 +44,16 @@ TILES = 384
 # Compressed assigns an ID to each Tetromino type
 tiles_compressed = np.zeros(TILES, dtype=np.uint8)
 # BLANK, J, Z, O, L, T, S, I, BLACK
-tiles_types = [[47], [129], [130], [131], [132], [133], [134], [128, 136, 137, 138, 139, 143], [135]]
+tiles_types = [[47], [129], [130], [131], [132], [133], [134],
+               [128, 136, 137, 138, 139, 143], [135]]
 for tiles_type_ID, tiles_type in enumerate(tiles_types):
     for tile_ID in tiles_type:
         tiles_compressed[tile_ID] = tiles_type_ID
 
 # Minimal has 3 id's: Background, Tetromino and "losing tile" (which fills the board when losing)
-tiles_minimal = np.ones(TILES, dtype=np.uint8) # For minimal everything is 1
-tiles_minimal[47] = 0 # Except BLANK which is 0
-tiles_minimal[135] = 2 # And background losing tiles BLACK which is 2
+tiles_minimal = np.ones(TILES, dtype=np.uint8)  # For minimal everything is 1
+tiles_minimal[47] = 0  # Except BLANK which is 0
+tiles_minimal[135] = 2  # And background losing tiles BLACK which is 2
 
 
 class GameWrapperTetris(PyBoyGameWrapper):
@@ -83,19 +85,27 @@ class GameWrapperTetris(PyBoyGameWrapper):
         super().__init__(*args, **kwargs)
 
         ROWS, COLS = self.shape
-        self._cached_game_area_tiles_raw = array("B", [0xFF] * (ROWS*COLS*4))
+        self._cached_game_area_tiles_raw = array("B",
+                                                 [0xFF] * (ROWS * COLS * 4))
 
         if cythonmode:
-            self._cached_game_area_tiles = memoryview(self._cached_game_area_tiles_raw).cast("I", shape=(ROWS, COLS))
+            self._cached_game_area_tiles = memoryview(
+                self._cached_game_area_tiles_raw).cast("I", shape=(ROWS, COLS))
         else:
             v = memoryview(self._cached_game_area_tiles_raw).cast("I")
-            self._cached_game_area_tiles = [v[i:i + COLS] for i in range(0, COLS * ROWS, COLS)]
+            self._cached_game_area_tiles = [
+                v[i:i + COLS] for i in range(0, COLS * ROWS, COLS)
+            ]
 
-        super().__init__(*args, game_area_section=(2, 0) + self.shape, game_area_wrap_around=True, **kwargs)
+        super().__init__(*args,
+                         game_area_section=(2, 0) + self.shape,
+                         game_area_wrap_around=True,
+                         **kwargs)
 
     def _game_area_tiles(self):
         if self._tile_cache_invalid:
-            self._cached_game_area_tiles = np.asarray(self.tilemap_background[2:12, :18], dtype=np.uint32)
+            self._cached_game_area_tiles = np.asarray(
+                self.tilemap_background[2:12, :18], dtype=np.uint32)
             self._tile_cache_invalid = False
         return self._cached_game_area_tiles
 
@@ -130,7 +140,9 @@ class GameWrapperTetris(PyBoyGameWrapper):
         while True:
             self.pyboy.tick()
             self.tilemap_background.refresh_lcdc()
-            if self.tilemap_background[2:9, 14] == [89, 25, 21, 10, 34, 14, 27]: # '1PLAYER' on the first screen
+            if self.tilemap_background[2:9, 14] == [
+                    89, 25, 21, 10, 34, 14, 27
+            ]:  # '1PLAYER' on the first screen
                 break
 
         # Start game. Just press Start when the game allows us.
@@ -225,7 +237,8 @@ class GameWrapperTetris(PyBoyGameWrapper):
             * `"T"`: T-shape
         """
         # Bitmask, as the last two bits determine the direction
-        return inverse_tetromino_table[self.pyboy.get_memory_value(NEXT_TETROMINO_ADDR) & 0b11111100]
+        return inverse_tetromino_table[
+            self.pyboy.get_memory_value(NEXT_TETROMINO_ADDR) & 0b11111100]
 
     def set_tetromino(self, shape):
         """
@@ -258,17 +271,17 @@ class GameWrapperTetris(PyBoyGameWrapper):
         # ROM0:20B0 F0 AE            ld   a,(ff00+AE)
 
         patch1 = [
-            0x3E, # LD A, Tetromino
-            shape_number, # Tetromino
-            0x00, # NOOP
+            0x3E,  # LD A, Tetromino
+            shape_number,  # Tetromino
+            0x00,  # NOOP
         ]
 
         for i, byte in enumerate(patch1):
             self.pyboy.override_memory_value(0, 0x206E + i, byte)
 
         patch2 = [
-            0x3E, # LD A, Tetromino
-            shape_number, # Tetromino
+            0x3E,  # LD A, Tetromino
+            shape_number,  # Tetromino
         ]
 
         for i, byte in enumerate(patch2):
@@ -280,7 +293,9 @@ class GameWrapperTetris(PyBoyGameWrapper):
 
         Game over happens, when the game area is filled with Tetrominos without clearing any rows.
         """
-        return self.tilemap_background[2, 0] == 135 # The tile that fills up the screen when the game is over
+        return self.tilemap_background[
+            2,
+            0] == 135  # The tile that fills up the screen when the game is over
 
     def __repr__(self):
         adjust = 4

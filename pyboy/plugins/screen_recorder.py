@@ -21,6 +21,7 @@ FPS = 60
 
 
 class ScreenRecorder(PyBoyPlugin):
+
     def __init__(self, *args):
         super().__init__(*args)
 
@@ -41,7 +42,8 @@ class ScreenRecorder(PyBoyPlugin):
     def post_tick(self):
         # Plugin: Screen Recorder
         if self.recording:
-            self.add_frame(self.pyboy.botsupport_manager().screen().screen_image())
+            self.add_frame(
+                self.pyboy.botsupport_manager().screen().screen_image())
 
     def add_frame(self, frame):
         # Pillow makes artifacts in the output, if we use 'RGB', which is PyBoy's default format
@@ -54,18 +56,19 @@ class ScreenRecorder(PyBoyPlugin):
             directory = os.path.join(os.path.curdir, "recordings")
             if not os.path.exists(directory):
                 os.makedirs(directory, mode=0o755)
-            path = os.path.join(directory, time.strftime(f"{self.pyboy.cartridge_title()}-%Y.%m.%d-%H.%M.%S.gif"))
+            path = os.path.join(
+                directory,
+                time.strftime(
+                    f"{self.pyboy.cartridge_title()}-%Y.%m.%d-%H.%M.%S.gif"))
 
         if len(self.frames) > 0:
-            self.frames[0].save(
-                path,
-                save_all=True,
-                interlace=False,
-                loop=0,
-                optimize=True,
-                append_images=self.frames[1:],
-                duration=int(round(1000 / fps, -1))
-            )
+            self.frames[0].save(path,
+                                save_all=True,
+                                interlace=False,
+                                loop=0,
+                                optimize=True,
+                                append_images=self.frames[1:],
+                                duration=int(round(1000 / fps, -1)))
 
             logger.info("Screen recording saved in {}".format(path))
         else:
@@ -74,6 +77,8 @@ class ScreenRecorder(PyBoyPlugin):
 
     def enabled(self):
         if Image is None:
-            logger.warning(f"{__name__}: Missing dependency \"Pillow\". Recording disabled")
+            logger.warning(
+                f"{__name__}: Missing dependency \"Pillow\". Recording disabled"
+            )
             return False
         return True

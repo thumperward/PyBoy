@@ -6,6 +6,7 @@
 import logging
 
 import numpy as np
+
 from pyboy.logger import logger
 from pyboy.plugins.base_plugin import PyBoyWindowPlugin
 from pyboy.utils import WindowEvent
@@ -14,16 +15,18 @@ logger = logging.getLogger(__name__)
 
 try:
     import OpenGL.GLUT.freeglut
-    from OpenGL.GL import (
-        GL_COLOR_BUFFER_BIT, GL_DEPTH_BUFFER_BIT, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, glClear, glDrawPixels, glFlush,
-        glPixelZoom
-    )
+    from OpenGL.GL import (GL_COLOR_BUFFER_BIT, GL_DEPTH_BUFFER_BIT, GL_RGBA,
+                           GL_UNSIGNED_INT_8_8_8_8, glClear, glDrawPixels,
+                           glFlush, glPixelZoom)
     # from OpenGL.GLU import *
-    from OpenGL.GLUT import (
-        GLUT_KEY_DOWN, GLUT_KEY_LEFT, GLUT_KEY_RIGHT, GLUT_KEY_UP, GLUT_RGBA, GLUT_SINGLE, glutCreateWindow,
-        glutDestroyWindow, glutDisplayFunc, glutGetWindow, glutInit, glutInitDisplayMode, glutInitWindowSize,
-        glutKeyboardFunc, glutKeyboardUpFunc, glutReshapeFunc, glutSetWindowTitle, glutSpecialFunc, glutSpecialUpFunc
-    )
+    from OpenGL.GLUT import (GLUT_KEY_DOWN, GLUT_KEY_LEFT, GLUT_KEY_RIGHT,
+                             GLUT_KEY_UP, GLUT_RGBA, GLUT_SINGLE,
+                             glutCreateWindow, glutDestroyWindow,
+                             glutDisplayFunc, glutGetWindow, glutInit,
+                             glutInitDisplayMode, glutInitWindowSize,
+                             glutKeyboardFunc, glutKeyboardUpFunc,
+                             glutReshapeFunc, glutSetWindowTitle,
+                             glutSpecialFunc, glutSpecialUpFunc)
     opengl_enabled = True
 except ImportError:
     opengl_enabled = False
@@ -32,6 +35,7 @@ ROWS, COLS = 144, 160
 
 
 class WindowOpenGL(PyBoyWindowPlugin):
+
     def __init__(self, pyboy, mb, pyboy_argv):
         super().__init__(pyboy, mb, pyboy_argv)
 
@@ -52,7 +56,9 @@ class WindowOpenGL(PyBoyWindowPlugin):
         glPixelZoom(self.scale, self.scale)
         glutReshapeFunc(self._glreshape)
         glutDisplayFunc(self._gldraw)
-        logger.warning("OpenGL implementation is incomplete. To limit the frame-rate, set your monitor to 60hz.")
+        logger.warning(
+            "OpenGL implementation is incomplete. To limit the frame-rate, set your monitor to 60hz."
+        )
 
     # Cython does not cooperate with lambdas
     def _key(self, c, x, y):
@@ -84,7 +90,8 @@ class WindowOpenGL(PyBoyWindowPlugin):
             if c == GLUT_KEY_LEFT:
                 self.events.append(WindowEvent(WindowEvent.RELEASE_ARROW_LEFT))
             if c == GLUT_KEY_RIGHT:
-                self.events.append(WindowEvent(WindowEvent.RELEASE_ARROW_RIGHT))
+                self.events.append(WindowEvent(
+                    WindowEvent.RELEASE_ARROW_RIGHT))
         else:
             if c == GLUT_KEY_UP:
                 self.events.append(WindowEvent(WindowEvent.PRESS_ARROW_UP))
@@ -108,9 +115,11 @@ class WindowOpenGL(PyBoyWindowPlugin):
             elif c == " ":
                 self.events.append(WindowEvent(WindowEvent.RELEASE_SPEED_UP))
             elif c == chr(8):
-                self.events.append(WindowEvent(WindowEvent.RELEASE_BUTTON_SELECT))
+                self.events.append(
+                    WindowEvent(WindowEvent.RELEASE_BUTTON_SELECT))
             elif c == chr(13):
-                self.events.append(WindowEvent(WindowEvent.RELEASE_BUTTON_START))
+                self.events.append(
+                    WindowEvent(WindowEvent.RELEASE_BUTTON_START))
             elif c == "o":
                 self.events.append(WindowEvent(WindowEvent.SCREENSHOT_RECORD))
         else:
@@ -123,9 +132,11 @@ class WindowOpenGL(PyBoyWindowPlugin):
             elif c == " ":
                 self.events.append(WindowEvent(WindowEvent.PRESS_SPEED_UP))
             elif c == "i":
-                self.events.append(WindowEvent(WindowEvent.SCREEN_RECORDING_TOGGLE))
+                self.events.append(
+                    WindowEvent(WindowEvent.SCREEN_RECORDING_TOGGLE))
             elif c == chr(8):
-                self.events.append(WindowEvent(WindowEvent.PRESS_BUTTON_SELECT))
+                self.events.append(WindowEvent(
+                    WindowEvent.PRESS_BUTTON_SELECT))
             elif c == chr(13):
                 self.events.append(WindowEvent(WindowEvent.PRESS_BUTTON_START))
 
@@ -146,7 +157,8 @@ class WindowOpenGL(PyBoyWindowPlugin):
             if opengl_enabled:
                 return True
             else:
-                logger.error("Missing depencency \"PyOpenGL\". OpenGL window disabled")
+                logger.error(
+                    "Missing depencency \"PyOpenGL\". OpenGL window disabled")
         return False
 
     def post_tick(self):
@@ -155,5 +167,5 @@ class WindowOpenGL(PyBoyWindowPlugin):
 
     def stop(self):
         glutDestroyWindow(glutGetWindow())
-        for _ in range(10): # At least 2 to close
+        for _ in range(10):  # At least 2 to close
             OpenGL.GLUT.freeglut.glutMainLoopEvent()

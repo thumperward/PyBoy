@@ -11,6 +11,7 @@ from zipfile import ZipFile
 
 import PIL
 import pytest
+
 from pyboy import PyBoy
 
 if platform.python_implementation() == "PyPy":
@@ -143,8 +144,7 @@ saved_state = None
         (True, "emulator-only/mbc1/multicart_rom_8Mb.gb"),
         (True, "emulator-only/mbc1/rom_8Mb.gb"),
         (True, "emulator-only/mbc1/rom_16Mb.gb"),
-    ]
-)
+    ])
 def test_mooneye(clean, rom, mooneye_dir, default_rom):
     global saved_state
 
@@ -180,7 +180,8 @@ def test_mooneye(clean, rom, mooneye_dir, default_rom):
         old_image = PIL.Image.open(png_path)
         if "acceptance" in rom:
             # The registers are too volatile to depend on. We crop the top out, and only match the assertions.
-            diff = PIL.ImageChops.difference(image.crop((0, 72, 160, 144)), old_image.crop((0, 72, 160, 144)))
+            diff = PIL.ImageChops.difference(image.crop((0, 72, 160, 144)),
+                                             old_image.crop((0, 72, 160, 144)))
         else:
             diff = PIL.ImageChops.difference(image, old_image)
 

@@ -9,6 +9,7 @@ import sys
 
 import numpy as np
 import pytest
+
 from pyboy import PyBoy, WindowEvent
 from pyboy.botsupport.constants import COLS, ROWS
 
@@ -18,7 +19,10 @@ is_pypy = platform.python_implementation() == "PyPy"
 
 @pytest.fixture
 def pyboy(tetris_rom):
-    pyboy = PyBoy(tetris_rom, window_type="dummy", disable_input=True, game_wrapper=True)
+    pyboy = PyBoy(tetris_rom,
+                  window_type="dummy",
+                  disable_input=True,
+                  game_wrapper=True)
     pyboy.set_emulation_speed(0)
     return pyboy
 
@@ -38,8 +42,10 @@ def tiles_id():
     return {"BLANK": 47, "Z": 130, "DEADBLOCK": 135}
 
 
-@pytest.mark.skipif(is_pypy, reason="This requires gym, which doesn't work on this platform")
+@pytest.mark.skipif(
+    is_pypy, reason="This requires gym, which doesn't work on this platform")
 class TestOpenAIGym:
+
     def test_raw(self, pyboy):
         env = pyboy.openai_gym(observation_type="raw", action_type="press")
         observation = env.reset()
@@ -58,16 +64,17 @@ class TestOpenAIGym:
 
         # Build the expected first observation
         game_area_shape = pyboy.game_wrapper().shape[::-1]
-        expected_observation = tiles_id["BLANK"] * np.ones(game_area_shape, dtype=np.uint16)
+        expected_observation = tiles_id["BLANK"] * np.ones(game_area_shape,
+                                                           dtype=np.uint16)
         expected_observation[id0_block, id1_block] = tiles_id["Z"]
         print(observation, expected_observation)
         assert np.all(observation == expected_observation)
 
         expected_observation[id0_block, id1_block] = tiles_id["BLANK"]
 
-        action = 2 # DOWN
-        observation, _, _, _ = env.step(action) # Press DOWN
-        observation, _, _, _ = env.step(action) # Press DOWN
+        action = 2  # DOWN
+        observation, _, _, _ = env.step(action)  # Press DOWN
+        observation, _, _, _ = env.step(action)  # Press DOWN
 
         # Build the expected second observation
         expected_observation[id0_block + 1, id1_block] = tiles_id["Z"]
@@ -89,9 +96,9 @@ class TestOpenAIGym:
 
         expected_observation[id0_block, id1_block] = 0
 
-        action = 2 # DOWN
-        observation, _, _, _ = env.step(action) # Press DOWN
-        observation, _, _, _ = env.step(action) # Press DOWN
+        action = 2  # DOWN
+        observation, _, _, _ = env.step(action)  # Press DOWN
+        observation, _, _, _ = env.step(action)  # Press DOWN
 
         # Build the expected second observation
         expected_observation[id0_block + 1, id1_block] = 2
@@ -113,9 +120,9 @@ class TestOpenAIGym:
 
         expected_observation[id0_block, id1_block] = 0
 
-        action = 2 # DOWN
-        observation, _, _, _ = env.step(action) # Press DOWN
-        observation, _, _, _ = env.step(action) # Press DOWN
+        action = 2  # DOWN
+        observation, _, _, _ = env.step(action)  # Press DOWN
+        observation, _, _, _ = env.step(action)  # Press DOWN
 
         # Build the expected second observation
         expected_observation[id0_block + 1, id1_block] = 1
@@ -129,19 +136,20 @@ class TestOpenAIGym:
         assert env.action_space.n == 9
 
         env.reset()
-        action = 3 # RIGHT
-        observation, _, _, _ = env.step(action) # Press RIGHT
-        observation, _, _, _ = env.step(0) # Press NOTHING
+        action = 3  # RIGHT
+        observation, _, _, _ = env.step(action)  # Press RIGHT
+        observation, _, _, _ = env.step(0)  # Press NOTHING
 
         game_area_shape = pyboy.game_wrapper().shape[::-1]
-        expected_observation = tiles_id["BLANK"] * np.ones(game_area_shape, dtype=np.uint16)
+        expected_observation = tiles_id["BLANK"] * np.ones(game_area_shape,
+                                                           dtype=np.uint16)
         expected_observation[id0_block, id1_block + 1] = tiles_id["Z"]
         print(observation, expected_observation)
         assert np.all(observation == expected_observation)
 
-        action = 0 # NOTHING
+        action = 0  # NOTHING
         for _ in range(25):
-            observation, _, _, _ = env.step(action) # Press NOTHING
+            observation, _, _, _ = env.step(action)  # Press NOTHING
         print(observation, expected_observation)
         assert np.all(observation == expected_observation)
 
@@ -152,21 +160,22 @@ class TestOpenAIGym:
         assert env.action_space.n == 9
 
         env.reset()
-        action = 3 # RIGHT
-        observation, _, _, _ = env.step(action) # Press RIGHT
-        observation, _, _, _ = env.step(0) # Press NOTHING
+        action = 3  # RIGHT
+        observation, _, _, _ = env.step(action)  # Press RIGHT
+        observation, _, _, _ = env.step(0)  # Press NOTHING
 
         game_area_shape = pyboy.game_wrapper().shape[::-1]
-        expected_observation = tiles_id["BLANK"] * np.ones(game_area_shape, dtype=np.uint16)
+        expected_observation = tiles_id["BLANK"] * np.ones(game_area_shape,
+                                                           dtype=np.uint16)
         expected_observation[id0_block, id1_block + 1] = tiles_id["Z"]
         print(observation, expected_observation)
         assert np.all(observation == expected_observation)
 
         expected_observation[id0_block, id1_block + 1] = tiles_id["BLANK"]
 
-        action = 0 # NOTHING
+        action = 0  # NOTHING
         for _ in range(25):
-            observation, _, _, _ = env.step(action) # Press NOTHING
+            observation, _, _, _ = env.step(action)  # Press NOTHING
         print(observation, expected_observation)
         expected_observation[id0_block, id1_block + 2] = tiles_id["Z"]
         assert np.all(observation == expected_observation)

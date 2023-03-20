@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class RTC:
+
     def __init__(self, filename):
         self.filename = filename + ".rtc"
 
@@ -45,7 +46,8 @@ class RTC:
         f.write(self.day_carry)
 
     def load_state(self, f, state_version):
-        self.timezero = struct.unpack("f", bytes([f.read() for _ in range(4)]))[0]
+        self.timezero = struct.unpack("f",
+                                      bytes([f.read() for _ in range(4)]))[0]
         self.halt = f.read()
         self.day_carry = f.read()
 
@@ -76,7 +78,8 @@ class RTC:
 
     def getregister(self, register):
         if not self.latch_enabled:
-            logger.debug("RTC: Get register, but nothing is latched! 0x%0.2x" % register)
+            logger.debug("RTC: Get register, but nothing is latched! 0x%0.2x" %
+                         register)
 
         if register == 0x08:
             return self.sec_latch
@@ -96,7 +99,9 @@ class RTC:
 
     def setregister(self, register, value):
         if not self.latch_enabled:
-            logger.debug("RTC: Set register, but nothing is latched! 0x%0.4x, 0x%0.2x" % (register, value))
+            logger.debug(
+                "RTC: Set register, but nothing is latched! 0x%0.4x, 0x%0.2x" %
+                (register, value))
 
         t = time.time() - self.timezero
         if register == 0x08:
@@ -115,11 +120,12 @@ class RTC:
 
             self.halt = halt
             if self.halt == 0:
-                pass # TODO: Start the timer
+                pass  # TODO: Start the timer
             else:
                 logger.warning("Stopping RTC is not implemented!")
 
             self.timezero -= int(t / 3600 / 24) - (day_high << 8)
             self.day_carry = day_carry
         else:
-            logger.warning("Invalid RTC register: %0.4x %0.2x" % (register, value))
+            logger.warning("Invalid RTC register: %0.4x %0.2x" %
+                           (register, value))

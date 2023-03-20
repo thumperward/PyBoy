@@ -10,6 +10,7 @@ The Game Boy uses tiles as the building block for all graphics on the screen. Th
 import logging
 
 import numpy as np
+
 from pyboy import utils
 
 from .constants import LOW_TILEDATA, VRAM_OFFSET
@@ -23,6 +24,7 @@ except ImportError:
 
 
 class Tile:
+
     def __init__(self, mb, identifier):
         """
         The Game Boy uses tiles as the building block for all graphics on the screen. This base-class is used for
@@ -40,7 +42,7 @@ class Tile:
 
         assert 0 <= identifier < 384, "Identifier out of range"
 
-        self.data_address = LOW_TILEDATA + (16*identifier)
+        self.data_address = LOW_TILEDATA + (16 * identifier)
         """
         The tile data is defined in a specific area of the Game Boy. This function returns the address of the tile data
         corresponding to the tile identifier. It is advised to use `pyboy.botsupport.tile.Tile.image` or one of the
@@ -105,7 +107,8 @@ class Tile:
         numpy.ndarray :
             Array of shape (8, 8, 4) with data type of `numpy.uint8`.
         """
-        return np.asarray(self.image_data()).view(dtype=np.uint8).reshape(8, 8, 4)
+        return np.asarray(self.image_data()).view(dtype=np.uint8).reshape(
+            8, 8, 4)
 
     def image_data(self):
         """
@@ -120,7 +123,7 @@ class Tile:
             Image data of tile in 8x8 pixels and RGBA colors.
         """
         self.data = np.zeros((8, 8), dtype=np.uint32)
-        for k in range(0, 16, 2): # 2 bytes for each line
+        for k in range(0, 16, 2):  # 2 bytes for each line
             byte1 = self.mb.lcd.VRAM0[self.data_address + k - VRAM_OFFSET]
             byte2 = self.mb.lcd.VRAM0[self.data_address + k + 1 - VRAM_OFFSET]
 
@@ -128,7 +131,8 @@ class Tile:
                 colorcode = utils.color_code(byte1, byte2, 7 - x)
                 # NOTE: ">> 8 | 0xFF000000" to keep compatibility with earlier code
                 old_A_format = 0xFF000000
-                self.data[k // 2][x] = self.mb.lcd.BGP.getcolor(colorcode) >> 8 | old_A_format
+                self.data[k // 2][x] = self.mb.lcd.BGP.getcolor(
+                    colorcode) >> 8 | old_A_format
 
         return self.data
 

@@ -23,7 +23,10 @@ FILL_VALUE = 123
 
 
 class Rewind(PyBoyPlugin):
-    argv = [("--rewind", {"action": "store_true", "help": "Enable rewind function"})]
+    argv = [("--rewind", {
+        "action": "store_true",
+        "help": "Enable rewind function"
+    })]
 
     def __init__(self, *args):
         super().__init__(*args)
@@ -37,7 +40,8 @@ class Rewind(PyBoyPlugin):
             self.rewind_buffer.new()
 
     def window_title(self):
-        return " Rewind: %0.2fKB/s" % ((self.rewind_buffer.avg_section_size * 60) / 1024)
+        return " Rewind: %0.2fKB/s" % (
+            (self.rewind_buffer.avg_section_size * 60) / 1024)
 
     def handle_events(self, events):
         old_rewind_speed = self.rewind_speed
@@ -83,8 +87,9 @@ class Rewind(PyBoyPlugin):
 
 
 class FixedAllocBuffers(IntIOInterface):
+
     def __init__(self):
-        self.buffer = _malloc(FIXED_BUFFER_SIZE) # NOQA: F821
+        self.buffer = _malloc(FIXED_BUFFER_SIZE)  # NOQA: F821
         for n in range(FIXED_BUFFER_SIZE):
             self.buffer[n] = FILL_VALUE
         self.sections = [0]
@@ -97,7 +102,7 @@ class FixedAllocBuffers(IntIOInterface):
         self.avg_section_size = 0.0
 
     def stop(self):
-        _free(self.buffer) # NOQA: F821
+        _free(self.buffer)  # NOQA: F821
 
     def flush(self):
         pass
@@ -107,9 +112,11 @@ class FixedAllocBuffers(IntIOInterface):
         # print(self.section_pointer-self.sections[-1]) # Find the actual length of the state in memory
         self.sections.append(self.section_pointer)
         self.current_section += 1
-        section_size = (self.section_head - self.section_tail + FIXED_BUFFER_SIZE) % FIXED_BUFFER_SIZE
+        section_size = (self.section_head - self.section_tail +
+                        FIXED_BUFFER_SIZE) % FIXED_BUFFER_SIZE
         # Exponentially decaying moving average
-        self.avg_section_size = (0.9 * self.avg_section_size) + (0.1*section_size)
+        self.avg_section_size = (0.9 * self.avg_section_size) + (0.1 *
+                                                                 section_size)
         self.section_tail = self.section_pointer
 
     def write(self, val):
@@ -133,7 +140,9 @@ class FixedAllocBuffers(IntIOInterface):
 
     def commit(self):
         if not self.section_head == self.section_pointer:
-            raise Exception("Section wasn't read to finish. This would likely be unintentional")
+            raise Exception(
+                "Section wasn't read to finish. This would likely be unintentional"
+            )
         self.sections = self.sections[:self.current_section + 1]
 
     def seek_frame(self, frames):
@@ -165,6 +174,7 @@ class FixedAllocBuffers(IntIOInterface):
 
 
 class CompressedFixedAllocBuffers(FixedAllocBuffers):
+
     def __init__(self):
         FixedAllocBuffers.__init__(self)
         self.zeros = 0
@@ -220,6 +230,7 @@ class DeltaFixedAllocBuffers(CompressedFixedAllocBuffers):
     I chose to keep the code simple at the expense of some edge cases acting different from the other buffers.
     When seeking, the last frame will be lost. This has no practical effect, and is only noticeble in unittesting.
     """
+
     def __init__(self):
         CompressedFixedAllocBuffers.__init__(self)
         self.internal_pointer = 0
@@ -300,5 +311,4 @@ def _malloc(n):
 
 def _free(_):
     pass
-""", globals(), locals()
-    )
+""", globals(), locals())

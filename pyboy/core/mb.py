@@ -10,12 +10,15 @@ from pyboy.utils import STATE_VERSION
 
 from . import bootrom, cartridge, cpu, interaction, lcd, ram, sound, timer
 
-INTR_VBLANK, INTR_LCDC, INTR_TIMER, INTR_SERIAL, INTR_HIGHTOLOW = [1 << x for x in range(5)]
+INTR_VBLANK, INTR_LCDC, INTR_TIMER, INTR_SERIAL, INTR_HIGHTOLOW = [
+    1 << x for x in range(5)
+]
 
 logger = logging.getLogger(__name__)
 
 
 class Motherboard:
+
     def __init__(
         self,
         gamerom_file,
@@ -36,7 +39,8 @@ class Motherboard:
         self.cartridge = cartridge.load_cartridge(gamerom_file)
         if cgb is None:
             cgb = self.cartridge.cgb
-            logger.debug(f'Cartridge type auto-detected to {"CGB" if cgb else "DMG"}')
+            logger.debug(
+                f'Cartridge type auto-detected to {"CGB" if cgb else "DMG"}')
 
         self.timer = timer.Timer()
         self.interaction = interaction.Interaction()
@@ -74,8 +78,9 @@ class Motherboard:
         self.bootrom_enabled = True
         self.serialbuffer = ""
 
-        self.breakpoints_enabled = False # breakpoints_enabled
-        self.breakpoints_list = [] #[(0, 0x150), (0, 0x0040), (0, 0x0048), (0, 0x0050)]
+        self.breakpoints_enabled = False  # breakpoints_enabled
+        self.breakpoints_list = [
+        ]  #[(0, 0x150), (0, 0x0040), (0, 0x0048), (0, 0x0050)]
         self.breakpoint_latch = 0
 
     def switch_speed(self):
@@ -144,7 +149,9 @@ class Motherboard:
             self.double_speed = f.read()
             _cgb = f.read()
             if self.cgb != _cgb:
-                logger.critical(f"Loading state which is not CGB, but PyBoy is loaded in CGB mode!")
+                logger.critical(
+                    f"Loading state which is not CGB, but PyBoy is loaded in CGB mode!"
+                )
                 return
             self.cgb = _cgb
             if self.cgb:
@@ -211,8 +218,7 @@ class Motherboard:
                     self.lcd.cycles_to_interrupt(),
                     self.timer.cycles_to_interrupt(),
                     # self.serial.cycles_to_interrupt(),
-                    mode0_cycles
-                )
+                    mode0_cycles)
 
                 # Profiling
                 self.cpu.add_opcode_hit(0x76, cycles // 4)
@@ -236,7 +242,8 @@ class Motherboard:
             # Escape halt. This happens when pressing 'return' in the debugger. It will make us skip breaking on halt
             # for every cycle, but do break on the next instruction -- even in an interrupt.
             escape_halt = self.cpu.halted and self.breakpoint_latch == 1
-            if self.breakpoints_enabled and (not escape_halt) and self.breakpoint_reached():
+            if self.breakpoints_enabled and (
+                    not escape_halt) and self.breakpoint_reached():
                 return True
 
         # TODO: Move SDL2 sync to plugin
@@ -248,21 +255,22 @@ class Motherboard:
     # MemoryManager
     #
     def getitem(self, i):
-        if 0x0000 <= i < 0x4000: # 16kB ROM bank #0
-            if self.bootrom_enabled and (i <= 0xFF or (self.cgb and 0x200 <= i < 0x900)):
+        if 0x0000 <= i < 0x4000:  # 16kB ROM bank #0
+            if self.bootrom_enabled and (i <= 0xFF or
+                                         (self.cgb and 0x200 <= i < 0x900)):
                 return self.bootrom.getitem(i)
             else:
                 return self.cartridge.getitem(i)
-        elif 0x4000 <= i < 0x8000: # 16kB switchable ROM bank
+        elif 0x4000 <= i < 0x8000:  # 16kB switchable ROM bank
             return self.cartridge.getitem(i)
-        elif 0x8000 <= i < 0xA000: # 8kB Video RAM
+        elif 0x8000 <= i < 0xA000:  # 8kB Video RAM
             if not self.cgb or self.lcd.vbk.active_bank == 0:
                 return self.lcd.VRAM0[i - 0x8000]
             else:
                 return self.lcd.VRAM1[i - 0x8000]
-        elif 0xA000 <= i < 0xC000: # 8kB switchable RAM bank
+        elif 0xA000 <= i < 0xC000:  # 8kB switchable RAM bank
             return self.cartridge.getitem(i)
-        elif 0xC000 <= i < 0xE000: # 8kB Internal RAM
+        elif 0xC000 <= i < 0xE000:  # 8kB Internal RAM
             bank_offset = 0
             if self.cgb and 0xD000 <= i:
                 # Find which bank to read from at FF70
@@ -270,16 +278,16 @@ class Motherboard:
                 bank &= 0b111
                 if bank == 0x0:
                     bank = 0x01
-                bank_offset = (bank-1) * 0x1000
+                bank_offset = (bank - 1) * 0x1000
             return self.ram.internal_ram0[i - 0xC000 + bank_offset]
-        elif 0xE000 <= i < 0xFE00: # Echo of 8kB Internal RAM
+        elif 0xE000 <= i < 0xFE00:  # Echo of 8kB Internal RAM
             # Redirect to internal RAM
             return self.getitem(i - 0x2000)
-        elif 0xFE00 <= i < 0xFEA0: # Sprite Attribute Memory (OAM)
+        elif 0xFE00 <= i < 0xFEA0:  # Sprite Attribute Memory (OAM)
             return self.lcd.OAM[i - 0xFE00]
-        elif 0xFEA0 <= i < 0xFF00: # Empty but unusable for I/O
+        elif 0xFEA0 <= i < 0xFF00:  # Empty but unusable for I/O
             return self.ram.non_io_internal_ram0[i - 0xFEA0]
-        elif 0xFF00 <= i < 0xFF4C: # I/O ports
+        elif 0xFF00 <= i < 0xFF4C:  # I/O ports
             if i == 0xFF04:
                 return self.timer.DIV
             elif i == 0xFF05:
@@ -305,7 +313,7 @@ class Motherboard:
             elif i == 0xFF45:
                 return self.lcd.LYC
             elif i == 0xFF46:
-                return 0x00 # DMA
+                return 0x00  # DMA
             elif i == 0xFF47:
                 return self.lcd.BGP.get()
             elif i == 0xFF48:
@@ -318,7 +326,7 @@ class Motherboard:
                 return self.lcd.WX
             else:
                 return self.ram.io_ports[i - 0xFF00]
-        elif 0xFF4C <= i < 0xFF80: # Empty but unusable for I/O
+        elif 0xFF4C <= i < 0xFF80:  # Empty but unusable for I/O
             # CGB registers
             if self.cgb and i == 0xFF4D:
                 return self.key1
@@ -334,51 +342,55 @@ class Motherboard:
                 return self.lcd.ocpd.get()
             elif self.cgb and i == 0xFF51:
                 logger.error("HDMA1 is not readable")
-                return 0x00 # Not readable
+                return 0x00  # Not readable
             elif self.cgb and i == 0xFF52:
                 logger.error("HDMA2 is not readable")
-                return 0x00 # Not readable
+                return 0x00  # Not readable
             elif self.cgb and i == 0xFF53:
                 logger.error("HDMA3 is not readable")
-                return 0x00 # Not readable
+                return 0x00  # Not readable
             elif self.cgb and i == 0xFF54:
                 logger.error("HDMA4 is not readable")
-                return 0x00 # Not readable
+                return 0x00  # Not readable
             elif self.cgb and i == 0xFF55:
                 return self.hdma.hdma5 & 0xFF
             return self.ram.non_io_internal_ram1[i - 0xFF4C]
-        elif 0xFF80 <= i < 0xFFFF: # Internal RAM
+        elif 0xFF80 <= i < 0xFFFF:  # Internal RAM
             return self.ram.internal_ram1[i - 0xFF80]
-        elif i == 0xFFFF: # Interrupt Enable Register
+        elif i == 0xFFFF:  # Interrupt Enable Register
             return self.cpu.interrupts_enabled_register
         else:
-            raise IndexError("Memory access violation. Tried to read: %s" % hex(i))
+            raise IndexError("Memory access violation. Tried to read: %s" %
+                             hex(i))
 
     def setitem(self, i, value):
-        assert 0 <= value < 0x100, "Memory write error! Can't write %s to %s" % (hex(value), hex(i))
+        assert 0 <= value < 0x100, "Memory write error! Can't write %s to %s" % (
+            hex(value), hex(i))
 
-        if 0x0000 <= i < 0x4000: # 16kB ROM bank #0
+        if 0x0000 <= i < 0x4000:  # 16kB ROM bank #0
             # Doesn't change the data. This is for MBC commands
             self.cartridge.setitem(i, value)
-        elif 0x4000 <= i < 0x8000: # 16kB switchable ROM bank
+        elif 0x4000 <= i < 0x8000:  # 16kB switchable ROM bank
             # Doesn't change the data. This is for MBC commands
             self.cartridge.setitem(i, value)
-        elif 0x8000 <= i < 0xA000: # 8kB Video RAM
+        elif 0x8000 <= i < 0xA000:  # 8kB Video RAM
             if not self.cgb or self.lcd.vbk.active_bank == 0:
                 self.lcd.VRAM0[i - 0x8000] = value
-                if i < 0x9800: # Is within tile data -- not tile maps
+                if i < 0x9800:  # Is within tile data -- not tile maps
                     # Mask out the byte of the tile
-                    self.lcd.renderer.invalidate_tile(((i & 0xFFF0) - 0x8000) // 16, 0)
+                    self.lcd.renderer.invalidate_tile(
+                        ((i & 0xFFF0) - 0x8000) // 16, 0)
                     # self.lcd.renderer.tiles_changed0.add(i & 0xFFF0)
             else:
                 self.lcd.VRAM1[i - 0x8000] = value
-                if i < 0x9800: # Is within tile data -- not tile maps
+                if i < 0x9800:  # Is within tile data -- not tile maps
                     # Mask out the byte of the tile
-                    self.lcd.renderer.invalidate_tile(((i & 0xFFF0) - 0x8000) // 16, 1)
+                    self.lcd.renderer.invalidate_tile(
+                        ((i & 0xFFF0) - 0x8000) // 16, 1)
                     # self.lcd.renderer.tiles_changed1.add(i & 0xFFF0)
-        elif 0xA000 <= i < 0xC000: # 8kB switchable RAM bank
+        elif 0xA000 <= i < 0xC000:  # 8kB switchable RAM bank
             self.cartridge.setitem(i, value)
-        elif 0xC000 <= i < 0xE000: # 8kB Internal RAM
+        elif 0xC000 <= i < 0xE000:  # 8kB Internal RAM
             bank_offset = 0
             if self.cgb and 0xD000 <= i:
                 # Find which bank to read from at FF70
@@ -386,15 +398,15 @@ class Motherboard:
                 bank &= 0b111
                 if bank == 0x0:
                     bank = 0x01
-                bank_offset = (bank-1) * 0x1000
+                bank_offset = (bank - 1) * 0x1000
             self.ram.internal_ram0[i - 0xC000 + bank_offset] = value
-        elif 0xE000 <= i < 0xFE00: # Echo of 8kB Internal RAM
-            self.setitem(i - 0x2000, value) # Redirect to internal RAM
-        elif 0xFE00 <= i < 0xFEA0: # Sprite Attribute Memory (OAM)
+        elif 0xE000 <= i < 0xFE00:  # Echo of 8kB Internal RAM
+            self.setitem(i - 0x2000, value)  # Redirect to internal RAM
+        elif 0xFE00 <= i < 0xFEA0:  # Sprite Attribute Memory (OAM)
             self.lcd.OAM[i - 0xFE00] = value
-        elif 0xFEA0 <= i < 0xFF00: # Empty but unusable for I/O
+        elif 0xFEA0 <= i < 0xFF00:  # Empty but unusable for I/O
             self.ram.non_io_internal_ram0[i - 0xFEA0] = value
-        elif 0xFF00 <= i < 0xFF4C: # I/O ports
+        elif 0xFF00 <= i < 0xFF4C:  # I/O ports
             if i == 0xFF00:
                 self.ram.io_ports[i - 0xFF00] = self.interaction.pull(value)
             elif i == 0xFF01:
@@ -407,7 +419,7 @@ class Motherboard:
             elif i == 0xFF06:
                 self.timer.TMA = value
             elif i == 0xFF07:
-                self.timer.TAC = value & 0b111 # TODO: Move logic to Timer class
+                self.timer.TAC = value & 0b111  # TODO: Move logic to Timer class
             elif i == 0xFF0F:
                 self.cpu.interrupts_flag_register = value
             elif 0xFF10 <= i < 0xFF40:
@@ -444,8 +456,9 @@ class Motherboard:
                 self.lcd.WX = value
             else:
                 self.ram.io_ports[i - 0xFF00] = value
-        elif 0xFF4C <= i < 0xFF80: # Empty but unusable for I/O
-            if self.bootrom_enabled and i == 0xFF50 and (value == 0x1 or value == 0x11):
+        elif 0xFF4C <= i < 0xFF80:  # Empty but unusable for I/O
+            if self.bootrom_enabled and i == 0xFF50 and (value == 0x1
+                                                         or value == 0x11):
                 logger.debug("Bootrom disabled!")
                 self.bootrom_enabled = False
             # CGB registers
@@ -458,11 +471,11 @@ class Motherboard:
                 #     value = 0
                 self.hdma.hdma1 = value
             elif self.cgb and i == 0xFF52:
-                self.hdma.hdma2 = value # & 0xF0
+                self.hdma.hdma2 = value  # & 0xF0
             elif self.cgb and i == 0xFF53:
-                self.hdma.hdma3 = value # & 0x1F
+                self.hdma.hdma3 = value  # & 0x1F
             elif self.cgb and i == 0xFF54:
-                self.hdma.hdma4 = value # & 0xF0
+                self.hdma.hdma4 = value  # & 0xF0
             elif self.cgb and i == 0xFF55:
                 self.hdma.set_hdma5(value, self)
             elif self.cgb and i == 0xFF68:
@@ -479,12 +492,13 @@ class Motherboard:
                 self.lcd.renderer.clear_spritecache1()
             else:
                 self.ram.non_io_internal_ram1[i - 0xFF4C] = value
-        elif 0xFF80 <= i < 0xFFFF: # Internal RAM
+        elif 0xFF80 <= i < 0xFFFF:  # Internal RAM
             self.ram.internal_ram1[i - 0xFF80] = value
-        elif i == 0xFFFF: # Interrupt Enable Register
+        elif i == 0xFFFF:  # Interrupt Enable Register
             self.cpu.interrupts_enabled_register = value
         else:
-            raise Exception("Memory access violation. Tried to write: %s" % hex(i))
+            raise Exception("Memory access violation. Tried to write: %s" %
+                            hex(i))
 
     def transfer_DMA(self, src):
         # http://problemkaputt.de/pandocs.htm#lcdoamdmatransfers
@@ -496,6 +510,7 @@ class Motherboard:
 
 
 class HDMA:
+
     def __init__(self):
         self.hdma1 = 0
         self.hdma2 = 0
@@ -550,12 +565,13 @@ class HDMA:
             if transfer_type == 0:
                 # General purpose DMA transfer
                 for i in range(bytes_to_transfer):
-                    mb.setitem((dst + i) & 0xFFFF, mb.getitem((src + i) & 0xFFFF))
+                    mb.setitem((dst + i) & 0xFFFF,
+                               mb.getitem((src + i) & 0xFFFF))
                 # self.curr_dst += bytes_to_transfer
                 # self.curr_src += bytes_to_transfer
 
                 # Number of blocks of 16-bytes transfered. Set 7th bit for "completed".
-                self.hdma5 = 0xFF #(value & 0x7F) | 0x80 #0xFF
+                self.hdma5 = 0xFF  #(value & 0x7F) | 0x80 #0xFF
                 self.hdma4 = 0xFF
                 self.hdma3 = 0xFF
                 self.hdma2 = 0xFF
@@ -600,4 +616,4 @@ class HDMA:
         else:
             self.hdma5 -= 1
 
-        return 206 # TODO: adjust for double speed
+        return 206  # TODO: adjust for double speed

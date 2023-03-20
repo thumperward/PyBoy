@@ -20,7 +20,7 @@ from .core.mb import Motherboard
 
 logger = logging.getLogger(__name__)
 
-SPF = 1 / 60. # inverse FPS (frame-per-second)
+SPF = 1 / 60.  # inverse FPS (frame-per-second)
 
 defaults = {
     "color_palette": (0xFFFFFF, 0x999999, 0x555555, 0x000000),
@@ -30,18 +30,17 @@ defaults = {
 
 
 class PyBoy:
-    def __init__(
-        self,
-        gamerom_file,
-        *,
-        bootrom_file=None,
-        profiling=False,
-        disable_renderer=False,
-        sound=False,
-        cgb=None,
-        randomize=False,
-        **kwargs
-    ):
+
+    def __init__(self,
+                 gamerom_file,
+                 *,
+                 bootrom_file=None,
+                 profiling=False,
+                 disable_renderer=False,
+                 sound=False,
+                 cgb=None,
+                 randomize=False,
+                 **kwargs):
         """
         PyBoy is loadable as an object in Python. This means, it can be initialized from another script, and be
         controlled and probed by the script. It is supported to spawn multiple emulators, just instantiate the class
@@ -81,7 +80,9 @@ class PyBoy:
 
         self.mb = Motherboard(
             gamerom_file,
-            bootrom_file or kwargs.get("bootrom"), # Our current way to provide cli arguments is broken
+            bootrom_file or
+            kwargs.get("bootrom"
+                       ),  # Our current way to provide cli arguments is broken
             kwargs["color_palette"],
             disable_renderer,
             sound,
@@ -139,13 +140,13 @@ class PyBoy:
         t_post = time.perf_counter_ns()
 
         nsecs = t_pre - t_start
-        self.avg_pre = 0.9 * self.avg_pre + (0.1*nsecs/1_000_000_000)
+        self.avg_pre = 0.9 * self.avg_pre + (0.1 * nsecs / 1_000_000_000)
 
         nsecs = t_tick - t_pre
-        self.avg_tick = 0.9 * self.avg_tick + (0.1*nsecs/1_000_000_000)
+        self.avg_tick = 0.9 * self.avg_tick + (0.1 * nsecs / 1_000_000_000)
 
         nsecs = t_post - t_tick
-        self.avg_post = 0.9 * self.avg_post + (0.1*nsecs/1_000_000_000)
+        self.avg_post = 0.9 * self.avg_post + (0.1 * nsecs / 1_000_000_000)
 
         return self.quitting
 
@@ -157,7 +158,8 @@ class PyBoy:
                 self.quitting = True
             elif event == WindowEvent.RELEASE_SPEED_UP:
                 # Switch between unlimited and 1x real-time emulation speed
-                self.target_emulationspeed = int(bool(self.target_emulationspeed) ^ True)
+                self.target_emulationspeed = int(
+                    bool(self.target_emulationspeed) ^ True)
                 logger.debug("Speed limit: %s" % self.target_emulationspeed)
             elif event == WindowEvent.STATE_SAVE:
                 with open(self.gamerom_file + ".state", "wb") as f:
@@ -170,7 +172,7 @@ class PyBoy:
                 with open(state_path, "rb") as f:
                     self.mb.load_state(IntIOWrapper(f))
             elif event == WindowEvent.PASS:
-                pass # Used in place of None in Cython, when key isn't mapped to anything
+                pass  # Used in place of None in Cython, when key isn't mapped to anything
             elif event == WindowEvent.PAUSE_TOGGLE:
                 if self.paused:
                     self._unpause()
@@ -214,8 +216,10 @@ class PyBoy:
 
     def _update_window_title(self):
         avg_emu = self.avg_pre + self.avg_tick + self.avg_post
-        self.window_title = "CPU/frame: %0.2f%%" % ((self.avg_pre + self.avg_tick) / SPF * 100)
-        self.window_title += " Emulation: x%s" % (round(SPF / avg_emu) if avg_emu > 0 else "INF")
+        self.window_title = "CPU/frame: %0.2f%%" % (
+            (self.avg_pre + self.avg_tick) / SPF * 100)
+        self.window_title += " Emulation: x%s" % (round(SPF / avg_emu)
+                                                  if avg_emu > 0 else "INF")
         if self.paused:
             self.window_title += "[PAUSED]"
         self.window_title += self.plugin_manager.window_title()
@@ -263,7 +267,11 @@ class PyBoy:
         """
         return botsupport.BotSupportManager(self, self.mb)
 
-    def openai_gym(self, observation_type="tiles", action_type="press", simultaneous_actions=False, **kwargs):
+    def openai_gym(self,
+                   observation_type="tiles",
+                   action_type="press",
+                   simultaneous_actions=False,
+                   **kwargs):
         """
         For Reinforcement learning, it is often easier to use the standard gym environment. This method will provide one.
         This function requires PyBoy to implement a Game Wrapper for the loaded ROM. You can find the supported games in pyboy.plugins.
@@ -289,7 +297,8 @@ class PyBoy:
             A Gym environment based on the `Pyboy` object.
         """
         if gym_enabled:
-            return PyBoyGymEnv(self, observation_type, action_type, simultaneous_actions, **kwargs)
+            return PyBoyGymEnv(self, observation_type, action_type,
+                               simultaneous_actions, **kwargs)
         else:
             logger.error(f"{__name__}: Missing dependency \"gym\". ")
             return None
@@ -372,13 +381,11 @@ class PyBoy:
         """
         self.events.append(WindowEvent(event))
 
-    def get_input(
-        self,
-        ignore=(
-            WindowEvent.PASS, WindowEvent._INTERNAL_TOGGLE_DEBUG, WindowEvent._INTERNAL_RENDERER_FLUSH,
-            WindowEvent._INTERNAL_MOUSE, WindowEvent._INTERNAL_MARK_TILE
-        )
-    ):
+    def get_input(self,
+                  ignore=(WindowEvent.PASS, WindowEvent._INTERNAL_TOGGLE_DEBUG,
+                          WindowEvent._INTERNAL_RENDERER_FLUSH,
+                          WindowEvent._INTERNAL_MOUSE,
+                          WindowEvent._INTERNAL_MARK_TILE)):
         """
         Get current inputs except the events specified in "ignore" tuple.
         This is both Game Boy buttons and emulator controls.
@@ -416,7 +423,9 @@ class PyBoy:
         """
 
         if isinstance(file_like_object, str):
-            raise Exception("String not allowed. Did you specify a filepath instead of a file-like object?")
+            raise Exception(
+                "String not allowed. Did you specify a filepath instead of a file-like object?"
+            )
 
         self.mb.save_state(IntIOWrapper(file_like_object))
 
@@ -439,7 +448,9 @@ class PyBoy:
         """
 
         if isinstance(file_like_object, str):
-            raise Exception("String not allowed. Did you specify a filepath instead of a file-like object?")
+            raise Exception(
+                "String not allowed. Did you specify a filepath instead of a file-like object?"
+            )
 
         self.mb.load_state(IntIOWrapper(file_like_object))
 
@@ -486,7 +497,9 @@ class PyBoy:
             target_speed (int): Target emulation speed as multiplier of real-time.
         """
         if target_speed > 5:
-            logger.warning("The emulation speed might not be accurate when speed-target is higher than 5")
+            logger.warning(
+                "The emulation speed might not be accurate when speed-target is higher than 5"
+            )
         self.target_emulationspeed = target_speed
 
     def cartridge_title(self):

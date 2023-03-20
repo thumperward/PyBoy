@@ -9,12 +9,15 @@ import logging
 from . import opcodes
 
 FLAGC, FLAGH, FLAGN, FLAGZ = range(4, 8)
-INTR_VBLANK, INTR_LCDC, INTR_TIMER, INTR_SERIAL, INTR_HIGHTOLOW = [1 << x for x in range(5)]
+INTR_VBLANK, INTR_LCDC, INTR_TIMER, INTR_SERIAL, INTR_HIGHTOLOW = [
+    1 << x for x in range(5)
+]
 
 logger = logging.getLogger(__name__)
 
 
 class CPU:
+
     def set_bc(self, x):
         self.B = x >> 8
         self.C = x & 0x00FF
@@ -83,7 +86,9 @@ class CPU:
         f.write(self.interrupts_flag_register)
 
     def load_state(self, f, state_version):
-        self.A, self.F, self.B, self.C, self.D, self.E = [f.read() for _ in range(6)]
+        self.A, self.F, self.B, self.C, self.D, self.E = [
+            f.read() for _ in range(6)
+        ]
         self.HL = f.read_16bit()
         self.SP = f.read_16bit()
         self.PC = f.read_16bit()
@@ -100,9 +105,8 @@ class CPU:
         logger.debug("State loaded: " + self.dump_state(""))
 
     def dump_state(self, sym_label):
-        opcode_data = [
-            self.mb.getitem(self.mb.cpu.PC + n) for n in range(3)
-        ] # Max 3 length, then we don't need to backtrack
+        opcode_data = [self.mb.getitem(self.mb.cpu.PC + n) for n in range(3)
+                       ]  # Max 3 length, then we don't need to backtrack
 
         opcode = opcode_data[0]
         opcode_length = opcodes.OPCODE_LENGTHS[opcode]
@@ -110,7 +114,8 @@ class CPU:
         if opcode == 0xCB:
             opcode_str += f" {opcodes.CPU_COMMANDS[opcode_data[1]+0x100]}"
         else:
-            opcode_str += " " + " ".join(f"{d:02X}" for d in opcode_data[1:opcode_length])
+            opcode_str += " " + " ".join(f"{d:02X}"
+                                         for d in opcode_data[1:opcode_length])
 
         return (
             "\n"
@@ -125,8 +130,7 @@ class CPU:
             f"Timer Intr.: {self.mb.timer.cycles_to_interrupt()}\n"
             f"halted:{self.halted}, "
             f"interrupt_queued:{self.interrupt_queued}, "
-            f"stopped:{self.stopped}\n"
-        )
+            f"stopped:{self.stopped}\n")
 
     def set_interruptflag(self, flag):
         self.interrupts_flag_register |= flag
@@ -145,10 +149,10 @@ class CPU:
             self.PC += 1
             self.PC &= 0xFFFF
         elif self.halted:
-            return 4 # TODO: Number of cycles for a HALT in effect?
+            return 4  # TODO: Number of cycles for a HALT in effect?
 
-        old_pc = self.PC # If the PC doesn't change, we're likely stuck
-        old_sp = self.SP # Sometimes a RET can go to the same PC, so we check the SP too.
+        old_pc = self.PC  # If the PC doesn't change, we're likely stuck
+        old_sp = self.SP  # Sometimes a RET can go to the same PC, so we check the SP too.
         cycles = self.fetch_and_execute()
         if not self.halted and old_pc == self.PC and old_sp == self.SP and not self.is_stuck:
             logger.error("CPU is stuck: " + self.dump_state(""))
@@ -161,7 +165,8 @@ class CPU:
             # Interrupt already queued. This happens only when using a debugger.
             return False
 
-        if (self.interrupts_flag_register & 0b11111) & (self.interrupts_enabled_register & 0b11111):
+        if (self.interrupts_flag_register
+                & 0b11111) & (self.interrupts_enabled_register & 0b11111):
             if self.handle_interrupt(INTR_VBLANK, 0x0040):
                 self.interrupt_queued = True
             elif self.handle_interrupt(INTR_LCDC, 0x0048):
@@ -181,17 +186,18 @@ class CPU:
         return False
 
     def handle_interrupt(self, flag, addr):
-        if (self.interrupts_enabled_register & flag) and (self.interrupts_flag_register & flag):
+        if (self.interrupts_enabled_register
+                & flag) and (self.interrupts_flag_register & flag):
             # Clear interrupt flag
             if self.halted:
-                self.PC += 1 # Escape HALT on return
+                self.PC += 1  # Escape HALT on return
                 self.PC &= 0xFFFF
 
             # Handle interrupt vectors
             if self.interrupt_master_enable:
-                self.interrupts_flag_register ^= flag # Remove flag
-                self.mb.setitem((self.SP - 1) & 0xFFFF, self.PC >> 8) # High
-                self.mb.setitem((self.SP - 2) & 0xFFFF, self.PC & 0xFF) # Low
+                self.interrupts_flag_register ^= flag  # Remove flag
+                self.mb.setitem((self.SP - 1) & 0xFFFF, self.PC >> 8)  # High
+                self.mb.setitem((self.SP - 2) & 0xFFFF, self.PC & 0xFF)  # Low
                 self.SP -= 2
                 self.SP &= 0xFFFF
 
@@ -208,9 +214,9 @@ class CPU:
 
     def fetch_and_execute(self):
         opcode = self.mb.getitem(self.PC)
-        if opcode == 0xCB: # Extension code
+        if opcode == 0xCB:  # Extension code
             opcode = self.mb.getitem(self.PC + 1)
-            opcode += 0x100 # Internally shifting look-up table
+            opcode += 0x100  # Internally shifting look-up table
 
         self.add_opcode_hit(opcode, 1)
 

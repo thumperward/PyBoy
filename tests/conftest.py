@@ -25,7 +25,10 @@ default_rom_path = "test_roms/secrets/"
 
 def url_open(url):
     # https://stackoverflow.com/questions/62684468/pythons-requests-triggers-cloudflares-security-while-urllib-does-not
-    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:77.0) Gecko/20100101 Firefox/77.0"}
+    headers = {
+        "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:77.0) Gecko/20100101 Firefox/77.0"
+    }
     for _ in range(5):
         try:
             request = urllib.request.Request(url, headers=headers)
@@ -43,9 +46,8 @@ def locate_roms(path=default_rom_path):
     gb_files = map(
         lambda x: path + x,
         filter(
-            lambda x: x.lower().endswith(".gb") or x.lower().endswith(".gbc") or x.endswith(".bin"), os.listdir(path)
-        )
-    )
+            lambda x: x.lower().endswith(".gb") or x.lower().endswith(".gbc")
+            or x.endswith(".bin"), os.listdir(path)))
 
     entries = {}
     for rom in gb_files:
@@ -65,17 +67,20 @@ def locate_sha256(digest):
     if rom_entries is None:
         rom_entries = locate_roms()
     digest_bytes = bytes.fromhex(digest.decode("ASCII"))
-    return next(filter(lambda kv: kv[1] == digest_bytes, rom_entries.items()), [None])[0]
+    return next(filter(lambda kv: kv[1] == digest_bytes, rom_entries.items()),
+                [None])[0]
 
 
 @pytest.fixture(scope="session")
 def boot_rom(secrets):
-    return locate_sha256(b"cf053eccb4ccafff9e67339d4e78e98dce7d1ed59be819d2a1ba2232c6fce1c7")
+    return locate_sha256(
+        b"cf053eccb4ccafff9e67339d4e78e98dce7d1ed59be819d2a1ba2232c6fce1c7")
 
 
 @pytest.fixture(scope="session")
 def boot_cgb_rom(secrets):
-    return locate_sha256(b"b4f2e416a35eef52cba161b159c7c8523a92594facb924b3ede0d722867c50c7")
+    return locate_sha256(
+        b"b4f2e416a35eef52cba161b159c7c8523a92594facb924b3ede0d722867c50c7")
 
 
 @pytest.fixture(scope="session")
@@ -85,32 +90,38 @@ def default_rom():
 
 @pytest.fixture(scope="session")
 def pokemon_blue_rom(secrets):
-    return locate_sha256(b"2a951313c2640e8c2cb21f25d1db019ae6245d9c7121f754fa61afd7bee6452d")
+    return locate_sha256(
+        b"2a951313c2640e8c2cb21f25d1db019ae6245d9c7121f754fa61afd7bee6452d")
 
 
 @pytest.fixture(scope="session")
 def pokemon_gold_rom(secrets):
-    return locate_sha256(b"fb0016d27b1e5374e1ec9fcad60e6628d8646103b5313ca683417f52b97e7e4e")
+    return locate_sha256(
+        b"fb0016d27b1e5374e1ec9fcad60e6628d8646103b5313ca683417f52b97e7e4e")
 
 
 @pytest.fixture(scope="session")
 def pokemon_crystal_rom(secrets):
-    return locate_sha256(b"d6702e353dcbe2d2c69183046c878ef13a0dae4006e8cdff521cca83dd1582fe")
+    return locate_sha256(
+        b"d6702e353dcbe2d2c69183046c878ef13a0dae4006e8cdff521cca83dd1582fe")
 
 
 @pytest.fixture(scope="session")
 def tetris_rom(secrets):
-    return locate_sha256(b"7fde11dd4e594a6905deccd57943d2909ecb37665a030741c42155aeb346323b")
+    return locate_sha256(
+        b"7fde11dd4e594a6905deccd57943d2909ecb37665a030741c42155aeb346323b")
 
 
 @pytest.fixture(scope="session")
 def supermarioland_rom(secrets):
-    return locate_sha256(b"470d6c45c9bcf7f0397d00c1ae6de727c63dd471049c8eedbefdc540ceea80b4")
+    return locate_sha256(
+        b"470d6c45c9bcf7f0397d00c1ae6de727c63dd471049c8eedbefdc540ceea80b4")
 
 
 @pytest.fixture(scope="session")
 def kirby_rom(secrets):
-    return locate_sha256(b"0f6dba94fae248d419083001c42c02a78be6bd3dff679c895517559e72c98d58")
+    return locate_sha256(
+        b"0f6dba94fae248d419083001c42c02a78be6bd3dff679c895517559e72c98d58")
 
 
 @pytest.fixture(scope="session")
@@ -133,7 +144,8 @@ def samesuite_dir():
     with FileLock(path.with_suffix(".lock")) as lock:
         if not os.path.isdir(path):
             print(url_open("https://pyboy.dk/mirror/LICENSE.SameSuite.txt"))
-            samesuite_data = io.BytesIO(url_open("https://pyboy.dk/mirror/SameSuite.zip"))
+            samesuite_data = io.BytesIO(
+                url_open("https://pyboy.dk/mirror/SameSuite.zip"))
             with ZipFile(samesuite_data) as _zip:
                 _zip.extractall(path)
     return str(path) + "/"
@@ -145,7 +157,8 @@ def mooneye_dir():
     with FileLock(path.with_suffix(".lock")) as lock:
         if not os.path.isdir(path):
             print(url_open("https://pyboy.dk/mirror/LICENSE.mooneye.txt"))
-            mooneye_data = io.BytesIO(url_open("https://pyboy.dk/mirror/mooneye.zip"))
+            mooneye_data = io.BytesIO(
+                url_open("https://pyboy.dk/mirror/mooneye.zip"))
             with ZipFile(mooneye_data) as _zip:
                 _zip.extractall(path)
     return str(path) + "/"
@@ -157,7 +170,8 @@ def magen_test_file():
     with FileLock(path.with_suffix(".lock")) as lock:
         if not os.path.isfile(path):
             print(url_open("https://pyboy.dk/mirror/LICENSE.magen_test.txt"))
-            magen_test_data = url_open("https://pyboy.dk/mirror/magen_test_bg_oam_priority.gbc")
+            magen_test_data = url_open(
+                "https://pyboy.dk/mirror/magen_test_bg_oam_priority.gbc")
             with open(path, "wb") as rom_file:
                 rom_file.write(magen_test_data)
     return str(path)
@@ -171,17 +185,18 @@ def blargg_dir():
             print(url_open("https://pyboy.dk/mirror/LICENSE.blargg.txt"))
 
             for name in [
-                "cgb_sound",
-                "cpu_instrs",
-                "dmg_sound",
-                "halt_bug",
-                "instr_timing",
-                "interrupt_time",
-                "mem_timing-2",
-                "mem_timing",
-                "oam_bug",
+                    "cgb_sound",
+                    "cpu_instrs",
+                    "dmg_sound",
+                    "halt_bug",
+                    "instr_timing",
+                    "interrupt_time",
+                    "mem_timing-2",
+                    "mem_timing",
+                    "oam_bug",
             ]:
-                blargg_data = io.BytesIO(url_open(f"https://pyboy.dk/mirror/blargg/{name}.zip"))
+                blargg_data = io.BytesIO(
+                    url_open(f"https://pyboy.dk/mirror/blargg/{name}.zip"))
                 with ZipFile(blargg_data) as _zip:
                     _zip.extractall(path)
     return str(path)
@@ -218,7 +233,8 @@ def shonumi_dir():
     with FileLock(path.with_suffix(".lock")) as lock:
         if not os.path.isdir(path):
             print(url_open("https://pyboy.dk/mirror/SOURCE.GBTests.txt"))
-            shonumi_data = io.BytesIO(url_open("https://pyboy.dk/mirror/GB%20Tests.zip"))
+            shonumi_data = io.BytesIO(
+                url_open("https://pyboy.dk/mirror/GB%20Tests.zip"))
             with ZipFile(shonumi_data) as _zip:
                 _zip.extractall(path)
     return str(path) + "/"
@@ -255,7 +271,9 @@ def git_tetris_ai():
             f'cd {path} && . {_venv_path / "bin" / "activate"} && pip install numpy torch matplotlib graphviz'
         ) == 0
         # Overwrite PyBoy with local version
-        assert os.system(f'cd {path} && . {_venv_path / "bin" / "activate"} && pip install ../') == 0
+        assert os.system(
+            f'cd {path} && . {_venv_path / "bin" / "activate"} && pip install ../'
+        ) == 0
     return str(path)
 
 
@@ -274,9 +292,13 @@ def git_pyboy_rl():
         _venv_path = Path(".venv")
         _venv.create(path / _venv_path)
         # _venv_context = _venv.ensure_directories(path / Path('.venv'))
-        assert os.system(f'cd {path} && . {_venv_path / "bin" / "activate"} && pip install -r requirements.txt') == 0
+        assert os.system(
+            f'cd {path} && . {_venv_path / "bin" / "activate"} && pip install -r requirements.txt'
+        ) == 0
         # Overwrite PyBoy with local version
-        assert os.system(f'cd {path} && . {_venv_path / "bin" / "activate"} && pip install ../') == 0
+        assert os.system(
+            f'cd {path} && . {_venv_path / "bin" / "activate"} && pip install ../'
+        ) == 0
     return str(path)
 
 
@@ -306,7 +328,10 @@ def pack_secrets():
 
     data = io.BytesIO()
     with ZipFile(data, "w") as _zip:
-        for rom in [globals()[x] for x in globals().keys() if x.endswith("_rom") and x != "any_rom"]:
+        for rom in [
+                globals()[x] for x in globals().keys()
+                if x.endswith("_rom") and x != "any_rom"
+        ]:
             _secrets_fixture = None
             _rom = rom.__pytest_wrapped__.obj(_secrets_fixture)
             _zip.write(_rom, os.path.basename(_rom))

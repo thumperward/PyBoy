@@ -7,13 +7,16 @@ The Game Boy has two tile maps, which defines what is rendered on the screen.
 """
 
 import numpy as np
+
 from pyboy.core.lcd import LCDCRegister
 
-from .constants import HIGH_TILEMAP, LCDC_OFFSET, LOW_TILEDATA_NTILES, LOW_TILEMAP
+from .constants import (HIGH_TILEMAP, LCDC_OFFSET, LOW_TILEDATA_NTILES,
+                        LOW_TILEMAP)
 from .tile import Tile
 
 
 class TileMap:
+
     def __init__(self, mb, select):
         """
         The Game Boy has two tile maps, which defines what is rendered on the screen. These are also referred to as
@@ -100,7 +103,8 @@ class TileMap:
         tilemap_identifiers = np.asarray(self[:, :], dtype=np.uint32)
         matches = []
         for i in identifiers:
-            matches.append([[int(y) for y in x] for x in np.argwhere(tilemap_identifiers == i)])
+            matches.append([[int(y) for y in x]
+                            for x in np.argwhere(tilemap_identifiers == i)])
         return matches
 
     def _tile_address(self, column, row):
@@ -131,10 +135,12 @@ class TileMap:
         """
 
         if not 0 <= column < 32:
-            raise IndexError("column is out of bounds. Value of 0 to 31 is allowed")
+            raise IndexError(
+                "column is out of bounds. Value of 0 to 31 is allowed")
         if not 0 <= row < 32:
-            raise IndexError("row is out of bounds. Value of 0 to 31 is allowed")
-        return self.map_offset + 32*row + column
+            raise IndexError(
+                "row is out of bounds. Value of 0 to 31 is allowed")
+        return self.map_offset + 32 * row + column
 
     def tile(self, column, row):
         """
@@ -221,8 +227,8 @@ class TileMap:
         if y == slice(None):
             y = slice(0, 32, 1)
 
-        x_slice = isinstance(x, slice) # Assume slice, otherwise int
-        y_slice = isinstance(y, slice) # Assume slice, otherwise int
+        x_slice = isinstance(x, slice)  # Assume slice, otherwise int
+        y_slice = isinstance(y, slice)  # Assume slice, otherwise int
         assert x_slice or isinstance(x, int)
         assert y_slice or isinstance(y, int)
 
@@ -232,7 +238,8 @@ class TileMap:
             tile_fun = lambda x, y: self.tile_identifier(x, y)
 
         if x_slice and y_slice:
-            return [[tile_fun(_x, _y) for _x in range(x.stop)[x]] for _y in range(y.stop)[y]]
+            return [[tile_fun(_x, _y) for _x in range(x.stop)[x]]
+                    for _y in range(y.stop)[y]]
         elif x_slice:
             return [tile_fun(_x, y) for _x in range(x.stop)[x]]
         elif y_slice:
