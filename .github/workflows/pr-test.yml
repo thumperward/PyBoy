@@ -16,13 +16,13 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
-        python-version: [3.7, 3.8, 3.9, "3.10"]
+        python-version: [3.7, 3.8, 3.9, "3.10", 3.11]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install Python dependencies
@@ -66,7 +66,7 @@ jobs:
         - os: windows-latest
           python-version: pypy-3.9
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Setup macOS
       if: ${{ contains(matrix.os, 'macos-latest') }}
       run: |
@@ -76,7 +76,7 @@ jobs:
         echo "LDFLAGS=-L/usr/local/opt/openssl/lib" >> $GITHUB_ENV
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install PyPy dependencies
@@ -110,7 +110,7 @@ jobs:
         manylinux-version: ['manylinux2010_x86_64', 'manylinux_2_28_x86_64'] # GHA doesn't support manylinux_2_24_aarch64
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Docker Run Action
       uses: addnab/docker-run-action@v3
       with:
@@ -124,7 +124,7 @@ jobs:
           if [[ "${{ matrix.manylinux-version }}" == "manylinux_2_28_x86_64" ]]; then
             dnf install libjpeg-devel -y
           else
-            yum -y install libjpeg-devel
+            yum -y install libjpeg-devel libffi-devel
           fi
 
           cd /work
@@ -134,6 +134,9 @@ jobs:
           python setup.py build_ext --inplace
 
           echo "Starting tests"
+          if [[ "${{ matrix.manylinux-version }}" == "manylinux2010_x86_64" ]]; then
+            python -m pip install cryptography==37
+          fi
           python -m pip install -r requirements_tests.txt
           PYTEST_SECRETS_KEY=${{ secrets.PYTEST_SECRETS_KEY }} TEST_CI=1 TEST_NO_UI=1 python -m pytest tests/ -n2 -v
 
@@ -148,7 +151,7 @@ jobs:
           mv wheelhouse/*.whl dist/
           chmod 777 -R . # Fix permissions to help cleaning up outside of Docker
     - name: Set up Python 3.8 (just for PyPi upload)
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v3
       with:
         python-version: 3.8
     - name: Upload wheel

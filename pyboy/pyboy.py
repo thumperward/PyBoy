@@ -51,13 +51,13 @@ class PyBoy:
         interfaces. All other parts of the emulator, are subject to change.
 
         A range of methods are exposed, which should allow for complete control of the emulator. Please open an issue on
-        GitHub, if other methods are needed for your projects. Take a look at `interface_example.py` or `tetris_bot.py`
-        for a crude "bot", which interacts with the game.
+        GitHub, if other methods are needed for your projects. Take a look at the files in `examples/` for a crude
+        "bots", which interact with the game.
 
         Only the `gamerom_file` argument is required.
 
         Args:
-            gamerom_file (str): Filepath to a game-ROM for the original Game Boy.
+            gamerom_file (str): Filepath to a game-ROM for Game Boy or Game Boy Color.
 
         Kwargs:
             bootrom_file (str): Filepath to a boot-ROM to use. If unsure, specify `None`.
@@ -125,27 +125,27 @@ class PyBoy:
         if self.stopped:
             return True
 
-        t_start = time.perf_counter() # Change to _ns when PyPy supports it
+        t_start = time.perf_counter_ns()
         self._handle_events(self.events)
-        t_pre = time.perf_counter()
+        t_pre = time.perf_counter_ns()
         if not self.paused:
             if self.mb.tick():
                 # breakpoint reached
                 self.plugin_manager.handle_breakpoint()
             else:
                 self.frame_count += 1
-        t_tick = time.perf_counter()
+        t_tick = time.perf_counter_ns()
         self._post_tick()
-        t_post = time.perf_counter()
+        t_post = time.perf_counter_ns()
 
-        secs = t_pre - t_start
-        self.avg_pre = 0.9 * self.avg_pre + 0.1*secs
+        nsecs = t_pre - t_start
+        self.avg_pre = 0.9 * self.avg_pre + (0.1*nsecs/1_000_000_000)
 
-        secs = t_tick - t_pre
-        self.avg_tick = 0.9 * self.avg_tick + 0.1*secs
+        nsecs = t_tick - t_pre
+        self.avg_tick = 0.9 * self.avg_tick + (0.1*nsecs/1_000_000_000)
 
-        secs = t_post - t_tick
-        self.avg_post = 0.9 * self.avg_post + 0.1*secs
+        nsecs = t_post - t_tick
+        self.avg_post = 0.9 * self.avg_post + (0.1*nsecs/1_000_000_000)
 
         return self.quitting
 
@@ -158,7 +158,7 @@ class PyBoy:
             elif event == WindowEvent.RELEASE_SPEED_UP:
                 # Switch between unlimited and 1x real-time emulation speed
                 self.target_emulationspeed = int(bool(self.target_emulationspeed) ^ True)
-                logger.info("Speed limit: %s" % self.target_emulationspeed)
+                logger.debug("Speed limit: %s" % self.target_emulationspeed)
             elif event == WindowEvent.STATE_SAVE:
                 with open(self.gamerom_file + ".state", "wb") as f:
                     self.mb.save_state(IntIOWrapper(f))
@@ -215,7 +215,7 @@ class PyBoy:
     def _update_window_title(self):
         avg_emu = self.avg_pre + self.avg_tick + self.avg_post
         self.window_title = "CPU/frame: %0.2f%%" % ((self.avg_pre + self.avg_tick) / SPF * 100)
-        self.window_title += " Emulation: x%d" % (round(SPF / avg_emu) if avg_emu != 0 else 0)
+        self.window_title += " Emulation: x%s" % (round(SPF / avg_emu) if avg_emu > 0 else "INF")
         if self.paused:
             self.window_title += "[PAUSED]"
         self.window_title += self.plugin_manager.window_title()

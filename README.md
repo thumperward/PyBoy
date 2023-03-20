@@ -23,6 +23,7 @@ If more features are needed, or if you find a bug, don't hesitate to make an
 issue here on GitHub, or write on our [Discord channel](https://discord.gg/Zrf2nyH).
 
 ![Pokemon in-game](docs/assets/1.gif)
+__If you are looking to make a bot or AI__, you can find all the external components in the [PyBoy Documentation](https://baekalfen.github.io/PyBoy/index.html). There is also a short example on our Wiki page [Scripts, AI and Bots](https://github.com/Baekalfen/PyBoy/wiki/Scripts,-AI-and-Bots) as well as in the [examples directory](https://github.com/Baekalfen/PyBoy/tree/master/examples). If more features are needed, or if you find a bug, don't hesitate to make an issue here on GitHub, or post on our [Discord channel](https://discord.gg/Zrf2nyH).
 
 | Rewind any game | [Beat world records](https://github.com/uiucanh/tetris) | [Train with Reinforcement Learning](https://github.com/lixado/PyBoy-RL) |
 | --- | --- | ---
@@ -81,7 +82,7 @@ own project: [Wiki](https://github.com/Baekalfen/PyBoy/wiki).
 
 ## Contributors
 
-Thanks to all the people, who have contributed to the project!
+Thanks to all the people who have contributed to the project!
 
 ### Original Developers
 
