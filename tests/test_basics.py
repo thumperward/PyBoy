@@ -27,17 +27,8 @@ def test_record_replay(boot_rom, default_rom):
                   bootrom_file=boot_rom,
                   record_input=True)
     pyboy.set_emulation_speed(0)
-    pyboy.tick()
-    pyboy.send_input(WindowEvent.PRESS_ARROW_DOWN)
-    pyboy.tick()
-    pyboy.send_input(WindowEvent.PRESS_ARROW_UP)
-    pyboy.tick()
-    pyboy.tick()
-    pyboy.send_input(WindowEvent.PRESS_ARROW_DOWN)
-    pyboy.tick()
-    pyboy.send_input(WindowEvent.PRESS_ARROW_UP)
-    pyboy.tick()
-
+    press_down_then_up(pyboy)
+    press_down_then_up(pyboy)
     events = pyboy.plugin_manager.record_replay.recorded_input
     assert len(
         events
@@ -52,15 +43,23 @@ def test_record_replay(boot_rom, default_rom):
 
     pyboy.stop(save=False)
 
-    with open(default_rom + ".replay", "rb") as f:
+    with open(f"{default_rom}.replay", "rb") as f:
         m = hashlib.sha256()
         m.update(f.read())
         digest = m.digest()
 
-    os.remove(default_rom + ".replay")
+    os.remove(f"{default_rom}.replay")
 
     assert digest == b"\xc0\xfe\x0f\xaa\x1b0YY\x1a\x174\x8c\xad\xeaDZ\x1dQ\xa8\xa2\x9fA\xaap\x15(\xc9\xd9#\xd4]{", \
         "The replay did not result in the expected output"
+
+
+def press_down_then_up(pyboy):
+    pyboy.tick()
+    pyboy.send_input(WindowEvent.PRESS_ARROW_DOWN)
+    pyboy.tick()
+    pyboy.send_input(WindowEvent.PRESS_ARROW_UP)
+    pyboy.tick()
 
 
 def test_profiling(boot_rom, default_rom):
@@ -254,34 +253,38 @@ def test_tilemaps(kirby_rom):
 def test_randomize_ram(default_rom):
     pyboy = PyBoy(default_rom, window_type="dummy", randomize=False)
     # RAM banks should all be 0 by default
-    assert not any([pyboy.get_memory_value(x)
-                    for x in range(0x8000, 0xA000)]), "VRAM not zeroed"
-    assert not any([pyboy.get_memory_value(x) for x in range(0xC000, 0xE000)
-                    ]), "Internal RAM 0 not zeroed"
-    assert not any([pyboy.get_memory_value(x)
-                    for x in range(0xFE00, 0xFEA0)]), "OAM not zeroed"
-    assert not any([pyboy.get_memory_value(x) for x in range(0xFEA0, 0xFF00)
-                    ]), "Non-IO internal RAM 0 not zeroed"
-    assert not any([pyboy.get_memory_value(x) for x in range(0xFF4C, 0xFF80)
-                    ]), "Non-IO internal RAM 1 not zeroed"
-    assert not any([pyboy.get_memory_value(x) for x in range(0xFF80, 0xFFFF)
-                    ]), "Internal RAM 1 not zeroed"
+    assert not any(pyboy.get_memory_value(x)
+                   for x in range(0x8000, 0xA000)), "VRAM not zeroed"
+    assert not any(pyboy.get_memory_value(x)
+                   for x in range(0xC000, 0xE000)), "Internal RAM 0 not zeroed"
+    assert not any(pyboy.get_memory_value(x)
+                   for x in range(0xFE00, 0xFEA0)), "OAM not zeroed"
+    assert not any(
+        pyboy.get_memory_value(x)
+        for x in range(0xFEA0, 0xFF00)), "Non-IO internal RAM 0 not zeroed"
+    assert not any(
+        pyboy.get_memory_value(x)
+        for x in range(0xFF4C, 0xFF80)), "Non-IO internal RAM 1 not zeroed"
+    assert not any(pyboy.get_memory_value(x)
+                   for x in range(0xFF80, 0xFFFF)), "Internal RAM 1 not zeroed"
     pyboy.stop(save=False)
 
     pyboy = PyBoy(default_rom, window_type="dummy", randomize=True)
     # RAM banks should have at least one nonzero value now
-    assert any([pyboy.get_memory_value(x)
-                for x in range(0x8000, 0xA000)]), "VRAM not randomized"
-    assert any([pyboy.get_memory_value(x) for x in range(0xC000, 0xE000)
-                ]), "Internal RAM 0 not randomized"
-    assert any([pyboy.get_memory_value(x)
-                for x in range(0xFE00, 0xFEA0)]), "OAM not randomized"
-    assert any([pyboy.get_memory_value(x) for x in range(0xFEA0, 0xFF00)
-                ]), "Non-IO internal RAM 0 not randomized"
-    assert any([pyboy.get_memory_value(x) for x in range(0xFF4C, 0xFF80)
-                ]), "Non-IO internal RAM 1 not randomized"
-    assert any([pyboy.get_memory_value(x) for x in range(0xFF80, 0xFFFF)
-                ]), "Internal RAM 1 not randomized"
+    assert any(pyboy.get_memory_value(x)
+               for x in range(0x8000, 0xA000)), "VRAM not randomized"
+    assert any(pyboy.get_memory_value(x)
+               for x in range(0xC000, 0xE000)), "Internal RAM 0 not randomized"
+    assert any(pyboy.get_memory_value(x)
+               for x in range(0xFE00, 0xFEA0)), "OAM not randomized"
+    assert any(
+        pyboy.get_memory_value(x)
+        for x in range(0xFEA0, 0xFF00)), "Non-IO internal RAM 0 not randomized"
+    assert any(
+        pyboy.get_memory_value(x)
+        for x in range(0xFF4C, 0xFF80)), "Non-IO internal RAM 1 not randomized"
+    assert any(pyboy.get_memory_value(x)
+               for x in range(0xFF80, 0xFFFF)), "Internal RAM 1 not randomized"
     pyboy.stop(save=False)
 
 
@@ -314,7 +317,7 @@ def test_all_modes(cgb, _bootrom, frames, rom, any_rom_cgb, boot_cgb_rom):
     if cgb == False and _bootrom == boot_cgb_rom:
         pytest.skip("Invalid combination")
 
-    if cgb == None and _bootrom == boot_cgb_rom and rom != any_rom_cgb:
+    if cgb is None and _bootrom == boot_cgb_rom and rom != any_rom_cgb:
         pytest.skip("Invalid combination")
 
     pyboy = PyBoy(rom, window_type="headless", bootrom_file=_bootrom, cgb=cgb)

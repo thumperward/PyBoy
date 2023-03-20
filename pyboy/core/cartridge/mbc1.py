@@ -45,7 +45,7 @@ class MBC1(BaseMBC):
                               self.external_ram_count][address -
                                                        0xA000] = value
         else:
-            logger.error("Invalid writing address: %s" % hex(address))
+            logger.error(f"Invalid writing address: {hex(address)}")
 
     def getitem(self, address):
         if 0x0000 <= address < 0x4000:
@@ -57,12 +57,12 @@ class MBC1(BaseMBC):
             return self.rombanks[self.rombank_selected][address]
         elif 0x4000 <= address < 0x8000:
             self.rombank_selected = \
-                    (self.bank_select_register2 << 5) % self.external_rom_count | self.bank_select_register1
+                            (self.bank_select_register2 << 5) % self.external_rom_count | self.bank_select_register1
             return self.rombanks[self.rombank_selected %
                                  len(self.rombanks)][address - 0x4000]
         elif 0xA000 <= address < 0xC000:
             if not self.rambank_initialized:
-                logger.error("RAM banks not initialized: %s" % hex(address))
+                logger.error(f"RAM banks not initialized: {hex(address)}")
 
             if not self.rambank_enabled:
                 return 0xFF
@@ -74,7 +74,7 @@ class MBC1(BaseMBC):
             return self.rambanks[self.rambank_selected %
                                  self.external_ram_count][address - 0xA000]
         else:
-            logger.error("Reading address invalid: %s" % address)
+            logger.error(f"Reading address invalid: {address}")
 
     def save_state(self, f):
         # Cython doesn't like super()

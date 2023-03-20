@@ -19,12 +19,14 @@ try:
                            GL_UNSIGNED_INT_8_8_8_8, glClear, glDrawPixels,
                            glFlush, glPixelZoom)
     # from OpenGL.GLU import *
-    from OpenGL.GLUT import (
-        GLUT_KEY_DOWN, GLUT_KEY_LEFT, GLUT_KEY_RIGHT, GLUT_KEY_UP, GLUT_RGBA,
-        GLUT_SINGLE, glutCreateWindow, glutDestroyWindow, glutDisplayFunc,
-        glutGetWindow, glutInit, glutInitDisplayMode, glutInitWindowSize,
-        glutKeyboardFunc, glutKeyboardUpFunc, glutReshapeFunc,
-        glutSetWindowTitle, glutSpecialFunc, glutSpecialUpFunc)
+    from OpenGL.GLUT import (GLUT_KEY_DOWN, GLUT_KEY_LEFT, GLUT_KEY_RIGHT,
+                             GLUT_KEY_UP, GLUT_RGBA, GLUT_SINGLE,
+                             glutCreateWindow, glutDestroyWindow,
+                             glutDisplayFunc, glutGetWindow, glutInit,
+                             glutInitDisplayMode, glutInitWindowSize,
+                             glutKeyboardFunc, glutKeyboardUpFunc,
+                             glutReshapeFunc, glutSetWindowTitle,
+                             glutSpecialFunc, glutSpecialUpFunc)
     opengl_enabled = True
 except ImportError:
     opengl_enabled = False
@@ -41,7 +43,7 @@ class WindowOpenGL(PyBoyWindowPlugin):
             return
 
         if not glutInit():
-            raise Exception("OpenGL couldn't initialize!")
+            raise OSError("OpenGL couldn't initialize!")
         glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA)
         glutInitWindowSize(*self._scaledresolution)
         glutCreateWindow("PyBoy")
@@ -120,23 +122,21 @@ class WindowOpenGL(PyBoyWindowPlugin):
                     WindowEvent(WindowEvent.RELEASE_BUTTON_START))
             elif c == "o":
                 self.events.append(WindowEvent(WindowEvent.SCREENSHOT_RECORD))
-        else:
-            if c == "a":
-                self.events.append(WindowEvent(WindowEvent.PRESS_BUTTON_A))
-            elif c == "s":
-                self.events.append(WindowEvent(WindowEvent.PRESS_BUTTON_B))
-            elif c == chr(27):
-                self.events.append(WindowEvent(WindowEvent.QUIT))
-            elif c == " ":
-                self.events.append(WindowEvent(WindowEvent.PRESS_SPEED_UP))
-            elif c == "i":
-                self.events.append(
-                    WindowEvent(WindowEvent.SCREEN_RECORDING_TOGGLE))
-            elif c == chr(8):
-                self.events.append(WindowEvent(
-                    WindowEvent.PRESS_BUTTON_SELECT))
-            elif c == chr(13):
-                self.events.append(WindowEvent(WindowEvent.PRESS_BUTTON_START))
+        elif c == "a":
+            self.events.append(WindowEvent(WindowEvent.PRESS_BUTTON_A))
+        elif c == "s":
+            self.events.append(WindowEvent(WindowEvent.PRESS_BUTTON_B))
+        elif c == chr(27):
+            self.events.append(WindowEvent(WindowEvent.QUIT))
+        elif c == " ":
+            self.events.append(WindowEvent(WindowEvent.PRESS_SPEED_UP))
+        elif c == "i":
+            self.events.append(WindowEvent(
+                WindowEvent.SCREEN_RECORDING_TOGGLE))
+        elif c == chr(8):
+            self.events.append(WindowEvent(WindowEvent.PRESS_BUTTON_SELECT))
+        elif c == chr(13):
+            self.events.append(WindowEvent(WindowEvent.PRESS_BUTTON_START))
 
     def _glreshape(self, width, height):
         scale = max(min(height / ROWS, width / COLS), 1)

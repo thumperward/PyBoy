@@ -24,7 +24,7 @@ except ImportError:
 def load_cartridge(filename):
     rombanks = load_romfile(filename)
     if not validate_checksum(rombanks):
-        raise Exception("Cartridge header checksum mismatch!")
+        raise OSError("Cartridge header checksum mismatch!")
 
     # WARN: The following table doesn't work for MBC2! See Pan Docs
     external_ram_count = int(EXTERNAL_RAM_TABLE[rombanks[0][0x0149]])
@@ -32,7 +32,7 @@ def load_cartridge(filename):
     carttype = rombanks[0][0x0147]
     cartinfo = CARTRIDGE_TABLE.get(carttype, None)
     if cartinfo is None:
-        raise Exception("Catridge type invalid: %s" % carttype)
+        raise OSError(f"Catridge type invalid: {carttype}")
 
     cartdata = (carttype, cartinfo[0].__name__, ", ".join(
         [x for x, y in zip(["SRAM", "Battery", "RTC"], cartinfo[1:]) if y]))
@@ -60,20 +60,19 @@ def load_romfile(filename):
     logger.debug(f"Loading ROM file: {len(romdata)} bytes")
     if len(romdata) == 0:
         logger.error("ROM file is empty!")
-        raise Exception("Empty ROM file")
+        raise OSError("Empty ROM file")
 
     banksize = 16 * 1024
     if len(romdata) % banksize != 0:
         logger.error("Unexpected ROM file length")
-        raise Exception("Bad ROM file size")
+        raise OSError("Bad ROM file size")
 
     if cythonmode:
         return memoryview(romdata).cast("B",
                                         shape=(len(romdata) // banksize,
                                                banksize))
-    else:
-        v = memoryview(romdata)
-        return [v[i:i + banksize] for i in range(0, len(romdata), banksize)]
+    v = memoryview(romdata)
+    return [v[i:i + banksize] for i in range(0, len(romdata), banksize)]
 
 
 # yapf: disable

@@ -15,7 +15,7 @@ class IntIOInterface:
         pass
 
     def write(self, byte):
-        raise Exception("Not implemented!")
+        raise OSError("Not implemented!")
 
     def write_64bit(self, value):
         self.write(value & 0xFF)
@@ -62,25 +62,25 @@ class IntIOInterface:
         return int(a | (b << 8))
 
     def read(self):
-        raise Exception("Not implemented!")
+        raise OSError("Not implemented!")
 
     def seek(self, pos):
-        raise Exception("Not implemented!")
+        raise OSError("Not implemented!")
 
     def flush(self):
-        raise Exception("Not implemented!")
+        raise OSError("Not implemented!")
 
     def new(self):
-        raise Exception("Not implemented!")
+        raise OSError("Not implemented!")
 
     def commit(self):
-        raise Exception("Not implemented!")
+        raise OSError("Not implemented!")
 
     def seek_frame(self, _):
-        raise Exception("Not implemented!")
+        raise OSError("Not implemented!")
 
     def tell(self):
-        raise Exception("Not implemented!")
+        raise OSError("Not implemented!")
 
 
 class IntIOWrapper(IntIOInterface):
@@ -138,8 +138,7 @@ def color_code(byte1, byte2, offset):
 def flatten_list(l):
     flat_list = []
     for sublist in l:
-        for item in sublist:
-            flat_list.append(item)
+        flat_list.extend(iter(sublist))
     return flat_list
 
 
@@ -210,10 +209,7 @@ class WindowEvent:
         self.event = event
 
     def __eq__(self, x):
-        if isinstance(x, int):
-            return self.event == x
-        else:
-            return self.event == x.event
+        return self.event == x if isinstance(x, int) else self.event == x.event
 
     def __int__(self):
         return self.event

@@ -37,10 +37,9 @@ class Sound:
             sdl2.SDL_PauseAudioDevice(self.device, 0)
 
             self.sample_rate = spec_have.freq
-            self.sampleclocks = CPU_FREQ // self.sample_rate
         else:
             self.sample_rate = 32768
-            self.sampleclocks = CPU_FREQ // self.sample_rate
+        self.sampleclocks = CPU_FREQ // self.sample_rate
         self.audiobuffer = array("b", [0] * 4096)  # Over 2 frames
         self.audiobuffer_p = c_void_p(self.audiobuffer.buffer_info()[0])
 
@@ -114,15 +113,7 @@ class Sound:
         elif offset == 20 and self.poweron:  # Control register NR50: Vin enable and volume -- not implemented
             return
         elif offset == 21 and self.poweron:  # Control register NR51: Channel stereo enable/panning
-            self.leftnoise = value & 0x80
-            self.leftwave = value & 0x40
-            self.lefttone = value & 0x20
-            self.leftsweep = value & 0x10
-            self.rightnoise = value & 0x08
-            self.rightwave = value & 0x04
-            self.righttone = value & 0x02
-            self.rightsweep = value & 0x01
-            return
+            return self.channel_stereo_set(value)
         elif offset == 22:  # Control register NR52: Sound on/off
             if value & 0x80 == 0:  # Sound power off
                 for n in range(22):
@@ -138,6 +129,17 @@ class Sound:
         else:
             raise IndexError(
                 f"Attempted to write register {offset} in sound memory")
+
+    def channel_stereo_set(self, value):
+        self.leftnoise = value & 0x80
+        self.leftwave = value & 0x40
+        self.lefttone = value & 0x20
+        self.leftsweep = value & 0x10
+        self.rightnoise = value & 0x08
+        self.rightwave = value & 0x04
+        self.righttone = value & 0x02
+        self.rightsweep = value & 0x01
+        return
 
     def sync(self):
         """Run the audio for the number of clock cycles stored in self.clock"""
@@ -236,8 +238,7 @@ class ToneChannel:
         elif reg == 4:
             return self.uselen << 6  # Other bits are write-only
         else:
-            raise IndexError(
-                "Attempt to read register {} in ToneChannel".format(reg))
+            raise IndexError(f"Attempt to read register {reg} in ToneChannel")
 
     def setreg(self, reg, val):
         if reg == 0:
@@ -264,8 +265,7 @@ class ToneChannel:
                 self.trigger(
                 )  # Sync is called first in Sound.set so it's okay to trigger immediately
         else:
-            raise IndexError(
-                "Attempt to write register {} in ToneChannel".format(reg))
+            raise IndexError(f"Attempt to write register {reg} in ToneChannel")
 
     def run(self, clocks):
         """Advances time to sync with system state.
@@ -309,17 +309,16 @@ class ToneChannel:
             self.waveframe] if self.enable else 0
 
     def trigger(self):
-        self.enable = True
         self.lengthtimer = self.lengthtimer or 64
         self.periodtimer = self.period
         self.envelopetimer = self.envper
         self.volume = self.envini
+
         # TODO: If channel DAC is off (NRx2 & 0xF8 == 0) then this
         #   will be undone and the channel immediately disabled.
         #   Probably need a new DAC power state/variable.
         # For now:
-        if self.envper == 0 and self.envini == 0:
-            self.enable = False
+        self.enable = self.envper != 0 or self.envini != 0
 
 
 class SweepChannel(ToneChannel):
@@ -357,16 +356,15 @@ class SweepChannel(ToneChannel):
         # Clock sweep timer on 2 and 6
         if self.sweepenable and self.swpper and self.frame & 3 == 2:
             self.sweeptimer -= 1
-            if self.sweeptimer == 0:
-                if self.sweep(True):
-                    self.sweeptimer = self.swpper
-                    self.sweep(False)
+            if self.sweeptimer == 0 and self.sweep(True):
+                self.sweeptimer = self.swpper
+                self.sweep(False)
 
     def trigger(self):
         ToneChannel.trigger(self)
         self.shadow = self.sndper
         self.sweeptimer = self.swpper
-        self.sweepenable = True if (self.swpper or self.swpmag) else False
+        self.sweepenable = bool((self.swpper or self.swpmag))
         if self.swpmag:
             self.sweep(False)
 
@@ -423,8 +421,7 @@ class WaveChannel:
         elif reg == 4:
             return self.uselen << 6 | 0xBF
         else:
-            raise IndexError(
-                "Attempt to read register {} in ToneChannel".format(reg))
+            raise IndexError(f"Attempt to read register {reg} in ToneChannel")
 
     def setreg(self, reg, val):
         if reg == 0:
@@ -449,8 +446,7 @@ class WaveChannel:
                 self.trigger(
                 )  # Sync is called first in Sound.set so it's okay to trigger immediately
         else:
-            raise IndexError(
-                "Attempt to write register {} in WaveChannel".format(reg))
+            raise IndexError(f"Attempt to write register {reg} in WaveChannel")
 
     def getwavebyte(self, offset):
         if self.dacpow:
@@ -496,7 +492,7 @@ class WaveChannel:
             return 0
 
     def trigger(self):
-        self.enable = True if self.dacpow else False
+        self.enable = bool(self.dacpow)
         self.lengthtimer = self.lengthtimer or 256
         self.periodtimer = self.period
 
@@ -543,8 +539,7 @@ class NoiseChannel:
         elif reg == 4:
             return self.uselen << 6 | 0xBF
         else:
-            raise IndexError(
-                "Attempt to read register {} in NoiseChannel".format(reg))
+            raise IndexError(f"Attempt to read register {reg} in NoiseChannel")
 
     def setreg(self, reg, val):
         if reg == 0:
@@ -570,8 +565,7 @@ class NoiseChannel:
                 self.trigger(
                 )  # Sync is called first in Sound.set so it's okay to trigger immediately
         else:
-            raise IndexError(
-                "Attempt to write register {} in ToneChannel".format(reg))
+            raise IndexError(f"Attempt to write register {reg} in ToneChannel")
 
     def run(self, clocks):
         """Advances time to sync with system state."""
@@ -619,12 +613,9 @@ class NoiseChannel:
             return 0
 
     def trigger(self):
-        self.enable = True
         self.lengthtimer = self.lengthtimer or 64
         self.periodtimer = self.period
         self.envelopetimer = self.envper
         self.volume = self.envini
         self.shiftregister = 0x7FFF
-        # TODO: tidy instead of double change variable
-        if self.envper == 0 and self.envini == 0:
-            self.enable = False
+        self.enable = self.envper != 0 or self.envini != 0

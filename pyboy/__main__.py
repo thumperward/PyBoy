@@ -24,7 +24,7 @@ def color_tuple(string):
 
 
 def valid_file_path(path):
-    if not path == INTERNAL_LOADSTATE and not os.path.isfile(path):
+    if path != INTERNAL_LOADSTATE and not os.path.isfile(path):
         logger.error(f"Filepath '{path}' couldn't be found, or isn't a file!")
         exit(1)
     return path
@@ -154,7 +154,7 @@ See "pyboy --help" for how to enable rewind and other awesome features!
     if argv.loadstate is not None:
         if argv.loadstate == INTERNAL_LOADSTATE:
             # Guess filepath from ROM path
-            state_path = argv.ROM + ".state"
+            state_path = f"{argv.ROM}.state"
         else:
             # Use filepath given
             state_path = argv.loadstate

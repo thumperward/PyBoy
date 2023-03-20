@@ -15,7 +15,8 @@
 				"sourcery.sourcery",
 				"DavidAnson.vscode-markdownlint",
 				"redhat.vscode-yaml",
-				"tomoki1207.pdf"
+				"tomoki1207.pdf",
+				"tcwalther.cython"
 			]
 		}
 	},

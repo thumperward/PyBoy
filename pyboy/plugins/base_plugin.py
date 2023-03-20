@@ -71,10 +71,10 @@ class PyBoyWindowPlugin(PyBoyPlugin):
 
         scale = pyboy_argv.get("scale")
         self.scale = scale
-        logger.debug("%s initialization" % self.__class__.__name__)
+        logger.debug(f"{self.__class__.__name__} initialization")
 
         self._scaledresolution = (scale * COLS, scale * ROWS)
-        logger.debug("Scale: x%s %s" % (self.scale, self._scaledresolution))
+        logger.debug(f"Scale: x{self.scale} {self._scaledresolution}")
 
         self.enable_title = True
         if not cythonmode:
@@ -160,7 +160,7 @@ class PyBoyGameWrapper(PyBoyPlugin):
             timer_div (int): Replace timer's DIV register with this value. Use `None` to randomize.
         """
 
-        if not self.pyboy.frame_count == 0:
+        if self.pyboy.frame_count != 0:
             logger.warning(
                 "Calling start_game from an already running game. This might not work."
             )
@@ -261,25 +261,25 @@ class PyBoyGameWrapper(PyBoyPlugin):
             try:
                 return self.tiles_compressed[np.asarray(self.game_area(),
                                                         dtype=np.uint16)]
-            except AttributeError:
+            except AttributeError as e:
                 raise AttributeError(
                     f"Game wrapper miss the attribute tiles_compressed for observation_type : {observation_type}"
-                )
+                ) from e
         elif observation_type == "minimal":
             try:
                 return self.tiles_minimal[np.asarray(self.game_area(),
                                                      dtype=np.uint16)]
-            except AttributeError:
+            except AttributeError as e:
                 raise AttributeError(
                     f"Game wrapper miss the attribute tiles_minimal for observation_type : {observation_type}"
-                )
+                ) from e
         else:
             raise ValueError(f"Invalid observation_type : {observation_type}")
 
     def _sum_number_on_screen(self, x, y, length, blank_tile_identifier,
                               tile_identifier_offset):
-        number = 0
-        for i, x in enumerate(self.tilemap_background[x:x + length, y]):
-            if x != blank_tile_identifier:
-                number += (x + tile_identifier_offset) * (10**(length - 1 - i))
-        return number
+        return sum(
+            (x + tile_identifier_offset) * (10 ** (length - 1 - i))
+            for i, x in enumerate(self.tilemap_background[x : x + length, y])
+            if x != blank_tile_identifier
+        )

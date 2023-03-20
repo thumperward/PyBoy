@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 class RTC:
 
     def __init__(self, filename):
-        self.filename = filename + ".rtc"
+        self.filename = f"{filename}.rtc"
 
         if not os.path.exists(self.filename):
             logger.info("No RTC file found. Skipping.")
@@ -47,7 +47,7 @@ class RTC:
 
     def load_state(self, f, state_version):
         self.timezero = struct.unpack("f",
-                                      bytes([f.read() for _ in range(4)]))[0]
+                                      bytes(f.read() for _ in range(4)))[0]
         self.halt = f.read()
         self.day_carry = f.read()
 
@@ -114,18 +114,21 @@ class RTC:
         elif register == 0x0B:
             self.timezero -= int(t / 3600 / 24) - value
         elif register == 0x0C:
-            day_high = value & 0b1
-            halt = (value & 0b1000000) >> 6
-            day_carry = (value & 0b10000000) >> 7
-
-            self.halt = halt
-            if self.halt == 0:
-                pass  # TODO: Start the timer
-            else:
-                logger.warning("Stopping RTC is not implemented!")
-
-            self.timezero -= int(t / 3600 / 24) - (day_high << 8)
-            self.day_carry = day_carry
+            self.set_register_0x0c(value, t)
         else:
             logger.warning("Invalid RTC register: %0.4x %0.2x" %
                            (register, value))
+
+    def set_register_0x0c(self, value, t):
+        day_high = value & 0b1
+        halt = (value & 0b1000000) >> 6
+        day_carry = (value & 0b10000000) >> 7
+
+        self.halt = halt
+        if self.halt != 0:
+            logger.warning("Stopping RTC is not implemented!")
+
+        # TODO: Start the timer
+
+        self.timezero -= int(t / 3600 / 24) - (day_high << 8)
+        self.day_carry = day_carry

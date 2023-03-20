@@ -44,39 +44,88 @@ def test_tiles(default_rom):
     data = tile.image_data()
     assert data.shape == (8, 8)
 
-    assert [[x for x in y] for y in data
-            ] == [[
-                0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff,
-                0xffffffff, 0xffffffff, 0xffffffff
-            ],
-                  [
-                      0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff,
-                      0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff
-                  ],
-                  [
-                      0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff,
-                      0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff
-                  ],
-                  [
-                      0xffffffff, 0xff000000, 0xff000000, 0xff000000,
-                      0xff000000, 0xff000000, 0xffffffff, 0xffffffff
-                  ],
-                  [
-                      0xffffffff, 0xff000000, 0xff000000, 0xff000000,
-                      0xff000000, 0xff000000, 0xff000000, 0xffffffff
-                  ],
-                  [
-                      0xffffffff, 0xff000000, 0xff000000, 0xffffffff,
-                      0xffffffff, 0xff000000, 0xff000000, 0xffffffff
-                  ],
-                  [
-                      0xffffffff, 0xff000000, 0xff000000, 0xffffffff,
-                      0xffffffff, 0xff000000, 0xff000000, 0xffffffff
-                  ],
-                  [
-                      0xffffffff, 0xff000000, 0xff000000, 0xffffffff,
-                      0xffffffff, 0xff000000, 0xff000000, 0xffffffff
-                  ]]
+    assert [list(y) for y in data] == [
+        [
+            0xFFFFFFFF,
+            0xFFFFFFFF,
+            0xFFFFFFFF,
+            0xFFFFFFFF,
+            0xFFFFFFFF,
+            0xFFFFFFFF,
+            0xFFFFFFFF,
+            0xFFFFFFFF,
+        ],
+        [
+            0xFFFFFFFF,
+            0xFFFFFFFF,
+            0xFFFFFFFF,
+            0xFFFFFFFF,
+            0xFFFFFFFF,
+            0xFFFFFFFF,
+            0xFFFFFFFF,
+            0xFFFFFFFF,
+        ],
+        [
+            0xFFFFFFFF,
+            0xFFFFFFFF,
+            0xFFFFFFFF,
+            0xFFFFFFFF,
+            0xFFFFFFFF,
+            0xFFFFFFFF,
+            0xFFFFFFFF,
+            0xFFFFFFFF,
+        ],
+        [
+            0xFFFFFFFF,
+            0xFF000000,
+            0xFF000000,
+            0xFF000000,
+            0xFF000000,
+            0xFF000000,
+            0xFFFFFFFF,
+            0xFFFFFFFF,
+        ],
+        [
+            0xFFFFFFFF,
+            0xFF000000,
+            0xFF000000,
+            0xFF000000,
+            0xFF000000,
+            0xFF000000,
+            0xFF000000,
+            0xFFFFFFFF,
+        ],
+        [
+            0xFFFFFFFF,
+            0xFF000000,
+            0xFF000000,
+            0xFFFFFFFF,
+            0xFFFFFFFF,
+            0xFF000000,
+            0xFF000000,
+            0xFFFFFFFF,
+        ],
+        [
+            0xFFFFFFFF,
+            0xFF000000,
+            0xFF000000,
+            0xFFFFFFFF,
+            0xFFFFFFFF,
+            0xFF000000,
+            0xFF000000,
+            0xFFFFFFFF,
+        ],
+        [
+            0xFFFFFFFF,
+            0xFF000000,
+            0xFF000000,
+            0xFFFFFFFF,
+            0xFFFFFFFF,
+            0xFF000000,
+            0xFF000000,
+            0xFFFFFFFF,
+        ],
+    ]
 
     for identifier in range(384):
         t = pyboy.botsupport_manager().tile(identifier)
@@ -95,7 +144,7 @@ def test_screen_buffer_and_image(tetris_rom, boot_rom):
 
     pyboy = PyBoy(tetris_rom, window_type="headless", bootrom_file=boot_rom)
     pyboy.set_emulation_speed(0)
-    for n in range(275):  # Iterate to boot logo
+    for _ in range(275):
         pyboy.tick()
 
     assert pyboy.botsupport_manager().screen().raw_screen_buffer_dims() == (
@@ -204,68 +253,65 @@ def test_tetris(tetris_rom):
             # We could also read out the score from the screen instead of
             # finding the corresponding value in RAM.
 
-            if not first_brick:
-                # 17 for the bottom tile when zero-indexed
-                # 2 because we skip the border on the left side. Then we take a slice of 10 more tiles
-                # 303 is the white background tile index
-                if any(filter(lambda x: x != 303, tile_map[2:12, 17])):
-                    first_brick = True
-                    print(frame)
-                    print("First brick touched the bottom!")
+            if not first_brick and any(
+                    filter(lambda x: x != 303, tile_map[2:12, 17])):
+                first_brick = True
+                print(frame)
+                print("First brick touched the bottom!")
 
-                    game_board_matrix = list(tile_map[2:12, :18])
-                    assert game_board_matrix == ([
-                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                        [303, 303, 303, 303, 303, 303, 303, 133, 133, 133],
-                        [303, 303, 303, 303, 303, 303, 303, 303, 133, 303]
-                    ])
+                game_board_matrix = list(tile_map[2:12, :18])
+                assert game_board_matrix == ([
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 133, 133, 133],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 133, 303]
+                ])
 
-                    tile_map.use_tile_objects(True)
+                tile_map.use_tile_objects(True)
 
-                    t1 = tile_map[0, 0]
-                    t2 = tile_map.tile(0, 0)
-                    t3 = tile_map.tile(1, 0)
-                    assert t1 == t2, "Testing __eq__ method of Tile object"
-                    assert t1 != t3, "Testing not __eq__ method of Tile object"
+                t1 = tile_map[0, 0]
+                t2 = tile_map.tile(0, 0)
+                t3 = tile_map.tile(1, 0)
+                assert t1 == t2, "Testing __eq__ method of Tile object"
+                assert t1 != t3, "Testing not __eq__ method of Tile object"
 
-                    game_board_matrix = [[x.tile_identifier for x in row]
-                                         for row in tile_map[2:12, :18]]
-                    tile_map.use_tile_objects(False)
-                    assert game_board_matrix == ([
-                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                        [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
-                        [303, 303, 303, 303, 303, 303, 303, 133, 133, 133],
-                        [303, 303, 303, 303, 303, 303, 303, 303, 133, 303]
-                    ])
+                game_board_matrix = [[x.tile_identifier for x in row]
+                                     for row in tile_map[2:12, :18]]
+                tile_map.use_tile_objects(False)
+                assert game_board_matrix == ([
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 303, 303],
+                    [303, 303, 303, 303, 303, 303, 303, 133, 133, 133],
+                    [303, 303, 303, 303, 303, 303, 303, 303, 133, 303]
+                ])
 
             if frame == 1012:
                 assert not first_brick
@@ -408,29 +454,26 @@ def test_tilemap_position_list(supermarioland_rom):
 
     # Move right for 100 frame
     pyboy.send_input(WindowEvent.PRESS_ARROW_RIGHT)
-    for _ in range(100):
-        pyboy.tick()
-
-    # Get screen positions, and verify the values
-    positions = pyboy.botsupport_manager().screen().tilemap_position_list()
-    for y in range(1, 16):
-        assert positions[y][0] == 0  # HUD
+    positions = get_screen_positions_and_verify(100, pyboy)
     for y in range(16, 144):
         assert positions[y][0] >= 50  # Actual screen position
         last_y = positions[y][0]
 
-    # Progress another 10 frames to see and increase in SCX
-    for _ in range(10):
-        pyboy.tick()
-
-    # Get screen positions, and verify the values
-    positions = pyboy.botsupport_manager().screen().tilemap_position_list()
-    for y in range(1, 16):
-        assert positions[y][0] == 0  # HUD
+    positions = get_screen_positions_and_verify(10, pyboy)
     for y in range(16, 144):
         assert positions[y][0] >= last_y + 10  # Actual screen position
 
     pyboy.stop(save=False)
+
+
+def get_screen_positions_and_verify(arg0, pyboy):
+    for _ in range(arg0):
+        pyboy.tick()
+
+    result = pyboy.botsupport_manager().screen().tilemap_position_list()
+    for y in range(1, 16):
+        assert result[y][0] == 0
+    return result
 
 
 def get_set_override(default_rom):

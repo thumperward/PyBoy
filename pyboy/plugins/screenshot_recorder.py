@@ -43,7 +43,7 @@ class ScreenshotRecorder(PyBoyPlugin):
 
         self.pyboy.botsupport_manager().screen().screen_image().save(path)
 
-        logger.info("Screenshot saved in {}".format(path))
+        logger.info(f"Screenshot saved in {path}")
 
     def enabled(self):
         if Image is None:

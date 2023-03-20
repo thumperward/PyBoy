@@ -160,12 +160,12 @@ class PyBoy:
                 # Switch between unlimited and 1x real-time emulation speed
                 self.target_emulationspeed = int(
                     bool(self.target_emulationspeed) ^ True)
-                logger.debug("Speed limit: %s" % self.target_emulationspeed)
+                logger.debug(f"Speed limit: {self.target_emulationspeed}")
             elif event == WindowEvent.STATE_SAVE:
-                with open(self.gamerom_file + ".state", "wb") as f:
+                with open(f"{self.gamerom_file}.state", "wb") as f:
                     self.mb.save_state(IntIOWrapper(f))
             elif event == WindowEvent.STATE_LOAD:
-                state_path = self.gamerom_file + ".state"
+                state_path = f"{self.gamerom_file}.state"
                 if not os.path.isfile(state_path):
                     logger.error(f"State file not found: {state_path}")
                     continue
@@ -299,9 +299,8 @@ class PyBoy:
         if gym_enabled:
             return PyBoyGymEnv(self, observation_type, action_type,
                                simultaneous_actions, **kwargs)
-        else:
-            logger.error(f"{__name__}: Missing dependency \"gym\". ")
-            return None
+        logger.error(f"{__name__}: Missing dependency \"gym\". ")
+        return None
 
     def game_wrapper(self):
         """
@@ -423,7 +422,7 @@ class PyBoy:
         """
 
         if isinstance(file_like_object, str):
-            raise Exception(
+            raise TypeError(
                 "String not allowed. Did you specify a filepath instead of a file-like object?"
             )
 
@@ -448,7 +447,7 @@ class PyBoy:
         """
 
         if isinstance(file_like_object, str):
-            raise Exception(
+            raise TypeError(
                 "String not allowed. Did you specify a filepath instead of a file-like object?"
             )
 

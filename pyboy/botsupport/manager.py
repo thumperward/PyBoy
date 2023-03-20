@@ -88,11 +88,9 @@ class BotSupportManager:
             match = []
             for s in range(_constants.SPRITES):
                 sprite = _sprite.Sprite(self.mb, s)
-                for t in sprite.tiles:
-                    if t.tile_identifier == i and (not on_screen or
-                                                   (on_screen
-                                                    and sprite.on_screen)):
-                        match.append(s)
+                match.extend(s for t in sprite.tiles
+                             if t.tile_identifier == i and (
+                                 not on_screen or sprite.on_screen))
             matches.append(match)
         return matches
 

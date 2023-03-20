@@ -146,7 +146,7 @@ class GameWrapperTetris(PyBoyGameWrapper):
                 break
 
         # Start game. Just press Start when the game allows us.
-        for i in range(2):
+        for _ in range(2):
             self.pyboy.send_input(WindowEvent.PRESS_BUTTON_START)
             self.pyboy.tick()
             self.pyboy.send_input(WindowEvent.RELEASE_BUTTON_START)

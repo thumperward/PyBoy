@@ -4,6 +4,7 @@
 #
 
 import array
+import itertools
 import logging
 import os
 
@@ -19,7 +20,7 @@ class BaseMBC:
 
     def __init__(self, filename, rombanks, external_ram_count, carttype, sram,
                  battery, rtc_enabled):
-        self.filename = filename + ".ram"
+        self.filename = f"{filename}.ram"
         self.rombanks = rombanks
         self.carttype = carttype
 
@@ -75,25 +76,23 @@ class BaseMBC:
 
     def save_ram(self, f):
         if not self.rambank_initialized:
-            logger.warning("Saving RAM is not supported on {}".format(
-                self.carttype))
+            logger.warning(f"Saving RAM is not supported on {self.carttype}")
             return
 
-        for bank in range(self.external_ram_count):
-            for byte in range(8 * 1024):
-                f.write(self.rambanks[bank][byte])
+        for bank, byte in itertools.product(range(self.external_ram_count),
+                                            range(8 * 1024)):
+            f.write(self.rambanks[bank][byte])
 
         logger.debug("RAM saved.")
 
     def load_ram(self, f):
         if not self.rambank_initialized:
-            logger.warning("Loading RAM is not supported on {}".format(
-                self.carttype))
+            logger.warning(f"Loading RAM is not supported on {self.carttype}")
             return
 
-        for bank in range(self.external_ram_count):
-            for byte in range(8 * 1024):
-                self.rambanks[bank][byte] = f.read()
+        for bank, byte in itertools.product(range(self.external_ram_count),
+                                            range(8 * 1024)):
+            self.rambanks[bank][byte] = f.read()
 
         logger.debug("RAM loaded.")
 
@@ -112,17 +111,16 @@ class BaseMBC:
                         for x in rombanks[0][0x0134:0x0142]]).split("\0")[0]
 
     def setitem(self, address, value):
-        raise Exception("Cannot set item in MBC")
+        raise OSError("Cannot set item in MBC")
 
     def overrideitem(self, rom_bank, address, value):
         if 0x0000 <= address < 0x4000:
             logger.debug(
-                "Performing overwrite on address: %s:%s. New value: %s Old value: %s"
-                % (hex(rom_bank), hex(address), hex(value),
-                   self.rombanks[rom_bank][address]))
+                f"Performing overwrite on address: {hex(rom_bank)}:{hex(address)}. New value: {hex(value)} Old value: {self.rombanks[rom_bank][address]}"
+            )
             self.rombanks[rom_bank][address] = value
         else:
-            logger.error("Invalid override address: %s" % hex(address))
+            logger.error(f"Invalid override address: {hex(address)}")
 
     def getitem(self, address):
         if 0x0000 <= address < 0x4000:
@@ -132,7 +130,7 @@ class BaseMBC:
                                  len(self.rombanks)][address - 0x4000]
         elif 0xA000 <= address < 0xC000:
             if not self.rambank_initialized:
-                logger.error("RAM banks not initialized: %s" % hex(address))
+                logger.error(f"RAM banks not initialized: {hex(address)}")
 
             if not self.rambank_enabled:
                 return 0xFF
@@ -143,22 +141,21 @@ class BaseMBC:
                 return self.rambanks[self.rambank_selected %
                                      self.external_ram_count][address - 0xA000]
         else:
-            logger.error("Reading address invalid: %s" % address)
+            logger.error(f"Reading address invalid: {address}")
 
     def __repr__(self):
         return "\n".join([
             "Cartridge:",
-            "Filename: %s" % self.filename,
-            "Game name: %s" % self.gamename,
-            "GB Color: %s" % str(self.ROMBanks[0][0x143] == 0x80),
-            "Cartridge type: %s" % hex(self.cartType),
-            "Number of ROM banks: %s" % self.external_rom_count,
-            "Active ROM bank: %s" % self.rombank_selected,
-            # "Memory bank type: %s" % self.ROMBankController,
-            "Number of RAM banks: %s" % len(self.rambanks),
-            "Active RAM bank: %s" % self.rambank_selected,
-            "Battery: %s" % self.battery,
-            "RTC: %s" % self.rtc
+            f"Filename: {self.filename}",
+            f"Game name: {self.gamename}",
+            f"GB Color: {self.ROMBanks[0][323] == 128}",
+            f"Cartridge type: {hex(self.cartType)}",
+            f"Number of ROM banks: {self.external_rom_count}",
+            f"Active ROM bank: {self.rombank_selected}",
+            f"Number of RAM banks: {len(self.rambanks)}",
+            f"Active RAM bank: {self.rambank_selected}",
+            f"Battery: {self.battery}",
+            f"RTC: {self.rtc}",
         ])
 
 

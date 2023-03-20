@@ -60,9 +60,9 @@ def move_gif(game, dest):
         try:
             gif = sorted(filter(lambda x: game in x,
                                 os.listdir(record_dir)))[-1]
-            os.replace(record_dir + "/" + gif, dest)
+            os.replace(f"{record_dir}/{gif}", dest)
             break
-        except:
+        except Exception:
             time.sleep(1)
     else:
         raise FileNotFoundError(f"Couldn't find gif to move for game {game}")

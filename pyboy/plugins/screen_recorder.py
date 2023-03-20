@@ -70,7 +70,7 @@ class ScreenRecorder(PyBoyPlugin):
                                 append_images=self.frames[1:],
                                 duration=int(round(1000 / fps, -1)))
 
-            logger.info("Screen recording saved in {}".format(path))
+            logger.info(f"Screen recording saved in {path}")
         else:
             logger.error("Screen recording failed: no frames")
         self.frames = []

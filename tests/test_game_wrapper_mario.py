@@ -80,7 +80,7 @@ class TestOpenAIGym:
 
         env = pyboy.openai_gym(observation_type="compressed")
         if env is None:
-            raise Exception(
+            raise ImportError(
                 "'env' is None. Did you remember to install 'gym'?")
         observation = env.reset()
 
@@ -102,7 +102,7 @@ class TestOpenAIGym:
 
         env = pyboy.openai_gym(observation_type="minimal")
         if env is None:
-            raise Exception(
+            raise ImportError(
                 "'env' is None. Did you remember to install 'gym'?")
         observation = env.reset()
 
@@ -127,7 +127,7 @@ class TestOpenAIGym:
                                action_type="toggle",
                                world_level=starting_level)
         if env is None:
-            raise Exception(
+            raise ImportError(
                 "'env' is None. Did you remember to install 'gym'?")
         observation = env.reset()
 

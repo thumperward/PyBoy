@@ -64,30 +64,21 @@ class TestRewind:
         write_bytes(buf, C)
         buf.new()
 
-        assert buf.seek_frame(-1)
-        tests = [(x, buf.read()) for x in C]
-        assert all(list(map(lambda x: x[0] == x[1], tests)))
+        tests = self.delta_seek_tests(buf, -1, C)
+        self.hit_buffer_boundary(buf, -1, B, A)
+        self.hit_buffer_boundary(buf, 1, B, C)
 
-        assert buf.seek_frame(-1)
-        tests = [(x, buf.read()) for x in B]
-        assert all(list(map(lambda x: x[0] == x[1], tests)))
+    def hit_buffer_boundary(self, buf, arg1, B, arg3):
+        tests = self.delta_seek_tests(buf, arg1, B)
+        tests = self.delta_seek_tests(buf, arg1, arg3)
+        assert not buf.seek_frame(arg1)
 
-        assert buf.seek_frame(-1)
-        tests = [(x, buf.read()) for x in A]
-        assert all(list(map(lambda x: x[0] == x[1], tests)))
+    def delta_seek_tests(self, buf, arg1, arg2):
+        assert buf.seek_frame(arg1)
+        result = [(x, buf.read()) for x in arg2]
+        assert all(list(map(lambda x: x[0] == x[1], result)))
 
-        # Hit buffer boundary
-        assert not buf.seek_frame(-1)
-
-        assert buf.seek_frame(1)
-        tests = [(x, buf.read()) for x in B]
-        assert all(list(map(lambda x: x[0] == x[1], tests)))
-
-        assert buf.seek_frame(1)
-        tests = [(x, buf.read()) for x in C]
-        assert all(list(map(lambda x: x[0] == x[1], tests)))
-
-        assert not buf.seek_frame(1)
+        return result
 
     def test_compressed_buffer(self):
         buf = CompressedFixedAllocBuffers()
@@ -96,18 +87,8 @@ class TestRewind:
         # Zeros are not written before a flush
         assert all(map(lambda x: x == FILL_VALUE, buf.buffer[:12]))
 
-        # Now, we should see one pair of '0' and length
-        buf.flush()
-        assert all(map(lambda x: x == FILL_VALUE, buf.buffer[2:12]))
-        assert buf.buffer[0] == 0
-        assert buf.buffer[1] == 10
-
-        # Second flush should do nothing
-        buf.flush()
-        assert all(map(lambda x: x == FILL_VALUE, buf.buffer[2:12]))
-        assert buf.buffer[0] == 0
-        assert buf.buffer[1] == 10
-
+        self.verify_buffer_length(buf)
+        self.verify_buffer_length(buf)
         # Overflow 8-bit counter and see two pairs
         write_bytes(buf, [0 for _ in range(256)])
         buf.flush()
@@ -121,6 +102,13 @@ class TestRewind:
         assert all(
             map(lambda x: x[0] == x[1],
                 zip(buf.buffer[6:10], [0, 255] + [FILL_VALUE] * 4)))
+
+    def verify_buffer_length(self, buf):
+        # Now, we should see one pair of '0' and length
+        buf.flush()
+        assert all(map(lambda x: x == FILL_VALUE, buf.buffer[2:12]))
+        assert buf.buffer[0] == 0
+        assert buf.buffer[1] == 10
 
     def test_delta_buffer(self):
         buf = DeltaFixedAllocBuffers()
@@ -174,25 +162,8 @@ class TestRewind:
         assert all(map(lambda x: x == FILL_VALUE, buf.buffer[:60]))
         assert all(map(lambda x: x == 0, buf.internal_buffer[:60]))
 
-        # Initial frame will just show up directly in the underlying buffer
-        write_bytes(buf, [0xAA] * 20)
-        assert all(
-            map(lambda x: x[0] == x[1],
-                zip(buf.buffer[:60], [0xAA] * 20 + [FILL_VALUE] * 40)))
-        assert all(
-            map(lambda x: x[0] == x[1],
-                zip(buf.internal_buffer[:60], [0xAA] * 20 + [0] * 40)))
-        buf.new()
-
-        write_bytes(buf, [0xAA] * 20)
-        # The written data should be zeros and only get written on a call to new (flush)
-        assert all(
-            map(lambda x: x[0] == x[1],
-                zip(buf.buffer[:60], [0xAA] * 20 + [FILL_VALUE] * 40)))
-        assert all(
-            map(lambda x: x[0] == x[1],
-                zip(buf.internal_buffer[:60], [0xAA] * 20 + [0] * 40)))
-        buf.new()
+        self.verify_initial_frame(buf)
+        self.verify_initial_frame(buf)
         # Test that we see a zero-prefix with a count of 20
         assert all(
             map(
@@ -215,6 +186,17 @@ class TestRewind:
         assert all(
             map(lambda x: x[0] == x[1],
                 zip(buf.internal_buffer[:60], [0xAA] * 20 + [0] * 40)))
+
+    def verify_initial_frame(self, buf):
+        # Initial frame will just show up directly in the underlying buffer
+        write_bytes(buf, [0xAA] * 20)
+        assert all(
+            map(lambda x: x[0] == x[1],
+                zip(buf.buffer[:60], [0xAA] * 20 + [FILL_VALUE] * 40)))
+        assert all(
+            map(lambda x: x[0] == x[1],
+                zip(buf.internal_buffer[:60], [0xAA] * 20 + [0] * 40)))
+        buf.new()
 
     def test_buffer_overrun(self):
         buf = FixedAllocBuffers()

@@ -56,9 +56,7 @@ class Rewind(PyBoyPlugin):
             elif event == WindowEvent.PRESS_REWIND_FORWARD:
                 self.pyboy._pause()
                 if self.rewind_buffer.seek_frame(1):
-                    self.mb.load_state(self.rewind_buffer)
-                    events.append(WindowEvent._INTERNAL_RENDERER_FLUSH)
-                    self.rewind_speed = min(self.rewind_speed * 1.1, 5)
+                    self.handle_press_rewind(events)
                 else:
                     logger.info("Rewind limit reached")
             elif event == WindowEvent.RELEASE_REWIND_BACK:
@@ -66,9 +64,7 @@ class Rewind(PyBoyPlugin):
             elif event == WindowEvent.PRESS_REWIND_BACK:
                 self.pyboy._pause()
                 if self.rewind_buffer.seek_frame(-1):
-                    self.mb.load_state(self.rewind_buffer)
-                    events.append(WindowEvent._INTERNAL_RENDERER_FLUSH)
-                    self.rewind_speed = min(self.rewind_speed * 1.1, 5)
+                    self.handle_press_rewind(events)
                 else:
                     logger.info("Rewind limit reached")
 
@@ -76,6 +72,11 @@ class Rewind(PyBoyPlugin):
             # NOTE: Disable this line, if recording for .replay files
             self.pyboy.set_emulation_speed(int(self.rewind_speed))
         return events
+
+    def handle_press_rewind(self, events):
+        self.mb.load_state(self.rewind_buffer)
+        events.append(WindowEvent._INTERNAL_RENDERER_FLUSH)
+        self.rewind_speed = min(self.rewind_speed * 1.1, 5)
 
     def enabled(self):
         return self.pyboy_argv.get("rewind")
@@ -133,14 +134,14 @@ class FixedAllocBuffers(IntIOInterface):
 
     def read(self):
         if self.section_pointer == self.section_head:
-            raise Exception("Read beyond section")
+            raise MemoryError("Read beyond section")
         data = self.buffer[self.section_pointer]
         self.section_pointer = (self.section_pointer + 1) % FIXED_BUFFER_SIZE
         return data
 
     def commit(self):
-        if not self.section_head == self.section_pointer:
-            raise Exception(
+        if self.section_head != self.section_pointer:
+            raise OSError(
                 "Section wasn't read to finish. This would likely be unintentional"
             )
         self.sections = self.sections[:self.current_section + 1]
@@ -184,7 +185,7 @@ class CompressedFixedAllocBuffers(FixedAllocBuffers):
             chunks = self.zeros // 0xFF
             rest = self.zeros % 0xFF
 
-            for i in range(chunks):
+            for _ in range(chunks):
                 FixedAllocBuffers.write(self, 0)
                 FixedAllocBuffers.write(self, 0xFF)
 
@@ -284,11 +285,7 @@ class DeltaFixedAllocBuffers(CompressedFixedAllocBuffers):
     def seek_frame(self, frames):
         # for _ in range(abs(frames)):
         # TODO: Can only seek one frame
-        if frames < 0:
-            frames = -1
-        else:
-            frames = 1
-
+        frames = -1 if frames < 0 else 1
         # Flush internal buffer to underlying memory. Otherwise, the newest frame, won't be seekable.
         if self.internal_buffer_dirty:
             self.flush_internal_buffer()

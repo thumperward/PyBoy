@@ -27,9 +27,8 @@ def to_snake_case(s):
 
 def skip_lines(iterator, stop):
     # Skip old lines
-    while True:
-        if next(line_iter).strip().startswith(stop):
-            break
+    while not next(line_iter).strip().startswith(stop):
+        pass
 
 
 if __name__ == "__main__":
@@ -185,8 +184,8 @@ if __name__ == "__main__":
 
                 skip_lines(line_iter, "# docs exclude end")
 
-                for p in (set(all_plugins) - set(game_wrappers)) | set(
-                    ["manager", "manager_gen"]):
+                for p in (set(all_plugins) - set(game_wrappers)
+                          | {"manager", "manager_gen"}):
                     p_name = to_snake_case(p)
                     lines.append(f"\"{p_name}\": False,\n")
 

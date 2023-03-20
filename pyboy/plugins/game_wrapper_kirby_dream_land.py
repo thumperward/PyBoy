@@ -91,6 +91,17 @@ class GameWrapperKirbyDreamLand(PyBoyGameWrapper):
         for _ in range(25):
             self.pyboy.tick()
 
+        self._extracted_from_start_game_27()
+        self._extracted_from_start_game_27()
+        self.game_has_started = True
+
+        self.saved_state.seek(0)
+        self.pyboy.save_state(self.saved_state)
+
+        self._set_timer_div(timer_div)
+
+    # TODO Rename this here and in `start_game`
+    def _extracted_from_start_game_27(self):
         self.pyboy.send_input(WindowEvent.PRESS_BUTTON_START)
         self.pyboy.tick()
         self.pyboy.send_input(WindowEvent.RELEASE_BUTTON_START)
@@ -98,22 +109,6 @@ class GameWrapperKirbyDreamLand(PyBoyGameWrapper):
         # Wait for transition to finish (exit start screen, enter level intro screen)
         for _ in range(60):
             self.pyboy.tick()
-
-        # Skip level intro
-        self.pyboy.send_input(WindowEvent.PRESS_BUTTON_START)
-        self.pyboy.tick()
-        self.pyboy.send_input(WindowEvent.RELEASE_BUTTON_START)
-
-        # Wait for transition to finish (exit level intro screen, enter game)
-        for _ in range(60):
-            self.pyboy.tick()
-
-        self.game_has_started = True
-
-        self.saved_state.seek(0)
-        self.pyboy.save_state(self.saved_state)
-
-        self._set_timer_div(timer_div)
 
     def reset_game(self, timer_div=None):
         """

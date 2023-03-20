@@ -67,7 +67,7 @@ class Screen:
             return [[line[0], line[1], line[2], line[3]]
                     for line in self.mb.lcd.renderer._scanlineparameters]
         else:
-            return [[0, 0, 0, 0] for line in range(144)]
+            return [[0, 0, 0, 0] for _ in range(144)]
 
     def raw_screen_buffer(self):
         """

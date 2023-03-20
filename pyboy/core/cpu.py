@@ -141,16 +141,16 @@ class CPU:
             # TODO: We return with the cycles it took to handle the interrupt
             return 0
 
-        if self.halted and self.interrupt_queued:
+        if self.halted:
+            if not self.interrupt_queued:
+                return 4  # TODO: Number of cycles for a HALT in effect?
+
             # GBCPUman.pdf page 20
             # WARNING: The instruction immediately following the HALT instruction is "skipped" when interrupts are
             # disabled (DI) on the GB,GBP, and SGB.
             self.halted = False
             self.PC += 1
             self.PC &= 0xFFFF
-        elif self.halted:
-            return 4  # TODO: Number of cycles for a HALT in effect?
-
         old_pc = self.PC  # If the PC doesn't change, we're likely stuck
         old_sp = self.SP  # Sometimes a RET can go to the same PC, so we check the SP too.
         cycles = self.fetch_and_execute()
@@ -186,26 +186,27 @@ class CPU:
         return False
 
     def handle_interrupt(self, flag, addr):
-        if (self.interrupts_enabled_register
-                & flag) and (self.interrupts_flag_register & flag):
-            # Clear interrupt flag
-            if self.halted:
-                self.PC += 1  # Escape HALT on return
-                self.PC &= 0xFFFF
+        if (not self.interrupts_enabled_register & flag
+                or not self.interrupts_flag_register & flag):
+            return False
+        # Clear interrupt flag
+        if self.halted:
+            self.PC += 1  # Escape HALT on return
+            self.PC &= 0xFFFF
 
-            # Handle interrupt vectors
-            if self.interrupt_master_enable:
-                self.interrupts_flag_register ^= flag  # Remove flag
-                self.mb.setitem((self.SP - 1) & 0xFFFF, self.PC >> 8)  # High
-                self.mb.setitem((self.SP - 2) & 0xFFFF, self.PC & 0xFF)  # Low
-                self.SP -= 2
-                self.SP &= 0xFFFF
+        if self.interrupt_master_enable:
+            self.handle_interrupt_vectors(flag, addr)
+        return True
 
-                self.PC = addr
-                self.interrupt_master_enable = False
+    def handle_interrupt_vectors(self, flag, addr):
+        self.interrupts_flag_register ^= flag  # Remove flag
+        self.mb.setitem((self.SP - 1) & 0xFFFF, self.PC >> 8)  # High
+        self.mb.setitem((self.SP - 2) & 0xFFFF, self.PC & 0xFF)  # Low
+        self.SP -= 2
+        self.SP &= 0xFFFF
 
-            return True
-        return False
+        self.PC = addr
+        self.interrupt_master_enable = False
 
     def add_opcode_hit(self, opcode, count):
         # Profiling

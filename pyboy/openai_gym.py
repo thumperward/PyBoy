@@ -83,10 +83,7 @@ class PyBoyGymEnv(Env):
             WindowEvent.RELEASE_BUTTON_A, WindowEvent.RELEASE_BUTTON_B,
             WindowEvent.RELEASE_BUTTON_SELECT, WindowEvent.RELEASE_BUTTON_START
         ]
-        self._release_button = {
-            button: r_button
-            for button, r_button in zip(self._buttons, self._buttons_release)
-        }
+        self._release_button = dict(zip(self._buttons, self._buttons_release))
 
         self.actions = [self._DO_NOTHING] + self._buttons
         if action_type == "all":
@@ -114,17 +111,17 @@ class PyBoyGymEnv(Env):
             if observation_type == "compressed":
                 try:
                     size_ids = np.max(self.game_wrapper.tiles_compressed) + 1
-                except AttributeError:
+                except AttributeError as e:
                     raise AttributeError(
                         "You need to add the tiles_compressed attibute to the game_wrapper to use the compressed observation_type"
-                    )
+                    ) from e
             elif observation_type == "minimal":
                 try:
                     size_ids = np.max(self.game_wrapper.tiles_minimal) + 1
-                except AttributeError:
+                except AttributeError as e:
                     raise AttributeError(
                         "You need to add the tiles_minimal attibute to the game_wrapper to use the minimal observation_type"
-                    )
+                    ) from e
             nvec = size_ids * np.ones(self.game_wrapper.shape)
             self.observation_space = MultiDiscrete(nvec)
         else:

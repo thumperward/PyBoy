@@ -2086,15 +2086,16 @@ def JP_C3(cpu, v): # C3 JP a16
 def CALL_C4(cpu, v): # C4 CALL NZ,a16
     cpu.PC += 3
     cpu.PC &= 0xFFFF
-    if cpu.f_nz():
-        cpu.mb.setitem((cpu.SP-1) & 0xFFFF, cpu.PC >> 8) # High
-        cpu.mb.setitem((cpu.SP-2) & 0xFFFF, cpu.PC & 0xFF) # Low
-        cpu.SP -= 2
-        cpu.SP &= 0xFFFF
-        cpu.PC = v
-        return 24
-    else:
-        return 12
+    return CALL_C4_result(cpu, v) if cpu.f_nz() else 12
+
+
+def CALL_C4_result(cpu, v):
+    cpu.mb.setitem((cpu.SP-1) & 0xFFFF, cpu.PC >> 8) # High
+    cpu.mb.setitem((cpu.SP-2) & 0xFFFF, cpu.PC & 0xFF) # Low
+    cpu.SP -= 2
+    cpu.SP &= 0xFFFF
+    cpu.PC = v
+    return 24
 
 
 def PUSH_C5(cpu): # C5 PUSH BC
@@ -2174,15 +2175,16 @@ def PREFIX_CB(cpu): # CB PREFIX CB
 def CALL_CC(cpu, v): # CC CALL Z,a16
     cpu.PC += 3
     cpu.PC &= 0xFFFF
-    if cpu.f_z():
-        cpu.mb.setitem((cpu.SP-1) & 0xFFFF, cpu.PC >> 8) # High
-        cpu.mb.setitem((cpu.SP-2) & 0xFFFF, cpu.PC & 0xFF) # Low
-        cpu.SP -= 2
-        cpu.SP &= 0xFFFF
-        cpu.PC = v
-        return 24
-    else:
-        return 12
+    return CALL_CC_result(cpu, v) if cpu.f_z() else 12
+
+
+def CALL_CC_result(cpu, v):
+    cpu.mb.setitem((cpu.SP-1) & 0xFFFF, cpu.PC >> 8) # High
+    cpu.mb.setitem((cpu.SP-2) & 0xFFFF, cpu.PC & 0xFF) # Low
+    cpu.SP -= 2
+    cpu.SP &= 0xFFFF
+    cpu.PC = v
+    return 24
 
 
 def CALL_CD(cpu, v): # CD CALL a16
@@ -2258,15 +2260,16 @@ def JP_D2(cpu, v): # D2 JP NC,a16
 def CALL_D4(cpu, v): # D4 CALL NC,a16
     cpu.PC += 3
     cpu.PC &= 0xFFFF
-    if cpu.f_nc():
-        cpu.mb.setitem((cpu.SP-1) & 0xFFFF, cpu.PC >> 8) # High
-        cpu.mb.setitem((cpu.SP-2) & 0xFFFF, cpu.PC & 0xFF) # Low
-        cpu.SP -= 2
-        cpu.SP &= 0xFFFF
-        cpu.PC = v
-        return 24
-    else:
-        return 12
+    return CALL_D4_result(cpu, v) if cpu.f_nc() else 12
+
+
+def CALL_D4_result(cpu, v):
+    cpu.mb.setitem((cpu.SP-1) & 0xFFFF, cpu.PC >> 8) # High
+    cpu.mb.setitem((cpu.SP-2) & 0xFFFF, cpu.PC & 0xFF) # Low
+    cpu.SP -= 2
+    cpu.SP &= 0xFFFF
+    cpu.PC = v
+    return 24
 
 
 def PUSH_D5(cpu): # D5 PUSH DE
@@ -2340,15 +2343,16 @@ def JP_DA(cpu, v): # DA JP C,a16
 def CALL_DC(cpu, v): # DC CALL C,a16
     cpu.PC += 3
     cpu.PC &= 0xFFFF
-    if cpu.f_c():
-        cpu.mb.setitem((cpu.SP-1) & 0xFFFF, cpu.PC >> 8) # High
-        cpu.mb.setitem((cpu.SP-2) & 0xFFFF, cpu.PC & 0xFF) # Low
-        cpu.SP -= 2
-        cpu.SP &= 0xFFFF
-        cpu.PC = v
-        return 24
-    else:
-        return 12
+    return CALL_DC_result(cpu, v) if cpu.f_c() else 12
+
+
+def CALL_DC_result(cpu, v):
+    cpu.mb.setitem((cpu.SP-1) & 0xFFFF, cpu.PC >> 8) # High
+    cpu.mb.setitem((cpu.SP-2) & 0xFFFF, cpu.PC & 0xFF) # Low
+    cpu.SP -= 2
+    cpu.SP &= 0xFFFF
+    cpu.PC = v
+    return 24
 
 
 def SBC_DE(cpu, v): # DE SBC A,d8

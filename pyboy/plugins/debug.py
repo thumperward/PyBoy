@@ -3,6 +3,7 @@
 # GitHub: https://github.com/Baekalfen/PyBoy
 #
 
+import itertools
 import logging
 import os
 import re
@@ -97,11 +98,11 @@ class Debug(PyBoyWindowPlugin):
         if pyboy_argv.get("ROM"):
             gamerom_file_no_ext, rom_ext = os.path.splitext(
                 pyboy_argv.get("ROM"))
-            for sym_ext in [".sym", rom_ext + ".sym"]:
+            for sym_ext in [".sym", f"{rom_ext}.sym"]:
                 sym_path = gamerom_file_no_ext + sym_ext
                 if os.path.isfile(sym_path):
                     with open(sym_path) as f:
-                        for _line in f.readlines():
+                        for _line in f:
                             line = _line.strip()
                             if line == "":
                                 continue
@@ -118,7 +119,7 @@ class Debug(PyBoyWindowPlugin):
                                     ":| ", line.strip())
                                 bank = int(bank, 16)
                                 addr = int(addr, 16)
-                                if not bank in self.rom_symbols:
+                                if bank not in self.rom_symbols:
                                     self.rom_symbols[bank] = {}
 
                                 self.rom_symbols[bank][addr] = sym_label
@@ -258,14 +259,12 @@ class Debug(PyBoyWindowPlugin):
             sdl2.SDL_Quit()
 
     def enabled(self):
-        if self.pyboy_argv.get("debug"):
-            if not sdl2:
-                logger.error("Failed to import sdl2, needed for debug window")
-                return False
-            else:
-                return True
-        else:
+        if not self.pyboy_argv.get("debug"):
             return False
+        if sdl2:
+            return True
+        logger.error("Failed to import sdl2, needed for debug window")
+        return False
 
     def parse_bank_addr_sym_label(self, command):
         if ":" in command:
@@ -284,10 +283,7 @@ class Debug(PyBoyWindowPlugin):
         while True:
             self.post_tick()
 
-            if self.mb.cpu.PC < 0x4000:
-                bank = 0
-            else:
-                bank = self.mb.cartridge.rombank_selected
+            bank = 0 if self.mb.cpu.PC < 0x4000 else self.mb.cartridge.rombank_selected
             sym_label = self.rom_symbols.get(bank, {}).get(self.mb.cpu.PC, "")
 
             print(self.mb.cpu.dump_state(sym_label))
@@ -336,9 +332,9 @@ class Debug(PyBoyWindowPlugin):
                 for i, (bank, pc) in enumerate(self.mb.breakpoints_list):
                     if self.mb.cpu.PC == pc and (
                         (pc < 0x4000 and bank == 0 and not self.mb.bootrom_enabled) or \
-                        (0x4000 <= pc < 0x8000 and self.mb.cartridge.rombank_selected == bank) or \
-                        (0xA000 <= pc < 0xC000 and self.mb.cartridge.rambank_selected == bank) or \
-                        (pc < 0x100 and bank == -1 and self.mb.bootrom_enabled)
+                            (0x4000 <= pc < 0x8000 and self.mb.cartridge.rombank_selected == bank) or \
+                            (0xA000 <= pc < 0xC000 and self.mb.cartridge.rambank_selected == bank) or \
+                            (pc < 0x100 and bank == -1 and self.mb.bootrom_enabled)
                     ):
                         break
                 else:
@@ -544,13 +540,13 @@ class TileViewWindow(BaseDebugWindow):
     def update_title(self):
         title = self.base_title
         title += " [HIGH MAP 0x9C00-0x9FFF]" if self.tilemap.map_offset == constants.HIGH_TILEMAP else \
-            " [LOW MAP 0x9800-0x9BFF]"
+                " [LOW MAP 0x9800-0x9BFF]"
         title += " [HIGH DATA (SIGNED) 0x8800-0x97FF]" if self.tilemap.signed_tile_data else \
-            " [LOW DATA (UNSIGNED) 0x8000-0x8FFF]"
-        if self.tilemap._select == "WINDOW":
-            title += " [Window]"
+                " [LOW DATA (UNSIGNED) 0x8000-0x8FFF]"
         if self.tilemap._select == "BACKGROUND":
             title += " [Background]"
+        elif self.tilemap._select == "WINDOW":
+            title += " [Window]"
         sdl2.SDL_SetWindowTitle(self._window, title.encode("utf8"))
 
     def draw_overlay(self):
@@ -568,7 +564,7 @@ class TileViewWindow(BaseDebugWindow):
 
             if background_view:  # Background
                 # Wraps around edges of the screen
-                if y == 0 or y == constants.ROWS - 1:  # Draw top/bottom bar
+                if y in [0, constants.ROWS - 1]:  # Draw top/bottom bar
                     for x in range(constants.COLS):
                         self.buf0[(yy + y) % 0xFF][(xx + x) % 0xFF] = COLOR
                 else:  # Draw body
@@ -586,13 +582,12 @@ class TileViewWindow(BaseDebugWindow):
                     for x in range(constants.COLS):
                         if 0 <= xx + x < constants.COLS:
                             self.buf0[yy + y][xx + x] = COLOR
-                else:  # Draw body
-                    if 0 <= yy + y:
-                        self.buf0[yy + y][max(xx, 0)] = COLOR
-                        for x in range(constants.COLS):
-                            if 0 <= xx + x < constants.COLS:
-                                self.buf0[yy + y][xx + x] &= self.color
-                        self.buf0[yy + y][xx + constants.COLS] = COLOR
+                elif yy + y >= 0:  # Draw body
+                    self.buf0[yy + y][max(xx, 0)] = COLOR
+                    for x in range(constants.COLS):
+                        if 0 <= xx + x < constants.COLS:
+                            self.buf0[yy + y][xx + x] &= self.color
+                    self.buf0[yy + y][xx + constants.COLS] = COLOR
 
         # Mark selected tiles
         for t, match in zip(
@@ -605,12 +600,11 @@ class TileViewWindow(BaseDebugWindow):
             self.mark_tile(self.hover_x, self.hover_y, HOVER, 8, 8, True)
 
         # Mark current scanline directly from LY,SCX,SCY,WX,WY
-        if background_view:
-            for x in range(constants.COLS):
+        for x in range(constants.COLS):
+            if background_view:
                 self.buf0[(self.mb.lcd.SCY + self.mb.lcd.LY) %
                           0xFF][(self.mb.lcd.SCX + x) % 0xFF] = 0xFF00CE12
-        else:
-            for x in range(constants.COLS):
+            else:
                 self.buf0[(self.mb.lcd.WY + self.mb.lcd.LY) %
                           0xFF][(self.mb.lcd.WX + x) % 0xFF] = 0xFF00CE12
 
@@ -695,34 +689,18 @@ class SpriteWindow(BaseDebugWindow):
             if self.cgb:
                 palette = attributes & 0b111
                 if attributes & 0b1000:
-                    self.renderer.update_spritecache1(self.mb.lcd, t, 1)
-                    if self.mb.lcd._LCDC.sprite_height:
-                        self.renderer.update_spritecache1(
-                            self.mb.lcd, t + 1, 1)
-                    self.spritecache = self.renderer._spritecache1
+                    self.post_tick_update_sprite_cache_1(t, 1)
                 else:
-                    self.renderer.update_spritecache0(self.mb.lcd, t, 0)
-                    if self.mb.lcd._LCDC.sprite_height:
-                        self.renderer.update_spritecache0(
-                            self.mb.lcd, t + 1, 0)
-                    self.spritecache = self.renderer._spritecache0
+                    self.post_tick_update_sprite_cache_0(t)
                 self.palette_rgb = self.mb.lcd.ocpd.palette_mem_rgb  # TODO: Select palette by adding offset
             else:
                 # Fake palette index
                 palette = 0
                 if attributes & 0b10000:
-                    self.renderer.update_spritecache1(self.mb.lcd, t, 0)
-                    if self.mb.lcd._LCDC.sprite_height:
-                        self.renderer.update_spritecache1(
-                            self.mb.lcd, t + 1, 0)
-                    self.spritecache = self.renderer._spritecache1
+                    self.post_tick_update_sprite_cache_1(t, 0)
                     self.palette_rgb = self.mb.lcd.OBP1.palette_mem_rgb
                 else:
-                    self.renderer.update_spritecache0(self.mb.lcd, t, 0)
-                    if self.mb.lcd._LCDC.sprite_height:
-                        self.renderer.update_spritecache0(
-                            self.mb.lcd, t + 1, 0)
-                    self.spritecache = self.renderer._spritecache0
+                    self.post_tick_update_sprite_cache_0(t)
                     self.palette_rgb = self.mb.lcd.OBP0.palette_mem_rgb
 
             self.copy_tile(self.spritecache, t, xx, yy, self.buf0, False,
@@ -733,6 +711,18 @@ class SpriteWindow(BaseDebugWindow):
 
         self.draw_overlay()
         BaseDebugWindow.post_tick(self)
+
+    def post_tick_update_sprite_cache_0(self, t):
+        self.renderer.update_spritecache0(self.mb.lcd, t, 0)
+        if self.mb.lcd._LCDC.sprite_height:
+            self.renderer.update_spritecache0(self.mb.lcd, t + 1, 0)
+        self.spritecache = self.renderer._spritecache0
+
+    def post_tick_update_sprite_cache_1(self, t, arg1):
+        self.renderer.update_spritecache1(self.mb.lcd, t, arg1)
+        if self.mb.lcd._LCDC.sprite_height:
+            self.renderer.update_spritecache1(self.mb.lcd, t + 1, arg1)
+        self.spritecache = self.renderer._spritecache1
 
     def handle_events(self, events):
         global mark_counter, marked_tiles
@@ -791,9 +781,8 @@ class SpriteWindow(BaseDebugWindow):
 class SpriteViewWindow(BaseDebugWindow):
 
     def post_tick(self):
-        for y in range(constants.ROWS):
-            for x in range(constants.COLS):
-                self.buf0[y][x] = SPRITE_BACKGROUND
+        for y, x in itertools.product(range(constants.ROWS), range(constants.COLS)):
+            self.buf0[y][x] = SPRITE_BACKGROUND
 
         for ly in range(144):
             self.mb.lcd.renderer.scanline_sprites(self.mb.lcd, ly, self.buf0,
@@ -915,16 +904,15 @@ class MemoryWindow(BaseDebugWindow):
                 self.text_buffer[y + 3][2:8] = addr
 
     def write_memory(self):
-        for y in range(32):
-            for x in range(16):
-                mem = self.mb.getitem(self.start_address + 16 * y + x)
-                if cythonmode:
-                    a = hex(mem)[2:].zfill(2).encode("cp437")
-                    self.text_buffer[y + 3][3 * x + 11] = a[0]
-                    self.text_buffer[y + 3][3 * x + 12] = a[1]
-                else:
-                    self.text_buffer[y + 3][3 * x + 11:3 * x + 13] = bytes(
-                        [mem]).hex().encode("cp437")
+        for y, x in itertools.product(range(32), range(16)):
+            mem = self.mb.getitem(self.start_address + 16 * y + x)
+            if cythonmode:
+                a = hex(mem)[2:].zfill(2).encode("cp437")
+                self.text_buffer[y + 3][3 * x + 11] = a[0]
+                self.text_buffer[y + 3][3 * x + 12] = a[1]
+            else:
+                self.text_buffer[y + 3][3 * x + 11:3 * x + 13] = bytes(
+                    [mem]).hex().encode("cp437")
 
     def render_text(self):
         for y in range(self.NROWS):
