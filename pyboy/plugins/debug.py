@@ -81,10 +81,10 @@ class Debug(PyBoyWindowPlugin):
         "action": "store_true",
         "help": "Enable emulator debugging mode"
     }),
-            ("--breakpoints", {
-                "type": str,
-                "help": "Add breakpoints on start-up (internal use)"
-            })]
+        ("--breakpoints", {
+            "type": str,
+            "help": "Add breakpoints on start-up (internal use)"
+        })]
 
     def __init__(self, pyboy, mb, pyboy_argv):
         super().__init__(pyboy, mb, pyboy_argv)
@@ -331,9 +331,9 @@ class Debug(PyBoyWindowPlugin):
                 # TODO: Share this code with breakpoint_reached
                 for i, (bank, pc) in enumerate(self.mb.breakpoints_list):
                     if self.mb.cpu.PC == pc and (
-                        (pc < 0x4000 and bank == 0 and not self.mb.bootrom_enabled) or \
-                            (0x4000 <= pc < 0x8000 and self.mb.cartridge.rombank_selected == bank) or \
-                            (0xA000 <= pc < 0xC000 and self.mb.cartridge.rambank_selected == bank) or \
+                        (pc < 0x4000 and bank == 0 and not self.mb.bootrom_enabled) or
+                            (0x4000 <= pc < 0x8000 and self.mb.cartridge.rombank_selected == bank) or
+                            (0xA000 <= pc < 0xC000 and self.mb.cartridge.rambank_selected == bank) or
                             (pc < 0x100 and bank == -1 and self.mb.bootrom_enabled)
                     ):
                         break
@@ -494,7 +494,8 @@ class TileViewWindow(BaseDebugWindow):
                 self.renderer.update_tilecache1(self.mb.lcd, tile_index, 1)
                 self.tilecache = (self.renderer._tilecache1
                                   if vbank else self.renderer._tilecache0)
-                self.palette_rgb = self.mb.lcd.ocpd.palette_mem_rgb  # TODO: Select palette by adding offset
+                # TODO: Select palette by adding offset
+                self.palette_rgb = self.mb.lcd.ocpd.palette_mem_rgb
             else:
                 # Fake palette index
                 palette = 0
@@ -540,9 +541,9 @@ class TileViewWindow(BaseDebugWindow):
     def update_title(self):
         title = self.base_title
         title += " [HIGH MAP 0x9C00-0x9FFF]" if self.tilemap.map_offset == constants.HIGH_TILEMAP else \
-                " [LOW MAP 0x9800-0x9BFF]"
+            " [LOW MAP 0x9800-0x9BFF]"
         title += " [HIGH DATA (SIGNED) 0x8800-0x97FF]" if self.tilemap.signed_tile_data else \
-                " [LOW DATA (UNSIGNED) 0x8000-0x8FFF]"
+            " [LOW DATA (UNSIGNED) 0x8000-0x8FFF]"
         if self.tilemap._select == "BACKGROUND":
             title += " [Background]"
         elif self.tilemap._select == "WINDOW":
@@ -623,7 +624,8 @@ class TileDataWindow(BaseDebugWindow):
             tilecache = self.renderer._tilecache0
 
         if self.cgb:
-            self.palette_rgb = self.mb.lcd.bcpd.palette_mem_rgb  # TODO: Select palette by adding offset
+            # TODO: Select palette by adding offset
+            self.palette_rgb = self.mb.lcd.bcpd.palette_mem_rgb
         else:
             self.palette_rgb = self.mb.lcd.BGP.palette_mem_rgb
 
@@ -692,7 +694,8 @@ class SpriteWindow(BaseDebugWindow):
                     self.post_tick_update_sprite_cache_1(t, 1)
                 else:
                     self.post_tick_update_sprite_cache_0(t)
-                self.palette_rgb = self.mb.lcd.ocpd.palette_mem_rgb  # TODO: Select palette by adding offset
+                # TODO: Select palette by adding offset
+                self.palette_rgb = self.mb.lcd.ocpd.palette_mem_rgb
             else:
                 # Fake palette index
                 palette = 0

@@ -32,8 +32,7 @@ def valid_file_path(path):
 
 parser = argparse.ArgumentParser(
     description="PyBoy -- Game Boy emulator written in Python",
-    epilog=
-    "Warning: Features marked with (internal use) might be subject to change.",
+    epilog="Warning: Features marked with (internal use) might be subject to change.",
 )
 parser.add_argument("ROM",
                     type=valid_file_path,
@@ -57,9 +56,8 @@ parser.add_argument(
     "--color-palette",
     type=color_tuple,
     default=defaults["color_palette"],
-    help=
-    ('Four comma seperated, hexadecimal, RGB values for colors (i.e. "FFFFFF,999999,555555,000000")'
-     ))
+    help=('Four comma seperated, hexadecimal, RGB values for colors (i.e. "FFFFFF,999999,555555,000000")'
+          ))
 parser.add_argument(
     "-l",
     "--loadstate",
@@ -67,9 +65,8 @@ parser.add_argument(
     default=None,
     const=INTERNAL_LOADSTATE,
     type=valid_file_path,
-    help=
-    ("Load state from file. If filepath is specified, it will load the given path. Otherwise, it will automatically "
-     "locate a saved state next to the ROM file."))
+    help=("Load state from file. If filepath is specified, it will load the given path. Otherwise, it will automatically "
+          "locate a saved state next to the ROM file."))
 parser.add_argument("-w",
                     "--window-type",
                     "--window",

@@ -21,8 +21,7 @@ color_palette = (0xFFFFFF, 0x999999, 0x555555, 0x000000)
 
 @pytest.mark.skipif(
     os.environ.get("TEST_CI") and (not is_pypy),
-    reason=
-    "This test requires env DEBUG=1 on Cython, which is not suitable for deployment builds"
+    reason="This test requires env DEBUG=1 on Cython, which is not suitable for deployment builds"
 )
 class TestLCD:
 

@@ -80,7 +80,7 @@ class Motherboard:
 
         self.breakpoints_enabled = False  # breakpoints_enabled
         self.breakpoints_list = [
-        ]  #[(0, 0x150), (0, 0x0040), (0, 0x0048), (0, 0x0050)]
+        ]  # [(0, 0x150), (0, 0x0040), (0, 0x0048), (0, 0x0050)]
         self.breakpoint_latch = 0
 
     def switch_speed(self):
@@ -221,7 +221,7 @@ class Motherboard:
                 # Profiling
                 self.cpu.add_opcode_hit(0x76, cycles // 4)
 
-            #TODO: Support General Purpose DMA
+            # TODO: Support General Purpose DMA
             # https://gbdev.io/pandocs/CGB_Registers.html#bit-7--0---general-purpose-dma
 
             # TODO: Unify interface
@@ -562,7 +562,7 @@ class HDMA:
                 # self.curr_src += bytes_to_transfer
 
                 # Number of blocks of 16-bytes transfered. Set 7th bit for "completed".
-                self.hdma5 = 0xFF  #(value & 0x7F) | 0x80 #0xFF
+                self.hdma5 = 0xFF  # (value & 0x7F) | 0x80 #0xFF
                 self.hdma4 = 0xFF
                 self.hdma3 = 0xFF
                 self.hdma2 = 0xFF

@@ -206,14 +206,20 @@ class ToneChannel:
 
         # Register values (abbreviated to keep track of what's external)
         # Register 0 is unused in the non-sweep tone channel
-        self.wavsel = 0  # Register 1 bits 7-6: wave table selection (duty cycle)
-        self.sndlen = 0  # Register 1 bits 5-0: time to play sound before stop (64-x)
+        # Register 1 bits 7-6: wave table selection (duty cycle)
+        self.wavsel = 0
+        # Register 1 bits 5-0: time to play sound before stop (64-x)
+        self.sndlen = 0
         self.envini = 0  # Register 2 bits 7-4: volume envelope initial volume
-        self.envdir = 0  # Register 2 bit 3: volume envelope change direction (0: decrease)
-        self.envper = 0  # Register 2 bits 2-0: volume envelope period (0: disabled)
-        self.sndper = 0  # Register 4 bits 2-0 MSB + register 3 all: period of tone ("frequency" on gg8 wiki)
+        # Register 2 bit 3: volume envelope change direction (0: decrease)
+        self.envdir = 0
+        # Register 2 bits 2-0: volume envelope period (0: disabled)
+        self.envper = 0
+        # Register 4 bits 2-0 MSB + register 3 all: period of tone ("frequency" on gg8 wiki)
+        self.sndper = 0
         # Register 4 bit 7: Write-only trigger bit. Process immediately.
-        self.uselen = 0  # Register 4 bit 6: enable/disable sound length timer in reg 1 (0: continuous)
+        # Register 4 bit 6: enable/disable sound length timer in reg 1 (0: continuous)
+        self.uselen = 0
 
         # Internal values
         self.enable = False  # Enable flag, turned on by trigger bit and off by length timer
@@ -222,8 +228,10 @@ class ToneChannel:
         self.envelopetimer = 0  # Volume envelope timer, counts down to signal change in volume
         self.period = 4  # Calculated copy of period, 4 * (2048 - sndper)
         self.waveframe = 0  # Wave frame index into wave table entries
-        self.frametimer = 0x2000  # Frame sequencer timer, underflows to signal change in frame sequences
-        self.frame = 0  # Frame sequencer value, generates clocks for length/envelope/(sweep)
+        # Frame sequencer timer, underflows to signal change in frame sequences
+        self.frametimer = 0x2000
+        # Frame sequencer value, generates clocks for length/envelope/(sweep)
+        self.frame = 0
         self.volume = 0  # Current volume level, modulated by envelope
 
     def getreg(self, reg):
@@ -392,11 +400,14 @@ class WaveChannel:
         # Register values (abbreviated to keep track of what's external)
         # Register 0 is unused in the wave channel
         self.dacpow = 0  # Register 0 bit 7: DAC Power, enable playback
-        self.sndlen = 0  # Register 1 bits 7-0: time to play sound before stop (256-x)
+        # Register 1 bits 7-0: time to play sound before stop (256-x)
+        self.sndlen = 0
         self.volreg = 0  # Register 2 bits 6-5: volume code
-        self.sndper = 0  # Register 4 bits 2-0 MSB + register 3 all: period of tone ("frequency" on gg8 wiki)
+        # Register 4 bits 2-0 MSB + register 3 all: period of tone ("frequency" on gg8 wiki)
+        self.sndper = 0
         # Register 4 bit 7: Write-only trigger bit. Process immediately.
-        self.uselen = 0  # Register 4 bit 6: enable/disable sound length timer in reg 1 (0: continuous)
+        # Register 4 bit 6: enable/disable sound length timer in reg 1 (0: continuous)
+        self.uselen = 0
 
         # Internal values
         self.enable = False  # Enable flag, turned on by trigger bit and off by length timer
@@ -404,8 +415,10 @@ class WaveChannel:
         self.periodtimer = 0  # Period timer, counts down to signal change in wave frame
         self.period = 4  # Calculated copy of period, 4 * (2048 - sndper)
         self.waveframe = 0  # Wave frame index into wave table entries
-        self.frametimer = 0x2000  # Frame sequencer timer, underflows to signal change in frame sequences
-        self.frame = 0  # Frame sequencer value, generates clocks for length/envelope/(sweep)
+        # Frame sequencer timer, underflows to signal change in frame sequences
+        self.frametimer = 0x2000
+        # Frame sequencer value, generates clocks for length/envelope/(sweep)
+        self.frame = 0
         self.volumeshift = 0  # Bitshift for volume, set by volreg
 
     def getreg(self, reg):
@@ -505,15 +518,19 @@ class NoiseChannel:
 
         # Register values (abbreviated to keep track of what's external)
         # Register 0 is unused in the noise channel
-        self.sndlen = 0  # Register 1 bits 5-0: time to play sound before stop (64-x)
+        # Register 1 bits 5-0: time to play sound before stop (64-x)
+        self.sndlen = 0
         self.envini = 0  # Register 2 bits 7-4: volume envelope initial volume
-        self.envdir = 0  # Register 2 bit 3: volume envelope change direction (0: decrease)
-        self.envper = 0  # Register 2 bits 2-0: volume envelope period (0: disabled)
+        # Register 2 bit 3: volume envelope change direction (0: decrease)
+        self.envdir = 0
+        # Register 2 bits 2-0: volume envelope period (0: disabled)
+        self.envper = 0
         self.clkpow = 0  # Register 3 bits 7-4: lfsr clock shift
         self.regwid = 0  # Register 3 bit 3: lfsr bit width (0: 15, 1: 7)
         self.clkdiv = 0  # Register 3 bits 2-0: base divider for lfsr clock
         # Register 4 bit 7: Write-only trigger bit. Process immediately.
-        self.uselen = 0  # Register 4 bit 6: enable/disable sound length timer in reg 1 (0: continuous)
+        # Register 4 bit 6: enable/disable sound length timer in reg 1 (0: continuous)
+        self.uselen = 0
 
         # Internal values
         self.enable = False  # Enable flag, turned on by trigger bit and off by length timer
@@ -523,8 +540,10 @@ class NoiseChannel:
         self.period = 8  # Calculated copy of period, 8 << 0
         self.shiftregister = 1  # Internal shift register value
         self.lfsrfeed = 0x4000  # Bit mask for inserting feedback in shift register
-        self.frametimer = 0x2000  # Frame sequencer timer, underflows to signal change in frame sequences
-        self.frame = 0  # Frame sequencer value, generates clocks for length/envelope/(sweep)
+        # Frame sequencer timer, underflows to signal change in frame sequences
+        self.frametimer = 0x2000
+        # Frame sequencer value, generates clocks for length/envelope/(sweep)
+        self.frame = 0
         self.volume = 0  # Current volume level, modulated by envelope
 
     def getreg(self, reg):

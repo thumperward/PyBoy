@@ -78,25 +78,25 @@ def load_romfile(filename):
 # yapf: disable
 CARTRIDGE_TABLE = {
     #      MBC     , SRAM  , Battery , RTC
-    0x00: (ROMOnly , False , False   , False) , # ROM
-    0x01: (MBC1    , False , False   , False) , # MBC1
-    0x02: (MBC1    , True  , False   , False) , # MBC1+RAM
-    0x03: (MBC1    , True  , True    , False) , # MBC1+RAM+BATT
-    0x05: (MBC2    , False , False   , False) , # MBC2
-    0x06: (MBC2    , False , True    , False) , # MBC2+BATTERY
-    0x08: (ROMOnly , True  , False   , False) , # ROM+RAM
-    0x09: (ROMOnly , True  , True    , False) , # ROM+RAM+BATTERY
-    0x0F: (MBC3    , False , True    , True)  , # MBC3+TIMER+BATT
-    0x10: (MBC3    , True  , True    , True)  , # MBC3+TIMER+RAM+BATT
-    0x11: (MBC3    , False , False   , False) , # MBC3
-    0x12: (MBC3    , True  , False   , False) , # MBC3+RAM
-    0x13: (MBC3    , True  , True    , False) , # MBC3+RAM+BATT
-    0x19: (MBC5    , False , False   , False) , # MBC5
-    0x1A: (MBC5    , True  , False   , False) , # MBC5+RAM
-    0x1B: (MBC5    , True  , True    , False) , # MBC5+RAM+BATT
-    0x1C: (MBC5    , False , False   , False) , # MBC5+RUMBLE
-    0x1D: (MBC5    , True  , False   , False) , # MBC5+RUMBLE+RAM
-    0x1E: (MBC5    , True  , True    , False) , # MBC5+RUMBLE+RAM+BATT
+    0x00: (ROMOnly, False, False, False),  # ROM
+    0x01: (MBC1, False, False, False),  # MBC1
+    0x02: (MBC1, True, False, False),  # MBC1+RAM
+    0x03: (MBC1, True, True, False),  # MBC1+RAM+BATT
+    0x05: (MBC2, False, False, False),  # MBC2
+    0x06: (MBC2, False, True, False),  # MBC2+BATTERY
+    0x08: (ROMOnly, True, False, False),  # ROM+RAM
+    0x09: (ROMOnly, True, True, False),  # ROM+RAM+BATTERY
+    0x0F: (MBC3, False, True, True),  # MBC3+TIMER+BATT
+    0x10: (MBC3, True, True, True),  # MBC3+TIMER+RAM+BATT
+    0x11: (MBC3, False, False, False),  # MBC3
+    0x12: (MBC3, True, False, False),  # MBC3+RAM
+    0x13: (MBC3, True, True, False),  # MBC3+RAM+BATT
+    0x19: (MBC5, False, False, False),  # MBC5
+    0x1A: (MBC5, True, False, False),  # MBC5+RAM
+    0x1B: (MBC5, True, True, False),  # MBC5+RAM+BATT
+    0x1C: (MBC5, False, False, False),  # MBC5+RUMBLE
+    0x1D: (MBC5, True, False, False),  # MBC5+RUMBLE+RAM
+    0x1E: (MBC5, True, True, False),  # MBC5+RUMBLE+RAM+BATT
 }
 # yapf: enable
 

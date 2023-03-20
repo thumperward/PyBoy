@@ -169,7 +169,8 @@ class GameWrapperSuperMarioLand(PyBoyGameWrapper):
             self._level_progress_max = max(self.level_progress,
                                            self._level_progress_max)
             end_score = self.score + self.time_left * 10
-            self.fitness = self.lives_left * 10000 + end_score + self._level_progress_max * 10
+            self.fitness = self.lives_left * 10000 + \
+                end_score + self._level_progress_max * 10
 
     def set_lives_left(self, amount):
         """
@@ -258,7 +259,8 @@ class GameWrapperSuperMarioLand(PyBoyGameWrapper):
         self.pyboy.send_input(WindowEvent.RELEASE_BUTTON_START)
 
         while True:
-            if unlock_level_select and self.pyboy.frame_count == 71:  # An arbitrary frame count, where the write will work
+            # An arbitrary frame count, where the write will work
+            if unlock_level_select and self.pyboy.frame_count == 71:
                 self.pyboy.set_memory_value(ADDR_WIN_COUNT,
                                             2 if unlock_level_select else 0)
                 break
@@ -352,7 +354,8 @@ class GameWrapperSuperMarioLand(PyBoyGameWrapper):
             "\n" +
             "\n".join(
                 [
-                    f"{i: <3}| " + "".join([str(tile).ljust(adjust) for tile in line])
+                    f"{i: <3}| " +
+                    "".join([str(tile).ljust(adjust) for tile in line])
                     for i, line in enumerate(self.game_area())
                 ]
             )

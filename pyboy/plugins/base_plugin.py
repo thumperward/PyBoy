@@ -135,7 +135,7 @@ class PyBoyGameWrapper(PyBoyPlugin):
     def enabled(self):
         return self.pyboy_argv.get(
             "game_wrapper") and self.pyboy.cartridge_title(
-            ) == self.cartridge_title
+        ) == self.cartridge_title
 
     def post_tick(self):
         raise NotImplementedError("post_tick not implemented in game wrapper")
@@ -280,6 +280,6 @@ class PyBoyGameWrapper(PyBoyPlugin):
                               tile_identifier_offset):
         return sum(
             (x + tile_identifier_offset) * (10 ** (length - 1 - i))
-            for i, x in enumerate(self.tilemap_background[x : x + length, y])
+            for i, x in enumerate(self.tilemap_background[x: x + length, y])
             if x != blank_tile_identifier
         )

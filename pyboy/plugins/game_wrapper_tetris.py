@@ -315,7 +315,8 @@ class GameWrapperTetris(PyBoyGameWrapper):
             "\n" +
             "\n".join(
                 [
-                    f"{i: <3}| " + "".join([str(tile).ljust(adjust) for tile in line])
+                    f"{i: <3}| " +
+                    "".join([str(tile).ljust(adjust) for tile in line])
                     for i, line in enumerate(self._game_area_np())
                 ]
             )

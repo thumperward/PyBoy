@@ -152,7 +152,8 @@ class Operand:
                     "cpu.mb.setitem(%s"
                     % self.codegen(
                         False,
-                        operand=re.search(r"\(([a-zA-Z]+\d*)[\+-]?\)", operand)[1],
+                        operand=re.search(
+                            r"\(([a-zA-Z]+\d*)[\+-]?\)", operand)[1],
                     )
                 ) + ", %s)"
             else:
@@ -302,51 +303,51 @@ class OpcodeData:
         # TODO: There's no need for this to be so explicit
         # yapf: disable
         self.functionhandlers = {
-            "NOP"    : self.NOP,
-            "HALT"   : self.HALT,
-            "PREFIX" : self.CB,
-            "EI"     : self.EI,
-            "DI"     : self.DI,
-            "STOP"   : self.STOP,
-            "LD"     : self.LD,
-            "LDH"    : self.LDH,
-            "ADD"    : self.ADD,
-            "SUB"    : self.SUB,
-            "INC"    : self.INC,
-            "DEC"    : self.DEC,
-            "ADC"    : self.ADC,
-            "SBC"    : self.SBC,
-            "AND"    : self.AND,
-            "OR"     : self.OR,
-            "XOR"    : self.XOR,
-            "CP"     : self.CP,
-            "PUSH"   : self.PUSH,
-            "POP"    : self.POP,
-            "JP"     : self.JP,
-            "JR"     : self.JR,
-            "CALL"   : self.CALL,
-            "RET"    : self.RET,
-            "RETI"   : self.RETI,
-            "RST"    : self.RST,
-            "DAA"    : self.DAA,
-            "SCF"    : self.SCF,
-            "CCF"    : self.CCF,
-            "CPL"    : self.CPL,
-            "RLA"    : self.RLA,
-            "RLCA"   : self.RLCA,
-            "RLC"    : self.RLC,
-            "RL"     : self.RL,
-            "RRA"    : self.RRA,
-            "RRCA"   : self.RRCA,
-            "RRC"    : self.RRC,
-            "RR"     : self.RR,
-            "SLA"    : self.SLA,
-            "SRA"    : self.SRA,
-            "SWAP"   : self.SWAP,
-            "SRL"    : self.SRL,
-            "BIT"    : self.BIT,
-            "RES"    : self.RES,
-            "SET"    : self.SET,
+            "NOP": self.NOP,
+            "HALT": self.HALT,
+            "PREFIX": self.CB,
+            "EI": self.EI,
+            "DI": self.DI,
+            "STOP": self.STOP,
+            "LD": self.LD,
+            "LDH": self.LDH,
+            "ADD": self.ADD,
+            "SUB": self.SUB,
+            "INC": self.INC,
+            "DEC": self.DEC,
+            "ADC": self.ADC,
+            "SBC": self.SBC,
+            "AND": self.AND,
+            "OR": self.OR,
+            "XOR": self.XOR,
+            "CP": self.CP,
+            "PUSH": self.PUSH,
+            "POP": self.POP,
+            "JP": self.JP,
+            "JR": self.JR,
+            "CALL": self.CALL,
+            "RET": self.RET,
+            "RETI": self.RETI,
+            "RST": self.RST,
+            "DAA": self.DAA,
+            "SCF": self.SCF,
+            "CCF": self.CCF,
+            "CPL": self.CPL,
+            "RLA": self.RLA,
+            "RLCA": self.RLCA,
+            "RLC": self.RLC,
+            "RL": self.RL,
+            "RRA": self.RRA,
+            "RRCA": self.RRCA,
+            "RRC": self.RRC,
+            "RR": self.RR,
+            "SLA": self.SLA,
+            "SRA": self.SRA,
+            "SWAP": self.SWAP,
+            "SRL": self.SRL,
+            "BIT": self.BIT,
+            "RES": self.RES,
+            "SET": self.SET,
         }
         # yapf: enable
 
@@ -379,7 +380,8 @@ class OpcodeData:
             (
                 "flag = "
                 + format(
-                    sum(map(lambda nf: (nf[1] == "1") << (nf[0] + 4), self.flags)),
+                    sum(map(lambda nf: (nf[1] == "1")
+                        << (nf[0] + 4), self.flags)),
                     "#010b",
                 )
             )
@@ -387,7 +389,8 @@ class OpcodeData:
         # flag += (((cpu.SP & 0xF) + (v & 0xF)) > 0xF) << FLAGH
         if self.flag_h == "H":
             c = f" {op} cpu.f_c()" if carry else ""
-            lines.append(f"flag += ((({r0} & 0xF) {op} ({r1} & 0xF){c}) > 0xF) << FLAGH")
+            lines.append(
+                f"flag += ((({r0} & 0xF) {op} ({r1} & 0xF){c}) > 0xF) << FLAGH")
 
         # flag += (((cpu.SP & 0xFF) + (v & 0xFF)) > 0xFF) << FLAGC
         if self.flag_c == "C":
@@ -396,7 +399,8 @@ class OpcodeData:
             )
 
         # Clears all flags affected by the operation
-        lines.extend(("cpu.F &= " + format(flagmask, "#010b"), "cpu.F |= flag"))
+        lines.extend(
+            ("cpu.F &= " + format(flagmask, "#010b"), "cpu.F |= flag"))
         return lines
 
     def handleflags16bit(self, r0, r1, op, carry=False):
@@ -413,7 +417,8 @@ class OpcodeData:
             (
                 "flag = "
                 + format(
-                    sum(map(lambda nf: (nf[1] == "1") << (nf[0] + 4), self.flags)),
+                    sum(map(lambda nf: (nf[1] == "1")
+                        << (nf[0] + 4), self.flags)),
                     "#010b",
                 )
             )
@@ -427,7 +432,8 @@ class OpcodeData:
         if self.flag_c == "C":
             lines.append("flag += (t > 0xFFFF) << FLAGC")
 
-        lines.extend(("cpu.F &= " + format(flagmask, "#010b"), "cpu.F |= flag"))
+        lines.extend(
+            ("cpu.F &= " + format(flagmask, "#010b"), "cpu.F |= flag"))
         return lines
 
     def handleflags8bit(self, r0, r1, op, carry=False):
@@ -453,9 +459,11 @@ class OpcodeData:
         if self.flag_h == "H":
             c = f" {op} cpu.f_c()" if carry else ""
             if op == "-":
-                lines.append(f"flag += ((({r0} & 0xF) {op} ({r1} & 0xF){c}) < 0) << FLAGH")
+                lines.append(
+                    f"flag += ((({r0} & 0xF) {op} ({r1} & 0xF){c}) < 0) << FLAGH")
             else:
-                lines.append(f"flag += ((({r0} & 0xF) {op} ({r1} & 0xF){c}) > 0xF) << FLAGH")
+                lines.append(
+                    f"flag += ((({r0} & 0xF) {op} ({r1} & 0xF){c}) > 0xF) << FLAGH")
 
         if self.flag_c == "C":
             if op == "-":
@@ -464,7 +472,8 @@ class OpcodeData:
                 lines.append("flag += (t > 0xFF) << FLAGC")
 
         # Clears all flags affected by the operation
-        lines.extend(("cpu.F &= " + format(flagmask, "#010b"), "cpu.F |= flag"))
+        lines.extend(
+            ("cpu.F &= " + format(flagmask, "#010b"), "cpu.F |= flag"))
         return lines
 
     ###################################################################
@@ -836,7 +845,8 @@ class OpcodeData:
                     f"cpu.{left.operand[-1]} = cpu.mb.getitem(cpu.SP){fmask} & 0xF0 # Low"
                 )
             else:
-                code.addline(f"cpu.{left.operand[-1]} = cpu.mb.getitem(cpu.SP){fmask} # Low")
+                code.addline(
+                    f"cpu.{left.operand[-1]} = cpu.mb.getitem(cpu.SP){fmask} # Low")
             code.addline("cpu.SP += 2")
             code.addline("cpu.SP &= 0xFFFF")
 
@@ -1204,7 +1214,8 @@ class OpcodeData:
         left = Operand(r0)
         code = Code(self.name.split()[0], self.opcode, self.name, False,
                     self.length, self.cycles)
-        code.addline(f"t = (({left.get} & 0xF0) >> 4) | (({left.get} & 0x0F) << 4)")
+        code.addline(
+            f"t = (({left.get} & 0xF0) >> 4) | (({left.get} & 0x0F) << 4)")
         code.addlines(self.handleflags8bit(left.get, None, None, False))
         code.addline("t &= 0xFF")
         code.addline(left.set % "t")

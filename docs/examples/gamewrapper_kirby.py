@@ -3,14 +3,14 @@
 # GitHub: https://github.com/Baekalfen/PyBoy
 #
 
+from pyboy import PyBoy, WindowEvent  # isort:skip
 import os
 import sys
 
 # Makes us able to import PyBoy from the directory below
 file_path = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, file_path + "/..")
+sys.path.insert(0, f"{file_path}/..")
 
-from pyboy import PyBoy, WindowEvent  # isort:skip
 
 # Check if the ROM is given through argv
 if len(sys.argv) > 1:

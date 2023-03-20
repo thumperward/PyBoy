@@ -174,7 +174,8 @@ class GameWrapperKirbyDreamLand(PyBoyGameWrapper):
             "\n" +
             "\n".join(
                 [
-                    f"{i: <3}| " + "".join([str(tile).ljust(adjust) for tile in line])
+                    f"{i: <3}| " +
+                    "".join([str(tile).ljust(adjust) for tile in line])
                     for i, line in enumerate(self.game_area())
                 ]
             )

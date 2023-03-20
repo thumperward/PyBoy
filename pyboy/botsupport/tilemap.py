@@ -206,7 +206,8 @@ class TileMap:
             + "\n"
         ) + "\n".join(
             [
-                f"{i: <3}| " + "".join([str(tile).ljust(adjust) for tile in line])
+                f"{i: <3}| " + "".join([str(tile).ljust(adjust)
+                                       for tile in line])
                 for i, line in enumerate(self[:, :])
             ]
         )
@@ -241,7 +242,7 @@ class TileMap:
         if self._use_tile_objects:
             tile_fun = self.tile
         else:
-            tile_fun = lambda x, y: self.tile_identifier(x, y)
+            def tile_fun(x, y): return self.tile_identifier(x, y)
 
         if x_slice and y_slice:
             return [[tile_fun(_x, _y) for _x in range(x.stop)[x]]

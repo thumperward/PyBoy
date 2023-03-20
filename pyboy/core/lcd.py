@@ -372,15 +372,15 @@ class LCDCRegister:
 
         # No need to convert to bool. Any non-zero value is true.
         # yapf: disable
-        self.lcd_enable           = value & (1 << 7)
-        self.windowmap_select     = value & (1 << 6)
-        self.window_enable        = value & (1 << 5)
-        self.tiledata_select      = value & (1 << 4)
+        self.lcd_enable = value & (1 << 7)
+        self.windowmap_select = value & (1 << 6)
+        self.window_enable = value & (1 << 5)
+        self.tiledata_select = value & (1 << 4)
         self.backgroundmap_select = value & (1 << 3)
-        self.sprite_height        = value & (1 << 2)
-        self.sprite_enable        = value & (1 << 1)
-        self.background_enable    = value & (1 << 0)
-        self.cgb_master_priority  = self.background_enable # Different meaning on CGB
+        self.sprite_height = value & (1 << 2)
+        self.sprite_enable = value & (1 << 1)
+        self.background_enable = value & (1 << 0)
+        self.cgb_master_priority = self.background_enable  # Different meaning on CGB
         # yapf: enable
 
 
@@ -975,7 +975,7 @@ CGB_NUM_PALETTES = 8
 class PaletteColorRegister:
 
     def __init__(self, i_reg):
-        #8 palettes of 4 colors each 2 bytes
+        # 8 palettes of 4 colors each 2 bytes
         self.palette_mem = array("I", [0xFFFF] * CGB_NUM_PALETTES * 4)
         self.palette_mem_rgb = array("L", [0] * CGB_NUM_PALETTES * 4)
         self.index_reg = i_reg
@@ -1009,14 +1009,14 @@ class PaletteColorRegister:
         self.palette_mem_rgb[self.index_reg.getindex()] = self.cgb_to_rgb(
             cgb_color, self.index_reg.getindex())
 
-        #check for autoincrement after write
+        # check for autoincrement after write
         self.index_reg.shouldincrement()
 
     def get(self):
         return self.palette_mem[self.index_reg.getindex()]
 
     def getcolor(self, paletteindex, colorindex):
-        #each palette = 8 bytes or 4 colors of 2 bytes
+        # each palette = 8 bytes or 4 colors of 2 bytes
         assert paletteindex <= 7 or colorindex <= 3, logger.error(
             f"Palette Mem Index Error, tried: Palette {paletteindex} color {colorindex}"
         )

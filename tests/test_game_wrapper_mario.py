@@ -47,7 +47,8 @@ def test_mario_advanced(supermarioland_rom):
     assert mario.lives_left == lives
     assert mario.time_left == 400
     assert mario.world == (3, 2)
-    assert mario.fitness == 10000 * lives + 6510  # A built-in fitness score for AI development
+    # A built-in fitness score for AI development
+    assert mario.fitness == 10000 * lives + 6510
     pyboy.stop()
 
 

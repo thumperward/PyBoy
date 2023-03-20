@@ -152,7 +152,8 @@ class CPU:
             self.PC += 1
             self.PC &= 0xFFFF
         old_pc = self.PC  # If the PC doesn't change, we're likely stuck
-        old_sp = self.SP  # Sometimes a RET can go to the same PC, so we check the SP too.
+        # Sometimes a RET can go to the same PC, so we check the SP too.
+        old_sp = self.SP
         cycles = self.fetch_and_execute()
         if not self.halted and old_pc == self.PC and old_sp == self.SP and not self.is_stuck:
             logger.error("CPU is stuck: " + self.dump_state(""))
