@@ -14,10 +14,10 @@
 				"bungcip.better-toml",
 				"sourcery.sourcery",
 				"DavidAnson.vscode-markdownlint",
-				"redhat.vscode-yaml"
+				"redhat.vscode-yaml",
+				"tomoki1207.pdf"
 			]
 		}
 	},
-	"postCreateCommand": "poetry install && pre-commit install",
-	"remoteUser": "vscode"
+	"postStartCommand": "pre-commit install"
 }
